@@ -2,8 +2,8 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-// PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html atau CSS!
-const APP_VERSION = '11.9'; 
+// PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html, CSS, atau logika sistem!
+const APP_VERSION = '12.0'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -15,6 +15,7 @@ const MAX_CDN_ITEMS = 20;
 const coreUrls = [
   './', 
   './index.html', 
+  './offline.html',
   './manifest.json',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
   'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
@@ -128,7 +129,7 @@ self.addEventListener('fetch', event => {
       return res;
     }).catch(() => null);
 
-    // [SURGICAL FIX]: Diletakkan di luar agar sinkron
+    // Eksekusi janji jaringan di background agar tersinkronisasi
     event.waitUntil(fetchPromiseHTML);
 
     event.respondWith(
@@ -144,9 +145,13 @@ self.addEventListener('fetch', event => {
         const res = await fetchPromiseHTML;
         if (res) return res;
 
-        // Failsafe jika jaringan mati total dan aplikasi belum ter-cache
+        // Failsafe cerdas: Jika jaringan mati total, arahkan ke Mode Darurat
+        const offlinePage = await cache.match('./offline.html');
+        if (offlinePage) return offlinePage;
+        
+        // Failsafe darurat jika aplikasi benar-benar belum pernah ter-install
         return new Response(
-          `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sedang Offline</h2><p>Aplikasi belum tersimpan di memori HP. Hubungkan ke internet untuk membuka pertama kali.</p></body></html>`,
+          `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan Anda tersambung ke internet untuk sinkronisasi awal aplikasi ke dalam perangkat.</p></body></html>`,
           { headers: { 'Content-Type': 'text/html' } }
         );
       })
@@ -170,7 +175,7 @@ self.addEventListener('fetch', event => {
       return res;
     }).catch(() => new Response('', { status: 503 }));
 
-    // [SURGICAL FIX]: Mencegah Crash Browser karena Siklus Berakhir Prematur
+    // Mencegah Crash Browser karena Siklus Berakhir Prematur
     event.waitUntil(fetchPromiseCDN);
 
     event.respondWith(
@@ -200,7 +205,7 @@ self.addEventListener('fetch', event => {
     return res;
   }).catch(() => null);
 
-  // [SURGICAL FIX]: Eksekusi WaitUntil Sinkron
+  // Eksekusi WaitUntil Sinkron
   event.waitUntil(fetchPromiseDyn);
 
   event.respondWith(
