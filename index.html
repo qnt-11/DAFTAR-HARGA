@@ -798,7 +798,7 @@
             let n = parseFloat(cleanVal);
             if (isNaN(n)) n = 0; 
             
-            // [SURGICAL FIX]: Hapus harga manual HANYA JIKA qty pada item spesifik ini benar-benar berubah
+            // Pengaman: Hapus harga manual HANYA JIKA kuantitas (Qty) benar-benar diubah
             if (cartState[id] && cartState[id].q !== n) {
                 delete cartState[id].manualPrice;
             }
@@ -814,13 +814,7 @@
                     const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
                     const iq = Math.max(1, item.iq || 1);
                     
-                                      let subTotal = 0;
-                    
-                    // Deteksi jika qty diubah manual, hapus harga manual agar tidak ngunci!
-                    if (document.activeElement && document.activeElement.classList.contains('qty-input-manual')) {
-                         delete cartState[k].manualPrice;
-                    }
-
+                    let subTotal = 0;
                     if (cartState[k].manualPrice !== undefined) {
                         subTotal = cartState[k].manualPrice;
                     } else {
@@ -835,13 +829,8 @@
                     grandTotal += subTotal;
 
                     const elemSub = $('sub-' + k); 
-                    // Update input value harga manual (bukan div text lagi)
-                    if (elemSub && (!document.activeElement || document.activeElement.id !== 'sub-'+k)) {
-                        elemSub.value = fmt(subTotal);
-                    }
-  
-                   // Update input value harga manual dengan aman
-                    if (elemSub && (!document.activeElement || document.activeElement.id !== 'sub-'+k)) {
+                    // Update input value harga manual dengan sangat aman (mencegah kursor melompat)
+                    if (elemSub && (!document.activeElement || document.activeElement !== elemSub)) {
                         elemSub.value = fmt(subTotal);
                     }
                     const elemLabel = $('qty-label-' + k);
@@ -872,7 +861,7 @@
                 cpList.style.maskImage = cpList.style.webkitMaskImage = 'linear-gradient(to bottom, black 85%, transparent 100%)';
                 let hasDeletedItems = false;
                 
-                         keys.forEach(id => {
+                keys.forEach(id => {
                     const item = db.find(x => String(x.id) === id);
                     if (!item || item.deleted) { delete cartState[id]; hasDeletedItems = true; return; } 
                     const q = cartState[id].q, p1 = item.p1, p2 = item.p2;
@@ -880,7 +869,7 @@
                     let unitName = String(item.u1 || '').trim();
                     unitName = unitName ? (unitName.charAt(0).toUpperCase() + unitName.slice(1)) : 'Satuan';
                     
-                                        let subTotal = 0;
+                    let subTotal = 0;
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
@@ -896,9 +885,9 @@
  
                     html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${q} ${escapeHTML(unitName)}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;">
                     
-                    <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
+                                        <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
                         <span style="font-size:12px; font-weight:700; color:var(--text-muted); padding-right:4px;">Rp</span>
-                        <input class="cpi-total" id="sub-${id}" type="tel" value="${fmt(subTotal)}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="formatRp(this); updateManualPrice('${id}', this);" style="background:transparent; border:none; width:70px; outline:none; text-align:right; font-family:'Montserrat', sans-serif; padding:8px 0;">
+                        <input class="cpi-total" id="sub-${id}" type="tel" value="${fmt(subTotal)}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="let v = this.value.replace(/[^0-9]/g, ''); this.value = fmt(v); updateManualPrice('${id}', v);" onblur="if(this.value==='') this.value=this.dataset.oldVal;" style="background:transparent; border:none; width:90px; outline:none; text-align:right; font-family:'Montserrat', sans-serif; padding:8px 0; color:var(--mono-main); font-weight:800; font-size:14px;">
                     </div>
                     
                     <input class="qty-input-manual" type="text" inputmode="decimal" value="${q}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="let v = this.value.replace(/[^0-9.,]/g, ''); this.value = v; updateCartQtyManual('${id}', this.value);" onblur="handleBlurQty('${id}', this)"></div></div></div>`;
@@ -913,16 +902,20 @@
             showConfirm("Kosongkan keranjang?", "Reset", "var(--danger)", () => { cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); });
         }
         
-        function updateManualPrice(id, inputElem) {
-            let cleanVal = parseFloat(String(inputElem.value).replace(/\D/g, ''));
-            if (!isNaN(cleanVal) && cleanVal > 0) {
+            function updateManualPrice(id, rawVal) {
+            // Mengizinkan nominal Rp 0 untuk fitur Barang Gratis / Promo
+            let cleanVal = parseInt(rawVal, 10); 
+            
+            if (!isNaN(cleanVal) && cleanVal >= 0) {
                 if (!cartState[id]) cartState[id] = { q: 1 };
                 cartState[id].manualPrice = cleanVal;
             } else {
-                delete cartState[id].manualPrice; // Jika kosong/0, kembalikan ke sistem auto
+                delete cartState[id].manualPrice; // Hapus paksa jika dikosongkan total
             }
+
             saveCartMem();
-            // Panggil paksa update kalkulasi total tanpa merubah angka input
+            
+            // Panggil paksa update kalkulasi total tanpa me-render ulang seluruh layar
             let grandTotal = 0;
             Object.keys(cartState).forEach(k => {
                 const item = db.find(x => String(x.id) === k);
@@ -1933,14 +1926,14 @@
         function promptPrint() {
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--danger)");
             
-                  let grandTotal = 0; let itemsPrint = [];
+                let grandTotal = 0; let itemsPrint = [];
             
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     
-                                        let subTotal = 0;
+                    let subTotal = 0;
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
@@ -1954,6 +1947,7 @@
                     }
                     grandTotal += subTotal;
 
+                    // HPP/Modal tetap terkalkulasi absolut dari Qty asli untuk laporan akuntansi Dashboard Google Sheets!
                     itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)) });
                 }
             });
@@ -2204,13 +2198,13 @@
             // Sortir Array & Batasi Top 10
             let top10Arr = Object.keys(globalItemAgg).map(k => ({ n: k, q: globalItemAgg[k] })).sort((a,b) => b.q - a.q).slice(0, 10);
             
-            let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => `
+                        let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => `
                 <div style="display:flex; justify-content:space-between; font-size:12px; align-items:center; background:#000; padding:12px 14px; border-radius:8px; border-left:3px solid #FFD700; margin-bottom: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
                     <span style="color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">${idx+1}. ${escapeHTML(it.n)}</span>
-                    <span style="color:#FFD700; font-weight:800;">${it.q} Terjual</span>
+                    <span style="color:#FFD700; font-weight:800;">${parseFloat(Number(it.q).toFixed(2))} Terjual</span>
                 </div>
             `).join('') : '<div style="font-size:11px; color:#666; font-style:italic; text-align:center; padding:20px 0;">Belum ada penjualan hari ini.</div>';
-            
+       
             $('top-10-list').innerHTML = top10Html;
             $('top10-modal').style.display = 'flex';
             document.body.classList.add('modal-open');
