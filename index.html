@@ -396,7 +396,7 @@
 
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxaOEb1Sxi5ChRGxdKdK2V8ehy3cO6P0sDXjOrz6c241j44JIOfHMaPLbIytvUc0Af6/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycby4HRqf2XGCbOxJ12vvFrq3-udznh-Fcm7bnM8Gkg4YNfSgvgZfGiQ-zlXT6iDY9Td-/exec";
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
@@ -2251,10 +2251,11 @@
             trackModal('top10');
         }
 
-        function closeTop10() {
+               function closeTop10() {
             untrackModal('top10');
             $('top10-modal').style.display = 'none';
-        }
+            checkModalOpen(); // <-- Pengaman Anti-Freeze Scroll Layar HP
+        } 
 
         function printHistory(id) {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
