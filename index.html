@@ -150,9 +150,13 @@
                 </button>
             </div>
 
-            <label style="color:#87CEFA;">Harga Modal (HPP)</label>
-            <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="0" oninput="formatRp(this)" style="border-color:#87CEFA; background:rgba(135,206,250,0.05);">
-            
+                      <label style="color:#87CEFA;">Harga Modal / Kulakan</label>
+            <div style="display:flex; gap:10px;">
+                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus/Slop" oninput="formatRp(this); autoCalcHPP();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+                <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this);" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+            </div>
+            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Ketik Modal 1 Dus, Modal Pcs akan terisi otomatis (Pastikan 'Isi per...' di bawah diisi dulu).</div>
+             
             <div class="form-grid">
                 <div class="col-price">
                     <label>Expired</label>
@@ -198,10 +202,10 @@
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
             </div>
 
-            <div id="wrap-iq">
+                         <div id="wrap-iq">
                 <label id="label-iq">Isi per ...</label>
-                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0">
-            </div>
+                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="autoCalcHPP();">
+            </div> 
 
             <div class="modal-btns">
                 <button class="btn-main btn-cancel" id="btn-cancel-item" onclick="hideMod()">BATAL</button>
@@ -392,7 +396,7 @@
 
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw--ZsjhddTxmDm-GoLtD4kHq53uB1KBSM6IKl3RJ1CmznnyOuyMRlRTrPLpjRNqFGq/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxaOEb1Sxi5ChRGxdKdK2V8ehy3cO6P0sDXjOrz6c241j44JIOfHMaPLbIytvUc0Af6/exec";
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
@@ -1166,15 +1170,21 @@
         
         function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
+                function autoCalcHPP() {
+            let mg = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0;
+            let isi = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
+            if (mg > 0 && isi > 0) $('i-hpp').value = fmt(Math.round(mg / isi));
+        }
+
         function showMod(id = null) { 
             activeId = id; 
-            const b = $('i-b'), b2 = $('i-b2'), n = $('i-n'), hpp = $('i-hpp'), p1 = $('i-p1'), p2 = $('i-p2'), exp = $('i-exp'), t = $('i-t'), u1 = $('i-u1'), u2 = $('i-u2'), iq = $('i-iq'); 
+            const b = $('i-b'), b2 = $('i-b2'), n = $('i-n'), hpp = $('i-hpp'), hppG = $('i-hpp-grosir'), p1 = $('i-p1'), p2 = $('i-p2'), exp = $('i-exp'), t = $('i-t'), u1 = $('i-u1'), u2 = $('i-u2'), iq = $('i-iq'); 
             $('mod-box').style.borderColor = "var(--border-color)";
             if (id) { 
                 const it = db.find(x => String(x.id) === String(id)); if(!it) return; 
-                $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(it.hpp) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
+                $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(it.hpp) : ''; hppG.value = (it.hpp && it.iq > 1) ? fmt(it.hpp * it.iq) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
             } else { 
-                $('m-tit').innerText = "Tambah Barang"; b.value = b2.value = n.value = hpp.value = p1.value = p2.value = exp.dataset.rawDate = exp.value = t.value = u1.value = u2.value = iq.value = ''; 
+                $('m-tit').innerText = "Tambah Barang"; b.value = b2.value = n.value = hpp.value = hppG.value = p1.value = p2.value = exp.dataset.rawDate = exp.value = t.value = u1.value = u2.value = iq.value = ''; 
             } 
             
             const getSafeChipData = (key, defaults) => {
