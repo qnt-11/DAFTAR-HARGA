@@ -782,47 +782,30 @@
 
         function toggleSort() { sortAZ = !sortAZ; $('s-btn-tabs').classList.toggle('active', sortAZ); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); }
 
-        function modifyCartItem(id, qtyChange) {
+                function modifyCartItem(id, qtyChange) {
             if (!cartState[id]) cartState[id] = { q: 0 };
             cartState[id].q += qtyChange;
+            // Jika Qty diubah dari luar, hapus memory manual override agar kembali otomatis
+            delete cartState[id].manualPrice; 
+            
             if (cartState[id].q <= 0) { delete cartState[id]; }
             saveCartMem(); 
             if (isCartMode) renderCartUI();
         }
 
-        function updateCartQtyManual(id, val) {
+                function updateCartQtyManual(id, val) {
             let cleanVal = String(val).replace(',', '.'); 
             let n = parseFloat(cleanVal);
             if (isNaN(n)) n = 0; 
+            
+            // [SURGICAL FIX]: Hapus harga manual HANYA JIKA qty pada item spesifik ini benar-benar berubah
+            if (cartState[id] && cartState[id].q !== n) {
+                delete cartState[id].manualPrice;
+            }
+            
             if (!cartState[id]) cartState[id] = { q: n }; else cartState[id].q = n; 
             saveCartMem(); 
             
-            // -- LOGIKA GROSIR CAMPUR (MIX & MATCH) BERDASARKAN NOMINAL --
-            let tempTotal = 0;
-            let BATAS_NOMINAL = 50000; 
-
-            Object.keys(cartState).forEach(k => {
-                const item = db.find(x => String(x.id) === k);
-                if (item && !item.deleted) {
-                    const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
-                    const iq = Math.max(1, item.iq || 1);
-                    if (p1 > 0 && p2 > 0) {
-                        let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                        if (q >= tier) {
-                            let grosirBlocks = Math.floor(q / tier);
-                            let ecerQty = q % tier;
-                            let pricePerTier = Math.round((tier / iq) * p2);
-                            tempTotal += (grosirBlocks * pricePerTier) + Math.round(ecerQty * p1);
-                        } else {
-                            tempTotal += Math.round(q * p1);
-                        }
-                    } else {
-                        tempTotal += Math.round(q * p1);
-                    }
-                }
-            });
-
-            let isGrosirCampur = tempTotal >= BATAS_NOMINAL;
             let grandTotal = 0;
             
             Object.keys(cartState).forEach(k => {
@@ -831,27 +814,36 @@
                     const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
                     const iq = Math.max(1, item.iq || 1);
                     
-                    let subTotal = 0;
-                    if (p1 > 0 && p2 > 0) {
-                        if (isGrosirCampur) {
-                            subTotal = Math.round(q * (p2 / iq));
-                        } else {
-                            let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                            if (q >= tier) {
-                                let grosirBlocks = Math.floor(q / tier);
-                                let ecerQty = q % tier;
-                                let pricePerTier = Math.round((tier / iq) * p2);
-                                subTotal = (grosirBlocks * pricePerTier) + Math.round(ecerQty * p1);
-                            } else {
-                                subTotal = Math.round(q * p1);
-                            }
-                        }
+                                      let subTotal = 0;
+                    
+                    // Deteksi jika qty diubah manual, hapus harga manual agar tidak ngunci!
+                    if (document.activeElement && document.activeElement.classList.contains('qty-input-manual')) {
+                         delete cartState[k].manualPrice;
+                    }
+
+                    if (cartState[k].manualPrice !== undefined) {
+                        subTotal = cartState[k].manualPrice;
                     } else {
-                        subTotal = Math.round(q * p1);
+                        if (p1 > 0 && p2 > 0 && iq > 1) {
+                            if (q >= iq) {
+                                let grosirBlocks = Math.floor(q / iq);
+                                let ecerQty = q % iq;
+                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
+                            } else { subTotal = Math.round(q * p1); }
+                        } else { subTotal = Math.round(q * p1); }
                     }
                     grandTotal += subTotal;
+
                     const elemSub = $('sub-' + k); 
-                    if (elemSub) elemSub.innerText = `Rp ${fmt(subTotal)}`;
+                    // Update input value harga manual (bukan div text lagi)
+                    if (elemSub && (!document.activeElement || document.activeElement.id !== 'sub-'+k)) {
+                        elemSub.value = fmt(subTotal);
+                    }
+  
+                   // Update input value harga manual dengan aman
+                    if (elemSub && (!document.activeElement || document.activeElement.id !== 'sub-'+k)) {
+                        elemSub.value = fmt(subTotal);
+                    }
                     const elemLabel = $('qty-label-' + k);
                     if (elemLabel) {
                         let unitName = String(item.u1 || '').trim();
@@ -880,34 +872,7 @@
                 cpList.style.maskImage = cpList.style.webkitMaskImage = 'linear-gradient(to bottom, black 85%, transparent 100%)';
                 let hasDeletedItems = false;
                 
-                // -- LOGIKA GROSIR CAMPUR (MIX & MATCH) BERDASARKAN NOMINAL --
-                let tempTotal = 0;
-                let BATAS_NOMINAL = 50000;
-                
-                keys.forEach(k => {
-                    const item = db.find(x => String(x.id) === k);
-                    if (item && !item.deleted) {
-                        const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
-                        const iq = Math.max(1, item.iq || 1);
-                        if (p1 > 0 && p2 > 0) {
-                            let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                            if (q >= tier) {
-                                let grosirBlocks = Math.floor(q / tier);
-                                let ecerQty = q % tier;
-                                let pricePerTier = Math.round((tier / iq) * p2);
-                                tempTotal += (grosirBlocks * pricePerTier) + Math.round(ecerQty * p1);
-                            } else {
-                                tempTotal += Math.round(q * p1);
-                            }
-                        } else {
-                            tempTotal += Math.round(q * p1);
-                        }
-                    }
-                });
-
-                let isGrosirCampur = tempTotal >= BATAS_NOMINAL;
-
-                keys.forEach(id => {
+                         keys.forEach(id => {
                     const item = db.find(x => String(x.id) === id);
                     if (!item || item.deleted) { delete cartState[id]; hasDeletedItems = true; return; } 
                     const q = cartState[id].q, p1 = item.p1, p2 = item.p2;
@@ -915,26 +880,28 @@
                     let unitName = String(item.u1 || '').trim();
                     unitName = unitName ? (unitName.charAt(0).toUpperCase() + unitName.slice(1)) : 'Satuan';
                     
-                    let subTotal = 0;
-                    if (p1 > 0 && p2 > 0) {
-                        if (isGrosirCampur) {
-                            subTotal = Math.round(q * (p2 / iq));
-                        } else {
-                            let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                            if (q >= tier) {
-                                let grosirBlocks = Math.floor(q / tier);
-                                let ecerQty = q % tier;
-                                let pricePerTier = Math.round((tier / iq) * p2);
-                                subTotal = (grosirBlocks * pricePerTier) + Math.round(ecerQty * p1);
-                            } else {
-                                subTotal = Math.round(q * p1);
-                            }
-                        }
+                                        let subTotal = 0;
+                    if (cartState[id].manualPrice !== undefined) {
+                        subTotal = cartState[id].manualPrice;
                     } else {
-                        subTotal = Math.round(q * p1);
+                        if (p1 > 0 && p2 > 0 && iq > 1) {
+                            if (q >= iq) {
+                                let grosirBlocks = Math.floor(q / iq);
+                                let ecerQty = q % iq;
+                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
+                            } else { subTotal = Math.round(q * p1); }
+                        } else { subTotal = Math.round(q * p1); }
                     }
                     grandTotal += subTotal;
-                    html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${q} ${escapeHTML(unitName)}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;"><div class="cpi-total" id="sub-${id}">Rp ${fmt(subTotal)}</div><input class="qty-input-manual" type="text" inputmode="decimal" value="${q}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="let v = this.value.replace(/[^0-9.,]/g, ''); this.value = v; updateCartQtyManual('${id}', this.value);" onblur="handleBlurQty('${id}', this)"></div></div></div>`;
+ 
+                    html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${q} ${escapeHTML(unitName)}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;">
+                    
+                    <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
+                        <span style="font-size:12px; font-weight:700; color:var(--text-muted); padding-right:4px;">Rp</span>
+                        <input class="cpi-total" id="sub-${id}" type="tel" value="${fmt(subTotal)}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="formatRp(this); updateManualPrice('${id}', this);" style="background:transparent; border:none; width:70px; outline:none; text-align:right; font-family:'Montserrat', sans-serif; padding:8px 0;">
+                    </div>
+                    
+                    <input class="qty-input-manual" type="text" inputmode="decimal" value="${q}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="let v = this.value.replace(/[^0-9.,]/g, ''); this.value = v; updateCartQtyManual('${id}', this.value);" onblur="handleBlurQty('${id}', this)"></div></div></div>`;
                 });
                 if (hasDeletedItems) saveCartMem();
             }
@@ -944,6 +911,36 @@
         function resetCart() {
             if (Object.keys(cartState).length === 0) return;
             showConfirm("Kosongkan keranjang?", "Reset", "var(--danger)", () => { cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); });
+        }
+        
+        function updateManualPrice(id, inputElem) {
+            let cleanVal = parseFloat(String(inputElem.value).replace(/\D/g, ''));
+            if (!isNaN(cleanVal) && cleanVal > 0) {
+                if (!cartState[id]) cartState[id] = { q: 1 };
+                cartState[id].manualPrice = cleanVal;
+            } else {
+                delete cartState[id].manualPrice; // Jika kosong/0, kembalikan ke sistem auto
+            }
+            saveCartMem();
+            // Panggil paksa update kalkulasi total tanpa merubah angka input
+            let grandTotal = 0;
+            Object.keys(cartState).forEach(k => {
+                const item = db.find(x => String(x.id) === k);
+                if (item && !item.deleted) {
+                    let subTotal = 0;
+                    if (cartState[k].manualPrice !== undefined) {
+                        subTotal = cartState[k].manualPrice;
+                    } else {
+                        const q = cartState[k].q, p1 = item.p1, p2 = item.p2, iq = Math.max(1, item.iq || 1);
+                        if (p1 > 0 && p2 > 0 && iq > 1) {
+                            if (q >= iq) { subTotal = (Math.floor(q / iq) * p2) + Math.round((q % iq) * p1); } 
+                            else { subTotal = Math.round(q * p1); }
+                        } else { subTotal = Math.round(q * p1); }
+                    }
+                    grandTotal += subTotal;
+                }
+            });
+            $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
 
         let startX, startY;
@@ -1052,11 +1049,10 @@
                     modifyCartItem(item.id, qtyToAdd); 
                 } else { 
                     $('pp-name').innerText = item.n; $('pp-price').innerText = "Rp " + fmt(item.p1); 
-                    let textGrosir = ""; 
+                                        let textGrosir = ""; 
                     if (item.p1 > 0 && item.p2 > 0) { 
-                        let tier = (item.iq >= 40) ? 10 : (item.iq >= 12 ? 6 : (item.iq >= 10 ? 5 : Math.max(2, Math.floor(item.iq/2))));
                         textGrosir = `Grosir: Rp ${fmt(item.p2)} / ${escapeHTML(String(item.u2 || 'Grosir'))}`; 
-                        if (item.iq > 1) textGrosir += `\n(Grosir aktif per ${tier} ${escapeHTML(String(item.u1 || 'pcs'))} atau Total Nota > 50rb)`; 
+                        if (item.iq > 1) textGrosir += `\n(Grosir otomatis aktif jika beli ${item.iq} ${escapeHTML(String(item.u1 || 'pcs'))})`; 
                     }
                     $('pp-price-grosir').innerText = textGrosir; $('pp-barcode').innerText = barcode; $('price-popup').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('price'); 
                 }
@@ -1937,57 +1933,27 @@
         function promptPrint() {
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--danger)");
             
-            let tempTotal = 0;
-            let BATAS_NOMINAL = 50000;
-            
-            Object.keys(cartState).forEach(k => {
-                const item = db.find(x => String(x.id) === k);
-                if (item && !item.deleted) {
-                    const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
-                    const iq = Math.max(1, item.iq || 1);
-                    if (p1 > 0 && p2 > 0) {
-                        let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                        if (q >= tier) {
-                            let grosirBlocks = Math.floor(q / tier);
-                            let ecerQty = q % tier;
-                            let pricePerTier = Math.round((tier / iq) * p2);
-                            tempTotal += (grosirBlocks * pricePerTier) + Math.round(ecerQty * p1);
-                        } else {
-                            tempTotal += Math.round(q * p1);
-                        }
-                    } else {
-                        tempTotal += Math.round(q * p1);
-                    }
-                }
-            });
-
-            let isGrosirCampur = tempTotal >= BATAS_NOMINAL;
-            let grandTotal = 0; let itemsPrint = [];
+                  let grandTotal = 0; let itemsPrint = [];
             
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     
-                    let subTotal = 0;
-                    if (item.p1 > 0 && item.p2 > 0) {
-                        if (isGrosirCampur) {
-                            subTotal = Math.round(q * (item.p2 / iq));
-                        } else {
-                            let tier = (iq >= 40) ? 10 : (iq >= 12 ? 6 : (iq >= 10 ? 5 : Math.max(2, Math.floor(iq/2))));
-                            if (q >= tier) {
-                                let grosirBlocks = Math.floor(q / tier);
-                                let ecerQty = q % tier;
-                                let pricePerTier = Math.round((tier / iq) * item.p2);
-                                subTotal = (grosirBlocks * pricePerTier) + Math.round(ecerQty * item.p1);
-                            } else {
-                                subTotal = Math.round(q * item.p1);
-                            }
-                        }
+                                        let subTotal = 0;
+                    if (cartState[id].manualPrice !== undefined) {
+                        subTotal = cartState[id].manualPrice;
                     } else {
-                        subTotal = Math.round(q * item.p1);
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                            if (q >= iq) {
+                                let grosirBlocks = Math.floor(q / iq);
+                                let ecerQty = q % iq;
+                                subTotal = (grosirBlocks * item.p2) + Math.round(ecerQty * item.p1);
+                            } else { subTotal = Math.round(q * item.p1); }
+                        } else { subTotal = Math.round(q * item.p1); }
                     }
                     grandTotal += subTotal;
+
                     itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)) });
                 }
             });
