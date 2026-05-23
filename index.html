@@ -150,12 +150,12 @@
                 </button>
             </div>
 
-                      <label style="color:#87CEFA;">Harga Modal / Kulakan</label>
+                      <label style="color:#87CEFA;">HPP</label>
             <div style="display:flex; gap:10px;">
-                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus/Slop" oninput="formatRp(this); autoCalcHPP();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
                 <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this);" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
             </div>
-            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Ketik Modal 1 Dus, Modal Pcs akan terisi otomatis (Pastikan 'Isi per...' di bawah diisi dulu).</div>
+            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis</div>
              
             <div class="form-grid">
                 <div class="col-price">
@@ -164,7 +164,7 @@
                 </div>
                 <div class="col-unit">
                     <label>Akronim</label>
-                    <input type="text" id="i-t" placeholder="Otomatis" autocomplete="off" style="text-transform: lowercase;">
+                    <input type="text" id="i-t" placeholder="" autocomplete="off" style="text-transform: lowercase;">
                 </div>
             </div>
             
@@ -175,7 +175,7 @@
                 </div>
                 <div class="col-unit">
                     <label>Satuan</label>
-                    <input type="text" id="i-u1" placeholder="Ketik" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1)">
+                    <input type="text" id="i-u1" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1)">
                 </div>
             </div>
             <div class="quick-chip-row" id="chip-row-u1">
@@ -192,7 +192,7 @@
                 </div>
                 <div class="col-unit">
                     <label>Grosir</label>
-                    <input type="text" id="i-u2" placeholder="Ketik" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
+                    <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
                 </div>
             </div>
             <div class="quick-chip-row" id="chip-row-u2">
