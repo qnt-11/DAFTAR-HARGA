@@ -29,7 +29,7 @@
         .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-calc { font-size: 12px; color: var(--text-muted); font-weight: 600; } .cpi-total { font-size: 15px; font-weight: 800; color: var(--mono-main); text-align: right; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; } .qty-input-manual { width: 48px; text-align: center; background: var(--wa-card); border: 1px solid var(--border-color); color: var(--mono-main); font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; border-radius: 8px; padding: 8px 0; outline: none; margin-left: 15px; } .qty-input-manual:focus { border-color: var(--mono-main); }
         .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } .search-box input { width: 100%; background: transparent; border: none; padding: 14px 44px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } .q-clear { position: absolute; right: 2px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; } .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
-        .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; content-visibility: auto; contain-intrinsic-size: 75px; contain: content; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
+        .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
     </style>
 </head>
@@ -782,7 +782,7 @@
 
         function toggleSort() { sortAZ = !sortAZ; $('s-btn-tabs').classList.toggle('active', sortAZ); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); }
 
-                function modifyCartItem(id, qtyChange) {
+        function modifyCartItem(id, qtyChange) {
             if (!cartState[id]) cartState[id] = { q: 0 };
             cartState[id].q += qtyChange;
             // Jika Qty diubah dari luar, hapus memory manual override agar kembali otomatis
@@ -793,7 +793,32 @@
             if (isCartMode) renderCartUI();
         }
 
-                function updateCartQtyManual(id, val) {
+        function formatShortUnit(u) {
+            let s = String(u || '').trim().toLowerCase();
+            if (!s) return '';
+            const map = { 'karton':'Krt', 'bungkus':'Bks', 'renceng':'Rcg', 'sachet':'Sct', 'botol':'Btl', 'kotak':'Ktk', 'kodi':'Kdi', 'lusin':'Lsn', 'lembar':'Lbr', 'kilo':'Kg', 'kilogram':'Kg', 'gram':'Gr', 'liter':'Lt', 'slop':'Slp', 'pack':'Pak', 'pax':'Pak', 'pieces':'Pcs', 'kaleng':'Klg', 'kardus':'Dus', 'karung':'Krg', 'strip':'Str' };
+            if (map[s]) return map[s];
+            return s.length > 3 ? s.charAt(0).toUpperCase() + s.slice(1,3) : s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function formatQtyBreakdown(q, iq, u1, u2) {
+            let eUnit = String(u1 || '').trim(); eUnit = eUnit ? (eUnit.charAt(0).toUpperCase() + eUnit.slice(1)) : 'Satuan';
+            let gUnit = String(u2 || '').trim(); gUnit = gUnit ? (gUnit.charAt(0).toUpperCase() + gUnit.slice(1)) : 'Grosir';
+            
+            let iqNum = Math.max(1, parseInt(iq) || 1);
+            let numQ = parseFloat(String(q).replace(',', '.')) || 0; 
+            
+            if (iqNum > 1 && numQ >= iqNum) {
+                let gQty = Math.floor(numQ / iqNum);
+                let eQty = parseFloat((numQ % iqNum).toFixed(3)); // Proteksi floating-point glitch JS
+
+                if (eQty === 0) return `${gQty} ${escapeHTML(gUnit)}`;
+                return `${gQty} ${escapeHTML(gUnit)} ${eQty} ${escapeHTML(eUnit)}`;
+            }
+            return `${numQ} ${escapeHTML(eUnit)}`;
+        }
+
+        function updateCartQtyManual(id, val) {
             let cleanVal = String(val).replace(',', '.'); 
             let n = parseFloat(cleanVal);
             if (isNaN(n)) n = 0; 
@@ -835,9 +860,7 @@
                     }
                     const elemLabel = $('qty-label-' + k);
                     if (elemLabel) {
-                        let unitName = String(item.u1 || '').trim();
-                        unitName = unitName ? (unitName.charAt(0).toUpperCase() + unitName.slice(1)) : 'Satuan';
-                        elemLabel.innerText = `${q} ${escapeHTML(unitName)}`;
+                        elemLabel.innerHTML = formatQtyBreakdown(q, item.iq, item.u1, item.u2);
                     }
                 }
             });
@@ -866,8 +889,7 @@
                     if (!item || item.deleted) { delete cartState[id]; hasDeletedItems = true; return; } 
                     const q = cartState[id].q, p1 = item.p1, p2 = item.p2;
                     const iq = Math.max(1, item.iq || 1);
-                    let unitName = String(item.u1 || '').trim();
-                    unitName = unitName ? (unitName.charAt(0).toUpperCase() + unitName.slice(1)) : 'Satuan';
+                    let qtyDisplay = formatQtyBreakdown(q, item.iq, item.u1, item.u2);
                     
                     let subTotal = 0;
                     if (cartState[id].manualPrice !== undefined) {
@@ -883,7 +905,7 @@
                     }
                     grandTotal += subTotal;
  
-                    html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${q} ${escapeHTML(unitName)}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;">
+                    html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${qtyDisplay}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;">
                     
                                         <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
                         <span style="font-size:12px; font-weight:700; color:var(--text-muted); padding-right:4px;">Rp</span>
@@ -902,7 +924,7 @@
             showConfirm("Kosongkan keranjang?", "Reset", "var(--danger)", () => { cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); });
         }
         
-            function updateManualPrice(id, rawVal) {
+        function updateManualPrice(id, rawVal) {
             // Mengizinkan nominal Rp 0 untuk fitur Barang Gratis / Promo
             let cleanVal = parseInt(rawVal, 10); 
             
@@ -1159,7 +1181,7 @@
         
         function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
-                function autoCalcHPP() {
+        function autoCalcHPP() {
             let mg = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0;
             let isi = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
             if (mg > 0 && isi > 0) $('i-hpp').value = fmt(Math.round(mg / isi));
@@ -1926,7 +1948,7 @@
         function promptPrint() {
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--danger)");
             
-                let grandTotal = 0; let itemsPrint = [];
+            let grandTotal = 0; let itemsPrint = [];
             
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
@@ -1948,7 +1970,7 @@
                     grandTotal += subTotal;
 
                     // HPP/Modal tetap terkalkulasi absolut dari Qty asli untuk laporan akuntansi Dashboard Google Sheets!
-                    itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)) });
+                    itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)), iq: item.iq, u1: item.u1, u2: item.u2 });
                 }
             });
 
@@ -2033,50 +2055,68 @@
             let valKembali = fmt(Math.abs(kembali));
 
             let d = timestamp ? new Date(timestamp) : new Date();
-            let dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).substring(2)} - ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
-                       // Pembuatan Header Struk
+            // Header Ala Supermarket (Font Monospace, 2 kolom untuk Tanggal & Kasir)
             let rawHTML = `
-            <div style="width: 58mm; margin: 0 auto; padding: 0 1mm; box-sizing: border-box; color: #000; font-family: monospace; font-size: 12px; line-height: 1.2;">
-                <div style="text-align: center; margin-bottom: 5px;">
-                    <b style="font-size:14px;">Toko Kelontong</b><br>
+            <div style="width: 58mm; margin: 0 auto; padding: 0; color: #000; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.2;">
+                <div style="text-align: center; margin-bottom: 4px;">
+                    <b style="font-size:14px; text-transform:uppercase;">Toko Kelontong</b><br>
                     Ps. Sunggingan Lt. 2<br>
                     Telp: 082226334999
                 </div>
-                <div style="border-bottom: 1px dashed #000; margin-bottom: 5px;"></div>
-                <div style="text-align: right; margin-bottom: 5px;">${dateStr}${isReprint ? ' [Reprint]' : ''}</div>
-                <div style="border-bottom: 1px dashed #000; margin-bottom: 5px;"></div>
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
+                    <tr>
+                        <td style="text-align:left;">${dateStr}</td>
+                        <td style="text-align:right;">Kasir: Admin${isReprint ? ' [R]' : ''}</td>
+                    </tr>
+                </table>
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
             `;
 
             // Looping Item Belanjaan
             items.forEach(i => {
                 let safeN = escapeHTML(i.n);
-                // Hitung harga satuan berdasarkan subtotal dan kuantitas
                 let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                 
+                let qtyText = `${i.q}x${fmt(hrgSatuan)}`; // Format super rapat
+                let iqNum = Math.max(1, parseInt(i.iq) || 1);
+                
+                if (i.iq !== undefined && iqNum > 1 && i.q >= iqNum) {
+                    let eU = formatShortUnit(i.u1);
+                    let gU = formatShortUnit(i.u2);
+                    let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
+                    let gQ = Math.floor(nQ / iqNum);
+                    let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                    qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                } else if (i.u1) { // Tambahkan singkatan eceran untuk item satuan biasa
+                    qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
+                }
+
                 rawHTML += `
-                <div style="margin-bottom: 6px;">
+                <div style="margin-bottom: 4px;">
                     <div style="text-align: left;">${safeN}</div>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 2px; font-size: 12px;">
+                    <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
                         <tr>
-                            <td style="text-align: left; padding: 0; width: 60%;">${i.q} x ${fmt(hrgSatuan)}</td>
+                            <td style="text-align: left; padding: 0 0 0 6px; width: 60%;">${escapeHTML(qtyText)}</td>
                             <td style="text-align: right; padding: 0; width: 40%;">${fmt(i.sub)}</td>
                         </tr>
                     </table>
                 </div>`;
             });
 
-            // Pembuatan Footer Struk (Total, Bayar, Kembalian)
+            // Footer Ala Supermarket (Tanpa simbol Rp agar angka sejajar rapi)
             rawHTML += `
-                <div style="border-bottom: 1px dashed #000; margin-top: 5px; margin-bottom: 5px;"></div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <tr><td style="text-align:left; padding: 2px 0;">TOTAL</td><td style="text-align:right; padding: 2px 0;">Rp ${fmt(total)}</td></tr>
-                    <tr><td style="text-align:left; padding: 2px 0;">BAYAR</td><td style="text-align:right; padding: 2px 0;">Rp ${fmt(bayar)}</td></tr>
-                    <tr><td style="text-align:left; padding: 2px 0;">${labelKembali}</td><td style="text-align:right; padding: 2px 0;">Rp ${valKembali}</td></tr>
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
+                    <tr><td style="text-align:left; padding: 1px 0;">TOTAL</td><td style="text-align:right; padding: 1px 0;">${fmt(total)}</td></tr>
+                    <tr><td style="text-align:left; padding: 1px 0;">BAYAR</td><td style="text-align:right; padding: 1px 0;">${fmt(bayar)}</td></tr>
+                    <tr><td style="text-align:left; padding: 1px 0;">${labelKembali}</td><td style="text-align:right; padding: 1px 0;">${valKembali}</td></tr>
                 </table>
-                <div style="border-bottom: 1px dashed #000; margin-top: 5px; margin-bottom: 5px;"></div>
-                <div style="text-align: center; margin-top: 5px;">
-                    Terimakasih<br>Atas Kunjungan Anda
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0 6px 0;"></div>
+                <div style="text-align: center; font-family: inherit; font-size: inherit;">
+                    Terima Kasih<br>Selamat Belanja Kembali
                 </div>
             </div>`;
  
@@ -2084,7 +2124,7 @@
                 let totalModal = items.reduce((sum, i) => sum + (i.modal || 0), 0);
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
                 hist.unshift({ id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal });
-          try {
+                try {
                     localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 4000)));
                 } catch (e) {
                     console.warn("Storage penuh! Auto-shrink riwayat ekstrem.");
@@ -2132,7 +2172,7 @@
 
         function closeHistory() { untrackModal('history'); $('history-modal').style.display = 'none'; checkModalOpen(); }
 
-                let globalItemAgg = {}; // Penampung Data Cerdas Top 10
+        let globalItemAgg = {}; // Penampung Data Cerdas Top 10
 
         function renderHistory() {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
@@ -2152,9 +2192,20 @@
                     let itemsHtml = '';
                     if (Array.isArray(h.items)) {
                         h.items.forEach(it => {
+                            let qtyText = `${it.q}x`;
+                            let iqNum = Math.max(1, parseInt(it.iq) || 1);
+                            if (it.iq !== undefined && iqNum > 1 && it.q >= iqNum) {
+                                let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
+                                let gU = String(it.u2 || '').trim(); gU = gU ? (gU.charAt(0).toUpperCase() + gU.slice(1)) : 'Grosir';
+                                let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
+                                let gQ = Math.floor(nQ / iqNum);
+                                let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                                qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                            }
+
                             itemsHtml += `
                             <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-bottom:4px;">
-                                <span>${it.q}x ${escapeHTML(it.n)}</span>
+                                <span>${escapeHTML(qtyText)} ${escapeHTML(it.n)}</span>
                                 <span>Rp ${fmt(it.sub)}</span>
                             </div>`;
                             
@@ -2193,12 +2244,11 @@
             $('hist-list').innerHTML = html || '<div style="text-align:center; color:#555; padding: 40px 0; font-size: 12px; font-weight: 600; letter-spacing:1px;">KOSONG</div>';
         }
 
-        // FUNGSI KHUSUS TOP 10
         function openTop10() {
             // Sortir Array & Batasi Top 10
             let top10Arr = Object.keys(globalItemAgg).map(k => ({ n: k, q: globalItemAgg[k] })).sort((a,b) => b.q - a.q).slice(0, 10);
             
-                        let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => `
+            let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => `
                 <div style="display:flex; justify-content:space-between; font-size:12px; align-items:center; background:#000; padding:12px 14px; border-radius:8px; border-left:3px solid #FFD700; margin-bottom: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
                     <span style="color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">${idx+1}. ${escapeHTML(it.n)}</span>
                     <span style="color:#FFD700; font-weight:800;">${parseFloat(Number(it.q).toFixed(2))} Terjual</span>
@@ -2211,7 +2261,7 @@
             trackModal('top10');
         }
 
-               function closeTop10() {
+        function closeTop10() {
             untrackModal('top10');
             $('top10-modal').style.display = 'none';
             checkModalOpen(); // <-- Pengaman Anti-Freeze Scroll Layar HP
@@ -2240,7 +2290,22 @@
                 h.items.forEach(i => {
                     let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                     let safeN = i.n.length > 20 ? i.n.substring(0, 19) + '…' : i.n;
-                    text += `${safeN}\n${i.q} x ${fmt(hrgSatuan)} = ${fmt(i.sub)}\n`;
+                    
+                    let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
+                    let iqNum = Math.max(1, parseInt(i.iq) || 1);
+                    
+                    if (i.iq !== undefined && iqNum > 1 && i.q >= iqNum) {
+                        let eU = formatShortUnit(i.u1);
+                        let gU = formatShortUnit(i.u2);
+                        let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
+                        let gQ = Math.floor(nQ / iqNum);
+                        let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                        qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                    } else if (i.u1) {
+                        qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
+                    }
+
+                    text += `${safeN}\n${qtyText} = ${fmt(i.sub)}\n`;
                 });
             } else {
                 text += `Item Terjual\n${h.items} Item = Rp ${fmt(h.total)}\n`;
@@ -2355,23 +2420,23 @@
         function processQueuedFile(file) { showLoading("Mengimpor data dari file...<br>Mohon tunggu.", "var(--warning)"); setTimeout(() => { importData({ target: { files: [file] } }); setTimeout(hideLoading, 1500); }, 300); }
         if ('launchQueue' in window) { window.launchQueue.setConsumer((launchParams) => { if (launchParams.files && launchParams.files.length > 0) launchParams.files[0].getFile().then(file => { if (isDbReady) processQueuedFile(file); else pendingLaunchFile = file; }); }); }
         if ('serviceWorker' in navigator) { 
-    window.addEventListener('load', () => { 
-        navigator.serviceWorker.register('sw.js').then((registration) => { 
-            registration.addEventListener('updatefound', () => { 
-                const newWorker = registration.installing; 
-                newWorker.addEventListener('statechange', () => { 
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) { 
-                        if (checkModalOpen() || isCartMode) {
-                            tampilkanToast("Versi baru tersedia. Muat ulang aplikasi nanti.", "#87CEFA");
-                        } else {
-                            showConfirm("Versi terbaru aplikasi telah tersedia! Perbarui sekarang.", "Update Sistem", "#87CEFA", () => { window.location.reload(); }, "REFRESH"); 
-                        }
-                    } 
-                }); 
+            window.addEventListener('load', () => { 
+                navigator.serviceWorker.register('sw.js').then((registration) => { 
+                    registration.addEventListener('updatefound', () => { 
+                        const newWorker = registration.installing; 
+                        newWorker.addEventListener('statechange', () => { 
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) { 
+                                if (checkModalOpen() || isCartMode) {
+                                    tampilkanToast("Versi baru tersedia. Muat ulang aplikasi nanti.", "#87CEFA");
+                                } else {
+                                    showConfirm("Versi terbaru aplikasi telah tersedia! Perbarui sekarang.", "Update Sistem", "#87CEFA", () => { window.location.reload(); }, "REFRESH"); 
+                                }
+                            } 
+                        }); 
+                    }); 
+                }).catch(console.error); 
             }); 
-        }).catch(console.error); 
-    }); 
-}
+        }
 
         // --- SISTEM ANTREAN MODAL PINTAR (ANDROID BACK BUTTON TRAP) ---
         let activeModals = [];
@@ -2379,7 +2444,7 @@
         function untrackModal(id) { const idx = activeModals.lastIndexOf(id); if (idx > -1) activeModals.splice(idx, 1); }
         window.addEventListener('popstate', (e) => { if (activeModals.length > 0) { const topModal = activeModals.pop(); closeModalById(topModal); } });
         
-                function closeModalById(id) {
+        function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { isClosingScan = true; $('scanner-wrap').style.display = 'none'; checkModalOpen(); if(torchState) toggleFlashlight(); if(isScanning && html5QrCode){ html5QrCode.stop().catch(()=>{}); } isScanning=false; isClosingScan=false; requestWakeLock(); }
             else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
@@ -2390,7 +2455,7 @@
             else if (id === 'offline') { $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'history') { closeHistory(); }
             else if (id === 'full-date-picker') { closeFullDatePicker(); }
-            else if (id === 'top10') { closeTop10(); } // FIX ANDROID BACK BUTTON UNTUK TOP 10
+            else if (id === 'top10') { closeTop10(); } 
         }
     </script>
 </body>
