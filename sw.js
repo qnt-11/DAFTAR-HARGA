@@ -3,7 +3,7 @@
 // ==========================================
 
 // PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html, CSS, atau logika sistem!
-const APP_VERSION = '12.8'; 
+const APP_VERSION = '12.9'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -135,9 +135,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.open(CACHE_CORE).then(async cache => {
         const cleanReqUrl = req.url.split('?')[0];
-        const cachedRes = await cache.match(cleanReqUrl) || 
-                          await cache.match('./index.html') || 
-                          await cache.match('./');
+        
+        // PERBAIKAN KRITIS: Tambahan ignoreSearch agar Deep Link dari WhatsApp tetap bisa memuat Cache Offline
+        const cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
+                          await cache.match('./index.html', { ignoreSearch: true }) || 
+                          await cache.match('./', { ignoreSearch: true });
 
         // Berikan UI dari memori seketika (0 detik)
         if (cachedRes) return cachedRes;
