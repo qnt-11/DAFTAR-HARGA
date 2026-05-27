@@ -27,10 +27,15 @@
         .header-left { display: flex; flex-direction: column; justify-content: center; } .header h1 { font-size: 18px; margin: 0; color: var(--text-light); } .header-date-location { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; letter-spacing: 0.5px; } .top-btns { display: flex; gap: 10px; color: var(--text-light); align-items: center; } .icon-btn { cursor: pointer; background: none; border: none; padding: 6px; color: inherit; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; width: 44px; height: 44px; outline: none; } .icon-btn:active { transform: scale(0.9); opacity: 0.8; } .header-upload-btn { display: flex; flex-direction: column; gap: 2px; color: #87CEFA; padding: 0; } .dropdown-wrapper { position: relative; display: flex; align-items: center; } .dropdown-content { position: absolute; top: 48px; right: 0; background: rgba(21, 21, 21, 0.98); backdrop-filter: blur(8px); min-width: 180px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; border: 1px solid var(--border-color); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.05); } .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--text-light); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 44px; } .dropdown-item:last-child { border-bottom: none; } .dropdown-item:active { background-color: rgba(255,255,255,0.15); } .dropdown-item input[type="file"] { display: none; }
         @keyframes laser-updown-header { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } } .laser-beam-header { animation: laser-updown-header 1.5s infinite ease-in-out; filter: drop-shadow(0 0 2px red); will-change: transform; transform: translate3d(0,0,0); } .glow-cloud { filter: drop-shadow(0 0 6px rgba(135, 206, 250, 0.8)); }
         .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-calc { font-size: 12px; color: var(--text-muted); font-weight: 600; } .cpi-total { font-size: 15px; font-weight: 800; color: var(--mono-main); text-align: right; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; } .qty-input-manual { width: 48px; text-align: center; background: var(--wa-card); border: 1px solid var(--border-color); color: var(--mono-main); font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; border-radius: 8px; padding: 8px 0; outline: none; margin-left: 15px; } .qty-input-manual:focus { border-color: var(--mono-main); }
-        .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } .search-box input { width: 100%; background: transparent; border: none; padding: 14px 44px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } .q-clear { position: absolute; right: 2px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; } .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
+        .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } .search-box input { width: 100%; background: transparent; border: none; padding: 14px 74px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } .q-clear { position: absolute; right: 36px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; z-index: 10; } .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
         .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
+        /* --- INJEKSI CSS VOICE SEARCH --- */
+        .q-mic { position: absolute; right: 2px; top: 2px; bottom: 2px; width: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; z-index: 5; }
+        .q-mic:active { transform: scale(0.9); }
+        .mic-active { color: var(--danger) !important; animation: micPulse 1s infinite alternate; }
+        @keyframes micPulse { 0% { opacity: 1; text-shadow: 0 0 5px red; } 100% { opacity: 0.5; text-shadow: 0 0 15px red; } }
     </style>
 </head>
 <body>
@@ -97,6 +102,9 @@
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" id="q" placeholder="search..." autocomplete="off">
                     <div id="q-x" class="q-clear" onclick="clearSearch()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6M9 9l6 6"></path></svg></div>
+                    <div id="q-mic" class="q-mic" onclick="startVoiceSearch()">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    </div>
                     <div id="search-dropdown" class="search-dropdown-box hidden"><div id="sd-content"></div></div>
                 </div>
                 <button class="icon-btn" id="s-btn-search" onclick="toggleCartMode()" style="color:var(--mono-main);">
@@ -393,7 +401,6 @@
     </div>
 
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
-
     <script>
         const $ = (id) => document.getElementById(id);
         const CLOUD_URL = "https://script.google.com/macros/s/AKfycbz0NqeBRXVNWdwswVKgBNLffXX4nEP_WXqnPufBpNoG5Krv9n0UZuGyDTrseLf0p6SF/exec";
@@ -734,14 +741,22 @@
             return safeText.replace(regex, '<span class="highlight">$1</span>'); 
         }
         
-        function formatRp(input) { 
+                        function formatRp(input) { 
+            if(input.selectionStart === undefined) return;
             let cursorPosition = input.selectionStart;
-            let originalLength = input.value.length;
+            let leftStr = input.value.substring(0, cursorPosition);
+            let leftDigits = leftStr.replace(/\D/g, "").length; // Hitung digit asli di sebelah kiri kursor
+            
             let val = input.value.replace(/\D/g, ""); 
             input.value = val ? fmt(parseInt(val, 10) || 0) : ""; 
-            let newLength = input.value.length;
-            cursorPosition = cursorPosition + (newLength - originalLength);
-            try { input.setSelectionRange(cursorPosition, cursorPosition); } catch(e) {} 
+            
+            // Kembalikan kursor ke posisi digit yang benar
+            let newPos = 0, digitCount = 0;
+            for(let i=0; i<input.value.length; i++) {
+                if(/\d/.test(input.value[i])) digitCount++;
+                if(digitCount === leftDigits) { newPos = i+1; break; }
+            }
+            try { input.setSelectionRange(newPos, newPos); } catch(e) {} 
         }
 
         function debounce(func, wait) { 
@@ -831,40 +846,13 @@
             if (!cartState[id]) cartState[id] = { q: n }; else cartState[id].q = n; 
             saveCartMem(); 
             
-            let grandTotal = 0;
-            
-            Object.keys(cartState).forEach(k => {
-                const item = db.find(x => String(x.id) === k);
-                if (item && !item.deleted) {
-                    const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
-                    const iq = Math.max(1, item.iq || 1);
-                    
-                    let subTotal = 0;
-                    if (cartState[k].manualPrice !== undefined) {
-                        subTotal = cartState[k].manualPrice;
-                    } else {
-                        if (p1 > 0 && p2 > 0 && iq > 1) {
-                            if (q >= iq) {
-                                let grosirBlocks = Math.floor(q / iq);
-                                let ecerQty = q % iq;
-                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
-                            } else { subTotal = Math.round(q * p1); }
-                        } else { subTotal = Math.round(q * p1); }
-                    }
-                    grandTotal += subTotal;
-
-                    const elemSub = $('sub-' + k); 
-                    // Update input value harga manual dengan sangat aman (mencegah kursor melompat)
-                    if (elemSub && (!document.activeElement || document.activeElement !== elemSub)) {
-                        elemSub.value = fmt(subTotal);
-                    }
-                    const elemLabel = $('qty-label-' + k);
-                    if (elemLabel) {
-                        elemLabel.innerHTML = formatQtyBreakdown(q, item.iq, item.u1, item.u2);
-                    }
-                }
-            });
-            $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
+            // BUG FIX KRITIS: Wajib merender ulang keranjang, BUKAN mencoba update DOM yang sudah hilang
+            if (isCartMode) {
+                // Gunakan requestAnimationFrame agar tidak menabrak alur input keyboard user
+                requestAnimationFrame(() => renderCartUI()); 
+            } else {
+                applyFiltersAndRender();
+            }
         }
 
         function handleBlurQty(id, inputElem) {
@@ -1007,7 +995,8 @@
             
             const t = Date.now(), timeDiff = t - lastKeyTime; lastKeyTime = t;
             
-            if (timeDiff > 40) physicalInputBuffer = ""; 
+            // INJEKSI BUG FIX (Typist Hijack): Diperketat menjadi 25ms
+            if (timeDiff > 25) physicalInputBuffer = ""; 
             
             const isInputFocused = (document.activeElement && (document.activeElement.tagName.toLowerCase() === 'input' || document.activeElement.tagName.toLowerCase() === 'textarea'));
             
@@ -1077,27 +1066,111 @@
         function closePricePopup(e, force = false) { if (force || e.target === $('price-popup')) { untrackModal('price'); $('price-popup').style.display = 'none'; checkModalOpen(); $('q').value = ''; clearSearch(); } }
         
         function handleSearchLogic(query) { 
-            const q = query.trim(), qL = q.toLowerCase();
-            const exact = barcodeMap.get(q.toUpperCase()) || acronymMap.get(qL); 
-            if (exact && q.length > 0) { currentSearchReqId++; workerResult = [exact]; applyFiltersAndRender(); } else { if(worker) worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); }
+            const q = query.trim();
+            // BUG LOGIC FIX: Hapus acronymMap dari exact bypass, biarkan worker yang memproses cerdas
+            const exact = barcodeMap.get(q.toUpperCase()); 
+            if (exact && q.length > 0) { 
+                currentSearchReqId++; workerResult = [exact]; applyFiltersAndRender(); 
+            } else { 
+                if(worker) worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); 
+            }
         }
 
         const searchInput = $('q'), searchDropdown = $('search-dropdown'), sdContent = $('sd-content');
         
+        // --- INJEKSI KECERDASAN WORKER ---
         const workerScript = `
-        let workerList = []; let latestReqId = 0; 
+        let workerList = []; let latestReqId = 0; let trendMap = {};
+        
+        const prep = (item) => {
+            const rawText = \`\${item.n || ''} \${item.t || ''} \${item.b || ''} \${item.b2 || ''}\`.toLowerCase();
+            item._s = rawText;
+            item._sNoSpace = rawText.replace(/\\s+/g, ''); 
+            item._p1 = parseInt(item.p1) || 0;
+            item._p2 = parseInt(item.p2) || 0;
+            return item;
+        };
+
         self.onmessage = function(e) { 
-            if (e.data.type === 'init') workerList = e.data.db; 
-            else if (e.data.type === 'add') workerList.push(e.data.item); 
-            else if (e.data.type === 'update') { workerList = workerList.filter(x => String(x.id) !== String(e.data.item.id)); workerList.push(e.data.item); } 
-            else if (e.data.type === 'remove') workerList = workerList.filter(x => String(x.id) !== String(e.data.id)); 
+            if (e.data.type === 'init') { 
+                workerList = e.data.db.map(prep); 
+                trendMap = e.data.trend || {}; 
+            } 
+            else if (e.data.type === 'add') { workerList.push(prep(e.data.item)); } 
+            else if (e.data.type === 'update') { workerList = workerList.filter(x => String(x.id) !== String(e.data.item.id)); workerList.push(prep(e.data.item)); } 
+            else if (e.data.type === 'remove') { workerList = workerList.filter(x => String(x.id) !== String(e.data.id)); } 
             else if (e.data.type === 'search') { 
-                latestReqId = e.data.reqId; const query = (e.data.query || '').toLowerCase(); const terms = query.split(' ').filter(Boolean); 
-                const hasil = workerList.filter(item => { 
-                    if (latestReqId !== e.data.reqId) return false; 
-                    const n = (item.n || '').toLowerCase(), t = (item.t || '').toLowerCase(), b = (item.b || '').toLowerCase(), b2 = (item.b2 || '').toLowerCase(); 
-                    return terms.every(term => n.includes(term) || t.includes(term) || b.includes(term) || b2.includes(term)); 
-                }); 
+                latestReqId = e.data.reqId; 
+                let query = (e.data.query || '').toLowerCase().trim(); 
+                
+                let priceFilter = null;
+                const matchSemantic = query.match(/([<>]=?|=)\\s*(\\d+)/);
+                if (matchSemantic) {
+                    priceFilter = { operator: matchSemantic[1], value: parseInt(matchSemantic[2], 10) };
+                    query = query.replace(matchSemantic[0], '').trim();
+                }
+
+                const terms = query.split(/\\s+/).filter(Boolean); 
+                const queryNoSpace = query.replace(/\\s+/g, '');
+                
+                let hasil = [];
+                for (let i = 0; i < workerList.length; i++) {
+                    if (latestReqId !== e.data.reqId) return; 
+                    
+                    const item = workerList[i];
+
+                    if (priceFilter) {
+                        const val = priceFilter.value;
+                        const op = priceFilter.operator;
+                        const p1 = item._p1; const p2 = item._p2;
+                        
+                        let pass = false;
+                        if (op === '<') pass = (p1 > 0 && p1 < val) || (p2 > 0 && p2 < val);
+                        else if (op === '<=') pass = (p1 > 0 && p1 <= val) || (p2 > 0 && p2 <= val);
+                        else if (op === '>') pass = p1 > val || p2 > val;
+                        else if (op === '>=') pass = p1 >= val || p2 >= val;
+                        else if (op === '=') pass = p1 === val || p2 === val;
+                        
+                        if (!pass) continue; 
+                    }
+
+                    let match = true;
+                    let score = 0;
+
+                    if (item._sNoSpace.includes(queryNoSpace) && queryNoSpace.length > 0) {
+                        score += 80;
+                    } else {
+                        for (let j = 0; j < terms.length; j++) {
+                            const term = terms[j];
+                            const idx = item._s.indexOf(term);
+                            if (idx === -1) { match = false; break; }
+                            
+                            if ((item.t && item.t.toLowerCase() === term) || (item.b === term.toUpperCase()) || (item.b2 === term.toUpperCase())) {
+                                score += 100; 
+                            } else if (idx === 0 || item._s.charAt(idx - 1) === ' ') {
+                                score += 50;  
+                            } else {
+                                score += 10;  
+                            }
+                        }
+                    }
+
+                                        if (trendMap[item.n]) {
+                        score += (trendMap[item.n] * 1.5); 
+                    }
+
+                    // BUG FIX LOGIKA: Jika kasir HANYA mengetik `<5000` (tanpa nama barang), masukan semua barang ke hasil, urutkan murni dari trend popularitas.
+                    // Jika kasir mengetik nama barang (terms.length > 0), pastikan harus ADA kecocokan nama, dilarang masuk ke hasil jika match = false (kecuali skor anti-typo >= 80)
+                    if (terms.length === 0 && priceFilter) {
+                        item._score = score; // Skor utamanya dari trendMap
+                        hasil.push(item);
+                    } else if ((match && score > 0) || (!match && score >= 80)) {
+                        item._score = score;
+                        hasil.push(item);
+                    }
+                }
+                
+                hasil.sort((a, b) => b._score - a._score || (a.n || '').localeCompare(b.n || ''));
                 if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil, query: e.data.query, reqId: e.data.reqId }); }
             } 
         };`;
@@ -1354,7 +1427,6 @@
             }
             requestAnimationFrame(() => renderVirtualList(true)); 
         }, { passive: true });
-
         async function save() {
             if (isSaving) return; 
             isSaving = true;
@@ -1550,7 +1622,8 @@
                             } 
                         }); 
                         db = Array.from(tempMap.values()); updateMaps(); 
-                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
+                        const currentTrendMap = buildTrendMap();
+                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                     }
                     
@@ -1631,7 +1704,8 @@
                         }); 
                         tx.oncomplete = () => { 
                             db = Array.from(tempMap.values()); updateMaps(); 
-                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
+                            const currentTrendMap = buildTrendMap();
+                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
                             currentIndex += chunkSize; requestAnimationFrame(processNextChunk); 
                         }; 
                         tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
@@ -1781,7 +1855,8 @@
                                 s.put(item); 
                             });
                             tx.oncomplete = () => { 
-                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
+                                const currentTrendMap = buildTrendMap();
+                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
                                 updateMaps(); clearSearch(); renderCartUI(); applyFiltersAndRender();
                                 isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                                 
@@ -1969,7 +2044,6 @@
                     }
                     grandTotal += subTotal;
 
-                    // HPP/Modal tetap terkalkulasi absolut dari Qty asli untuk laporan akuntansi Dashboard Google Sheets!
                     itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)), iq: item.iq, u1: item.u1, u2: item.u2 });
                 }
             });
@@ -2057,7 +2131,6 @@
             let d = timestamp ? new Date(timestamp) : new Date();
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
-            // Header Ala Supermarket (Font Monospace, 2 kolom untuk Tanggal & Kasir)
             let rawHTML = `
             <div style="width: 58mm; margin: 0 auto; padding: 0; color: #000; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.2;">
                 <div style="text-align: center; margin-bottom: 4px;">
@@ -2075,12 +2148,11 @@
                 <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
             `;
 
-            // Looping Item Belanjaan
             items.forEach(i => {
                 let safeN = escapeHTML(i.n);
                 let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                 
-                let qtyText = `${i.q}x${fmt(hrgSatuan)}`; // Format super rapat
+                let qtyText = `${i.q}x${fmt(hrgSatuan)}`; 
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 
                 if (i.iq !== undefined && iqNum > 1 && i.q >= iqNum) {
@@ -2090,7 +2162,7 @@
                     let gQ = Math.floor(nQ / iqNum);
                     let eQ = parseFloat((nQ % iqNum).toFixed(3));
                     qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                } else if (i.u1) { // Tambahkan singkatan eceran untuk item satuan biasa
+                } else if (i.u1) { 
                     qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
                 }
 
@@ -2106,7 +2178,6 @@
                 </div>`;
             });
 
-            // Footer Ala Supermarket (Tanpa simbol Rp agar angka sejajar rapi)
             rawHTML += `
                 <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
                 <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
@@ -2120,18 +2191,26 @@
                 </div>
             </div>`;
  
+            // PENAMBALAN BUG PHANTOM TRANSACTION (PRIORITY 1)
             if (!isReprint) {
                 let totalModal = items.reduce((sum, i) => sum + (i.modal || 0), 0);
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                hist.unshift({ id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal });
+                let newTx = { id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal };
+                hist.unshift(newTx);
+                
+                // Reset State Keranjang Kasir SECARA AMAN di awal sebelum Storage Eksekusi
+                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
+                
                 try {
                     localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 4000)));
                 } catch (e) {
                     console.warn("Storage penuh! Auto-shrink riwayat ekstrem.");
-                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 500)));
+                    try {
+                        localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 300))); 
+                    } catch (fatalErr) {
+                        tampilkanToast("Peringatan: Memori HP Penuh, riwayat gagal tersimpan!", "var(--danger)");
+                    }
                 }
-
-                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
             }
 
             let printFrame = document.getElementById('receipt-spooler-frame');
@@ -2172,13 +2251,13 @@
 
         function closeHistory() { untrackModal('history'); $('history-modal').style.display = 'none'; checkModalOpen(); }
 
-        let globalItemAgg = {}; // Penampung Data Cerdas Top 10
+        let globalItemAgg = {}; 
 
         function renderHistory() {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let dateVal = $('hist-date').value;
             let totalOmzet = 0; let totalModal = 0; let html = '';
-            let itemAgg = {}; // Reset penampung Top 10 setiap ganti tanggal
+            let itemAgg = {}; 
 
             hist.forEach(h => {
                 let d = new Date(h.ts);
@@ -2186,7 +2265,7 @@
                 
                 if (dStr === dateVal) {
                     totalOmzet += h.total;
-                    totalModal += (h.modal || 0); // Fail-safe jika modal tidak ada
+                    totalModal += (h.modal || 0); 
                     let timeStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
                     let itemsHtml = '';
@@ -2209,7 +2288,6 @@
                                 <span>Rp ${fmt(it.sub)}</span>
                             </div>`;
                             
-                            // Agregasi Top 10 per Item
                             if (!itemAgg[it.n]) itemAgg[it.n] = 0;
                             itemAgg[it.n] += parseFloat(it.q);
                         });
@@ -2239,13 +2317,12 @@
             $('hist-omzet').innerText = `Rp ${fmt(totalOmzet)}`;
             $('hist-laba').innerText = `Rp ${fmt(totalOmzet - totalModal)}`;
             
-            globalItemAgg = itemAgg; // Backup hasil scan untuk ditampilkan di Modal Top 10
+            globalItemAgg = itemAgg; 
 
             $('hist-list').innerHTML = html || '<div style="text-align:center; color:#555; padding: 40px 0; font-size: 12px; font-weight: 600; letter-spacing:1px;">KOSONG</div>';
         }
 
         function openTop10() {
-            // Sortir Array & Batasi Top 10
             let top10Arr = Object.keys(globalItemAgg).map(k => ({ n: k, q: globalItemAgg[k] })).sort((a,b) => b.q - a.q).slice(0, 10);
             
             let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => `
@@ -2264,7 +2341,7 @@
         function closeTop10() {
             untrackModal('top10');
             $('top10-modal').style.display = 'none';
-            checkModalOpen(); // <-- Pengaman Anti-Freeze Scroll Layar HP
+            checkModalOpen(); 
         } 
 
         function printHistory(id) {
@@ -2404,13 +2481,72 @@
             }, "HAPUS");
         }
 
+        /* --- FITUR KECERDASAN TAMBAHAN (VOICE & TRENDING) --- */
+        let speechRecog = null;
+        function startVoiceSearch() {
+            const micBtn = $('q-mic');
+            if (micBtn.classList.contains('mic-active')) return;
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return tampilkanToast("Browser tidak mendukung pencarian suara!", "var(--warning)");
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!speechRecog) {
+                speechRecog = new SpeechRecognition();
+                speechRecog.lang = 'id-ID';
+                speechRecog.interimResults = false;
+                speechRecog.maxAlternatives = 1;
+
+                speechRecog.onstart = () => {
+                    micBtn.classList.add('mic-active');
+                    tampilkanToast("🎙️ Mendengarkan...", "#87CEFA");
+                };
+
+                speechRecog.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    const cleanText = transcript.replace(/[^\w\s\<\>\=]/gi, '').trim(); 
+                    $('q').value = cleanText;
+                    $('q-x').style.display = 'flex';
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    handleSearchLogic(cleanText);
+                };
+
+                speechRecog.onerror = (event) => {
+                    if (event.error !== 'no-speech') tampilkanToast("Error mikrofon: " + event.error, "var(--danger)");
+                };
+
+                speechRecog.onend = () => {
+                    micBtn.classList.remove('mic-active');
+                };
+            }
+            
+            try { speechRecog.start(); } catch(e) { /* Ignore */ }
+        }
+
+        function buildTrendMap() {
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e){}
+            let map = {};
+            hist.forEach(tx => {
+                if(Array.isArray(tx.items)) {
+                    tx.items.forEach(it => { map[it.n] = (map[it.n] || 0) + (parseFloat(it.q) || 1); });
+                }
+            });
+            return map;
+        }
+
         /* --- INIT APP & APP LIFECYCLE --- */
         let isDbReady = false, pendingLaunchFile = null; 
         async function initApp() { 
             try { 
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`; 
                 await initDB(); db = await loadAllFromIDB(); 
-                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
+                
+                // INJEKSI BEHAVIORAL SCORING: Menarik data popularitas dan mengirim ke Worker
+                const currentTrendMap = buildTrendMap();
+                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
+                
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; } checkOfflineLedger();
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
@@ -2438,7 +2574,6 @@
             }); 
         }
 
-        // --- SISTEM ANTREAN MODAL PINTAR (ANDROID BACK BUTTON TRAP) ---
         let activeModals = [];
         function trackModal(id) { activeModals.push(id); history.pushState({ modalOpen: true }, ''); }
         function untrackModal(id) { const idx = activeModals.lastIndexOf(id); if (idx > -1) activeModals.splice(idx, 1); }
