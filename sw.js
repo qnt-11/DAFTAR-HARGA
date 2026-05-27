@@ -3,7 +3,7 @@
 // ==========================================
 
 // PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html, CSS, atau logika sistem!
-const APP_VERSION = '12.9'; 
+const APP_VERSION = '13.0'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -11,16 +11,7 @@ const CACHE_CDN = 'cdn-v1';
 const MAX_DYNAMIC_ITEMS = 50; 
 const MAX_CDN_ITEMS = 20;
 
-// Daftar file pondasi yang WAJIB diunduh saat instalasi pertama
-const coreUrls = [
-  './', 
-  './index.html', 
-  './offline.html',
-  './manifest.json',
-  'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-  'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
-  'https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700;800&display=swap'
-];
+const OFFLINE_URL = 'offline.html';
 
 const cdnDomains = [
   'unpkg.com', 
@@ -33,12 +24,13 @@ const cdnDomains = [
 // MANAJEMEN MEMORI (ANTI-LAG)
 // ==========================================
 
-let isTrimming = false;
+// Gembok per-namespace agar pembersihan CDN dan Dynamic tidak saling memblokir
+let isTrimming = {}; 
 
 // Menghapus file lama agar CPU HP tidak macet
 async function trimCache(cacheName, maxItems) {
-  if (isTrimming) return; 
-  isTrimming = true;
+  if (isTrimming[cacheName]) return; 
+  isTrimming[cacheName] = true;
   try {
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
@@ -51,7 +43,7 @@ async function trimCache(cacheName, maxItems) {
   } catch (err) {
     console.warn('[SW] Gagal membersihkan memori:', err);
   } finally {
-    isTrimming = false;
+    isTrimming[cacheName] = false;
   }
 }
 
@@ -74,18 +66,29 @@ async function manageStorage() {
 
 self.addEventListener('install', event => {
   self.skipWaiting(); 
+  
+  // FIX KRITIS: Pisahkan file KRUSIAL dan OPSIONAL untuk mencegah "Atomic Install Trap (Error 404)"
+  const criticalUrls = ['./', './index.html'];
+  const optionalUrls = [
+    OFFLINE_URL, 
+    './manifest.json',
+    'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700;800&display=swap'
+  ];
+
   event.waitUntil(
-    caches.open(CACHE_CORE).then(cache => {
-      // Menggunakan Promise.all agar instalasi batal jika 1 file inti gagal unduh (Mencegah Instalasi Ilusi)
-      return Promise.all(
-        coreUrls.map(url => {
-          return fetch(new Request(url, { cache: 'reload' })).then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return cache.put(url, res);
-          });
-        })
-      );
-    }).catch(err => console.error('[SW] Instalasi PWA Gagal, akan mencoba lagi:', err))
+    caches.open(CACHE_CORE).then(async cache => {
+      // 1. Wajib Mutlak (SW batal install HANYA jika index.html gagal)
+      await cache.addAll(criticalUrls);
+      
+      // 2. Opsional & CDN (Aman dari kegagalan berantai jika server mati/file 404)
+      optionalUrls.forEach(url => {
+        fetch(new Request(url, { cache: 'reload' }))
+          .then(res => { if (res.ok) cache.put(url, res); })
+          .catch(err => console.warn('[SW] Aset opsional tertunda (aman):', url));
+      });
+    }).catch(err => console.error('[SW] Instalasi PWA Gagal Total:', err))
   );
 });
 
@@ -136,7 +139,7 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE_CORE).then(async cache => {
         const cleanReqUrl = req.url.split('?')[0];
         
-        // PERBAIKAN KRITIS: Tambahan ignoreSearch agar Deep Link dari WhatsApp tetap bisa memuat Cache Offline
+        // Deep Link dari WhatsApp tetap bisa memuat Cache Offline
         const cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
                           await cache.match('./index.html', { ignoreSearch: true }) || 
                           await cache.match('./', { ignoreSearch: true });
@@ -148,41 +151,50 @@ self.addEventListener('fetch', event => {
         if (res) return res;
 
         // Failsafe cerdas: Jika jaringan mati total, arahkan ke Mode Darurat
-        const offlinePage = await cache.match('./offline.html');
+        const offlinePage = await cache.match(OFFLINE_URL, { ignoreSearch: true });
         if (offlinePage) return offlinePage;
         
-        // Failsafe darurat jika aplikasi benar-benar belum pernah ter-install
+        // Failsafe darurat absolut jika aplikasi benar-benar belum pernah ter-install
         return new Response(
           `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan Anda tersambung ke internet untuk sinkronisasi awal aplikasi ke dalam perangkat.</p></body></html>`,
           { headers: { 'Content-Type': 'text/html' } }
         );
+      }).catch(async (err) => {
+        // FAILSAFE TINGKAT DEWA (ANTI-DINOSAURUS):
+        // Jika Storage API / Memori HP rusak atau diblokir browser, paksa tarik langsung dari jaringan!
+        console.error('[SW] Cache Storage API Crash! Mem-bypass memori...', err);
+        try {
+            return await fetch(req);
+        } catch (networkErr) {
+            return new Response('Fatal Error: Sistem dan Jaringan lumpuh total.', { status: 503 });
+        }
       })
     );
     return;
   }
 
   // ---------------------------------------------------------
-  // STRATEGI 2: Cache-First untuk CDN Eksternal
+  // STRATEGI 2: Cache-First Murni untuk CDN Eksternal
   // ---------------------------------------------------------
   if (cdnDomains.some(domain => url.hostname.includes(domain))) {
-    const fetchPromiseCDN = fetch(req).then(res => {
-      const contentType = res.headers.get('content-type') || '';
-      if (res.ok && res.type !== 'opaque' && !contentType.includes('text/html')) {
-        const resClone = res.clone();
-        caches.open(CACHE_CDN).then(async cache => { 
-          await cache.put(req, resClone); 
-          await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
-        }).catch(() => console.warn('[SW] Gagal simpan CDN lokal'));
-      }
-      return res;
-    }).catch(() => new Response('', { status: 503 }));
-
-    // Mencegah Crash Browser karena Siklus Berakhir Prematur
-    event.waitUntil(fetchPromiseCDN);
-
     event.respondWith(
       caches.match(req).then(cachedRes => {
-        if (cachedRes) return cachedRes; // Jika CDN ada di HP, pakai langsung
+        // Jika ada di cache, langsung kembalikan TANPA request ke jaringan (Anti Bocor Kuota)
+        if (cachedRes) return cachedRes; 
+        
+        // Jika tidak ada di cache, baru download dan simpan
+        const fetchPromiseCDN = fetch(req).then(res => {
+          const contentType = res.headers.get('content-type') || '';
+          if (res.ok && res.type !== 'opaque' && !contentType.includes('text/html')) {
+            const resClone = res.clone();
+            caches.open(CACHE_CDN).then(async cache => { 
+              await cache.put(req, resClone); 
+              await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
+            }).catch(() => console.warn('[SW] Gagal simpan CDN lokal'));
+          }
+          return res;
+        }).catch(() => new Response('', { status: 503 }));
+
         return fetchPromiseCDN;
       })
     );
