@@ -3,7 +3,7 @@
 // ==========================================
 
 // PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html, CSS, atau logika sistem!
-const APP_VERSION = '13.0'; 
+const APP_VERSION = '13.2'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -120,55 +120,59 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
 
   // ---------------------------------------------------------
-  // STRATEGI 1: Stale-While-Revalidate untuk File Utama HTML
+  // STRATEGI 1: Stale-While-Revalidate untuk File Utama HTML (Anti Race-Condition)
   // ---------------------------------------------------------
   if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.includes('index.html')) {
-    const fetchPromiseHTML = fetch(req).then(res => {
-      // Menolak halaman yang dialihkan (redirect) oleh WiFi Publik
-      if (res.ok && !res.redirected && res.type !== 'opaque') {
-        const resClone = res.clone();
-        caches.open(CACHE_CORE).then(cache => cache.put(req.url.split('?')[0], resClone));
-      }
-      return res;
-    }).catch(() => null);
-
-    // Eksekusi janji jaringan di background agar tersinkronisasi
-    event.waitUntil(fetchPromiseHTML);
-
     event.respondWith(
-      caches.open(CACHE_CORE).then(async cache => {
+      (async () => {
         const cleanReqUrl = req.url.split('?')[0];
-        
-        // Deep Link dari WhatsApp tetap bisa memuat Cache Offline
-        const cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
-                          await cache.match('./index.html', { ignoreSearch: true }) || 
-                          await cache.match('./', { ignoreSearch: true });
+        let cachedRes = null;
 
-        // Berikan UI dari memori seketika (0 detik)
-        if (cachedRes) return cachedRes;
+        try {
+          const cache = await caches.open(CACHE_CORE);
+          // Prioritas 1: Berikan UI dari memori lokal (Fastest Response)
+          cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
+                      await cache.match('./index.html', { ignoreSearch: true }) || 
+                      await cache.match('./', { ignoreSearch: true });
+        } catch (err) {
+          console.error('[SW] Cache API Crash (Storage diblokir)!', err);
+        }
 
-        const res = await fetchPromiseHTML;
-        if (res) return res;
+        // Jalankan Fetch di background tanpa waitUntil ganda (mengamankan Lifecycle)
+        const fetchPromise = fetch(req).then(async (res) => {
+          if (res.ok && !res.redirected && res.type !== 'opaque') {
+            try {
+              const cache = await caches.open(CACHE_CORE);
+              await cache.put(cleanReqUrl, res.clone());
+            } catch (e) {} // Abaikan error jika storage korup saat menyimpan
+          }
+          return res;
+        }).catch(() => null);
 
-        // Failsafe cerdas: Jika jaringan mati total, arahkan ke Mode Darurat
-        const offlinePage = await cache.match(OFFLINE_URL, { ignoreSearch: true });
-        if (offlinePage) return offlinePage;
-        
-        // Failsafe darurat absolut jika aplikasi benar-benar belum pernah ter-install
+        // Jika cache ada, langsung kirimkan ke layar (0 ms load time)
+        if (cachedRes) {
+           // Background sync tetap berjalan secara asinkron (mengunci pembaruan di latar belakang)
+           event.waitUntil(fetchPromise); 
+           return cachedRes;
+        }
+
+        // Jika tidak ada di cache (Install pertama kali atau memori kehapus), tunggu jaringan
+        const networkRes = await fetchPromise;
+        if (networkRes) return networkRes;
+
+        // Failsafe 1: Coba ambil halaman darurat (offline.html)
+        try {
+          const cache = await caches.open(CACHE_CORE);
+          const offlinePage = await cache.match(OFFLINE_URL, { ignoreSearch: true });
+          if (offlinePage) return offlinePage;
+        } catch (e) {}
+
+        // Failsafe Absolut: Tampilkan HTML statis Peringatan Jaringan
         return new Response(
           `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan Anda tersambung ke internet untuk sinkronisasi awal aplikasi ke dalam perangkat.</p></body></html>`,
-          { headers: { 'Content-Type': 'text/html' } }
+          { headers: { 'Content-Type': 'text/html' }, status: 503 }
         );
-      }).catch(async (err) => {
-        // FAILSAFE TINGKAT DEWA (ANTI-DINOSAURUS):
-        // Jika Storage API / Memori HP rusak atau diblokir browser, paksa tarik langsung dari jaringan!
-        console.error('[SW] Cache Storage API Crash! Mem-bypass memori...', err);
-        try {
-            return await fetch(req);
-        } catch (networkErr) {
-            return new Response('Fatal Error: Sistem dan Jaringan lumpuh total.', { status: 503 });
-        }
-      })
+      })()
     );
     return;
   }
