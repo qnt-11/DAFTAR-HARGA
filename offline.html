@@ -123,7 +123,6 @@
         const STORE_NAME = 'CatatanDarurat'; 
         let db;
         
-        // PERBAIKAN KRITIS: Scope Arrow Function agar DB terinisialisasi tepat waktu sebelum loadLedger dipanggil
         const requestDB = indexedDB.open(DB_NAME, 1);
         requestDB.onupgradeneeded = (e) => { 
             let d = e.target.result;
@@ -186,7 +185,7 @@
             }
         });
 
-        // --- SISTEM KALKULATOR ---
+        // --- SISTEM KALKULATOR (DIPERBAIKI) ---
         const display = document.getElementById('calc-display'); 
         let calcVal = '0';
         let isResultDisplayed = false; 
@@ -209,9 +208,12 @@
             }
             const p = calcVal.split(/[\+\-\*\/]/);
             const curr = p[p.length - 1]; 
+            
             if (n === '.' && curr.includes('.')) return; 
             if (curr === '0' && n !== '.') calcVal = calcVal.slice(0, -1) + n; 
+            else if (curr === '0' && n === '0') return; 
             else calcVal += n; 
+            
             updateDisplay(); 
         }
 
@@ -234,6 +236,7 @@
                 return;
             }
             calcVal = calcVal.length > 1 ? calcVal.slice(0, -1) : '0'; 
+            if (calcVal === '') calcVal = '0';
             updateDisplay(); 
         }
 
@@ -241,9 +244,8 @@
             try {
                 let safeVal = calcVal.replace(/[\+\-\*\/\.]$/, '');
                 
-                // PERBAIKAN KRITIS: Kalkulator Aman, Anti-Infinity, & Anti Injeksi
                 let result = eval(safeVal); 
-                if (!isFinite(result)) throw new Error();
+                if (!isFinite(result) || isNaN(result)) throw new Error();
                 
                 calcVal = String(parseFloat(result.toFixed(4))); 
                 isResultDisplayed = true; 
@@ -254,12 +256,11 @@
             }
         }
 
-        // --- DUKUNGAN KEYBOARD FISIK ---
+        // --- DUKUNGAN KEYBOARD FISIK (DIPERBAIKI) ---
         document.addEventListener('keydown', (e) => {
             if (document.activeElement.tagName === 'TEXTAREA') return;
 
             const key = e.key;
-            // Penambahan ^ dan $ untuk memastikan input wajib angka 0-9 murni
             if (/^[0-9]$/.test(key)) {
                 calcNum(key);
             } else if (key === '.' || key === ',') {
