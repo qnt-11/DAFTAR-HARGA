@@ -21,21 +21,23 @@
         body::before { content: ""; position: fixed; top: -2px; left: 0; right: 0; height: 4px; background-color: #000000; z-index: 999999; pointer-events: none; }
         .hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
-        body.modal-open { overflow: hidden !important; }
+        body.modal-open { overflow: hidden !important; touch-action: none; }
         .sticky-roof-group { z-index: 900; } .sticky-roof-group::after { z-index: 901; } .header { z-index: 1000; } .dropdown-content { z-index: 2000; } .search-dropdown-box { z-index: 2000; } .scanner-overlay { z-index: 3510; } .scan-stop, .btn-torch{ z-index: 3520; } .modal { z-index: 4000; } #sync-custom-options { z-index: 4100; } #scanner-wrap { z-index: 4500; } #loading-modal { z-index: 5500; } #toast-notification { z-index: 6000; }
         .header { padding: calc(15px + env(safe-area-inset-top, 0px)) 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--wa-header); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); margin-bottom: 15px; border-top: none !important; border-bottom: none !important; }
         .header-left { display: flex; flex-direction: column; justify-content: center; } .header h1 { font-size: 18px; margin: 0; color: var(--text-light); } .header-date-location { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; letter-spacing: 0.5px; } .top-btns { display: flex; gap: 10px; color: var(--text-light); align-items: center; } .icon-btn { cursor: pointer; background: none; border: none; padding: 6px; color: inherit; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; width: 44px; height: 44px; outline: none; } .icon-btn:active { transform: scale(0.9); opacity: 0.8; } .header-upload-btn { display: flex; flex-direction: column; gap: 2px; color: #87CEFA; padding: 0; } .dropdown-wrapper { position: relative; display: flex; align-items: center; } .dropdown-content { position: absolute; top: 48px; right: 0; background: rgba(21, 21, 21, 0.98); backdrop-filter: blur(8px); min-width: 180px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; border: 1px solid var(--border-color); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.05); } .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--text-light); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 44px; } .dropdown-item:last-child { border-bottom: none; } .dropdown-item:active { background-color: rgba(255,255,255,0.15); } .dropdown-item input[type="file"] { display: none; }
         @keyframes laser-updown-header { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } } .laser-beam-header { animation: laser-updown-header 1.5s infinite ease-in-out; filter: drop-shadow(0 0 2px red); will-change: transform; transform: translate3d(0,0,0); } .glow-cloud { filter: drop-shadow(0 0 6px rgba(135, 206, 250, 0.8)); }
         .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-calc { font-size: 12px; color: var(--text-muted); font-weight: 600; } .cpi-total { font-size: 15px; font-weight: 800; color: var(--mono-main); text-align: right; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; } .qty-input-manual { width: 48px; text-align: center; background: var(--wa-card); border: 1px solid var(--border-color); color: var(--mono-main); font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; border-radius: 8px; padding: 8px 0; outline: none; margin-left: 15px; } .qty-input-manual:focus { border-color: var(--mono-main); }
-        .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } .search-box input { width: 100%; background: transparent; border: none; padding: 14px 74px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } .q-clear { position: absolute; right: 36px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; z-index: 10; } .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
+        .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } 
+        .search-box input { width: 100%; background: transparent; border: none; padding: 14px 88px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } 
+        .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } 
+        .q-clear { position: absolute; right: 42px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; z-index: 10; } 
+        .mic-btn { position: absolute; right: 2px; top: 2px; bottom: 2px; width: 44px; background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; transition: color 0.2s; z-index: 10; }
+        .mic-btn.listening { color: var(--danger); animation: pulseMic 1s infinite alternate; }
+        @keyframes pulseMic { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+        .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
         .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; pointer-events: auto !important; }.btn-main:active { transform: scale(0.96); }.btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none !important; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
-        /* --- INJEKSI CSS VOICE SEARCH --- */
-        .q-mic { position: absolute; right: 2px; top: 2px; bottom: 2px; width: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; z-index: 5; }
-        .q-mic:active { transform: scale(0.9); }
-        .mic-active { color: var(--danger) !important; animation: micPulse 1s infinite alternate; }
-        @keyframes micPulse { 0% { opacity: 1; text-shadow: 0 0 5px red; } 100% { opacity: 0.5; text-shadow: 0 0 15px red; } }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
     </style>
 </head>
 <body>
@@ -101,10 +103,12 @@
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" id="q" placeholder="search..." autocomplete="off">
+                    
+                    <button id="mic-btn" class="mic-btn" onclick="startVoiceSearch()">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+                    </button>
+                    
                     <div id="q-x" class="q-clear" onclick="clearSearch()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6M9 9l6 6"></path></svg></div>
-                    <div id="q-mic" class="q-mic" onclick="startVoiceSearch()">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                    </div>
                     <div id="search-dropdown" class="search-dropdown-box hidden"><div id="sd-content"></div></div>
                 </div>
                 <button class="icon-btn" id="s-btn-search" onclick="toggleCartMode()" style="color:var(--mono-main);">
@@ -131,6 +135,7 @@
     </div>
     
     <div class="scroll-letter" id="scroll-letter">A</div>
+
     <button class="fab" onclick="showMod()">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
@@ -157,7 +162,7 @@
                 </button>
             </div>
 
-                      <label style="color:#87CEFA;">HPP</label>
+            <label style="color:#87CEFA;">HPP</label>
             <div style="display:flex; gap:10px;">
                 <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
                 <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this);" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
@@ -209,7 +214,7 @@
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
             </div>
 
-                         <div id="wrap-iq">
+            <div id="wrap-iq">
                 <label id="label-iq">Isi per ...</label>
                 <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="autoCalcHPP();">
             </div> 
@@ -311,12 +316,12 @@
     </div>
 
     <div id="custom-alert" class="modal">
-    <div class="modal-box" id="alert-box" style="text-align: center;">
-        <h3 id="alert-title" style="margin-top:0; font-size:15px; text-transform:uppercase;">Info</h3>
-        <div id="alert-msg" style="font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;"></div>
-        <div class="modal-btns" id="alert-btns"></div>
+        <div class="modal-box" id="alert-box" style="text-align: center;">
+            <h3 id="alert-title" style="margin-top:0; font-size:15px; text-transform:uppercase;">Info</h3>
+            <p id="alert-msg" style="font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;"></p>
+            <div class="modal-btns" id="alert-btns"></div>
+        </div>
     </div>
-</div>
 
     <div id="loading-modal" class="modal">
         <div class="modal-box" id="loading-box" style="text-align: center;">
@@ -326,7 +331,7 @@
         </div>
     </div>
 
-        <div id="history-modal" class="modal" onclick="if(event.target===this) closeHistory()">
+    <div id="history-modal" class="modal" onclick="if(event.target===this) closeHistory()">
         <div class="modal-box" style="background: #000; border-color: #333; padding: 20px; max-width: 340px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
                 <h3 class="audiowide-regular" style="margin: 0; font-size: 16px; font-style: italic; color: #fff; display: flex; align-items: center; gap: 8px;">
@@ -400,16 +405,21 @@
     </div>
 
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
+
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxN4GwVTlywH_NcE53KOO8E9kjGW8_JRHIWr4E6wOpID9n9oiq376Apc88ex17kygSP/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbz0NqeBRXVNWdwswVKgBNLffXX4nEP_WXqnPufBpNoG5Krv9n0UZuGyDTrseLf0p6SF/exec";
+        const TemaNotifikasi = { 
+            "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
+            "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
+            "Backup": "#87CEFA", "Sinkronisasi": "#87CEFA", "Sukses": "var(--mono-main)", "Info": "var(--mono-main)", "Info Offline": "var(--warning)", "Laporan Import": "var(--warning)" 
+        };
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
-                const APP_SECURE_PIN = localStorage.getItem('APP_PIN') || '170823';
+        const APP_SECURE_PIN = localStorage.getItem('APP_PIN') || '170823';
 
         let db = [], idb, worker, workerResult = null, filteredData = [], listOffsets = [];
-        let activeModals = []; // PERBAIKAN: Evakuasi dari zona bahaya (TDZ)
         
         let layoutCache = { listTop: 188, offsetBuffer: 135, lastUpdate: 0 };
         function invalidateLayoutCache() { layoutCache.lastUpdate = 0; }
@@ -421,12 +431,6 @@
         const Picker = { sel: new Date(), targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
         let recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || [];
         let trendingSearches = JSON.parse(localStorage.getItem('DB_WA_TRENDING')) || {};
-
-        const TemaNotifikasi = { 
-            "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
-            "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
-            "Backup": "#87CEFA", "Sinkronisasi": "#87CEFA", "Sukses": "var(--mono-main)", "Info": "var(--mono-main)", "Info Offline": "var(--warning)", "Laporan Import": "var(--warning)" 
-        };
 
         let isCartMode = false;
         let isApiLoading = false; 
@@ -737,26 +741,24 @@
         function highlightMatch(text, term) { 
             const safeText = escapeHTML(text || ""); 
             if (!term || String(term).trim() === '') return safeText; 
-            const regex = new RegExp(`(${escapeHTML(String(term).trim()).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'); 
+            
+            const terms = String(term).trim().split(/\s+/).filter(Boolean);
+            if (terms.length === 0) return safeText;
+
+            const regexStr = terms.map(t => escapeHTML(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'); 
+            const regex = new RegExp(`(${regexStr})`, 'gi'); 
+            
             return safeText.replace(regex, '<span class="highlight">$1</span>'); 
         }
         
-                        function formatRp(input) { 
-            if(input.selectionStart === undefined) return;
+        function formatRp(input) { 
             let cursorPosition = input.selectionStart;
-            let leftStr = input.value.substring(0, cursorPosition);
-            let leftDigits = leftStr.replace(/\D/g, "").length; // Hitung digit asli di sebelah kiri kursor
-            
+            let originalLength = input.value.length;
             let val = input.value.replace(/\D/g, ""); 
             input.value = val ? fmt(parseInt(val, 10) || 0) : ""; 
-            
-            // Kembalikan kursor ke posisi digit yang benar
-            let newPos = 0, digitCount = 0;
-            for(let i=0; i<input.value.length; i++) {
-                if(/\d/.test(input.value[i])) digitCount++;
-                if(digitCount === leftDigits) { newPos = i+1; break; }
-            }
-            try { input.setSelectionRange(newPos, newPos); } catch(e) {} 
+            let newLength = input.value.length;
+            cursorPosition = cursorPosition + (newLength - originalLength);
+            try { input.setSelectionRange(cursorPosition, cursorPosition); } catch(e) {} 
         }
 
         function debounce(func, wait) { 
@@ -800,7 +802,6 @@
         function modifyCartItem(id, qtyChange) {
             if (!cartState[id]) cartState[id] = { q: 0 };
             cartState[id].q += qtyChange;
-            // Jika Qty diubah dari luar, hapus memory manual override agar kembali otomatis
             delete cartState[id].manualPrice; 
             
             if (cartState[id].q <= 0) { delete cartState[id]; }
@@ -825,7 +826,7 @@
             
             if (iqNum > 1 && numQ >= iqNum) {
                 let gQty = Math.floor(numQ / iqNum);
-                let eQty = parseFloat((numQ % iqNum).toFixed(3)); // Proteksi floating-point glitch JS
+                let eQty = parseFloat((numQ % iqNum).toFixed(3)); 
 
                 if (eQty === 0) return `${gQty} ${escapeHTML(gUnit)}`;
                 return `${gQty} ${escapeHTML(gUnit)} ${eQty} ${escapeHTML(eUnit)}`;
@@ -833,12 +834,11 @@
             return `${numQ} ${escapeHTML(eUnit)}`;
         }
 
-         function updateCartQtyManual(id, val) {
+        function updateCartQtyManual(id, val) {
             let cleanVal = String(val).replace(',', '.'); 
             let n = parseFloat(cleanVal);
             if (isNaN(n)) n = 0; 
             
-            // Pengaman: Hapus harga manual HANYA JIKA kuantitas (Qty) benar-benar diubah
             if (cartState[id] && cartState[id].q !== n) {
                 delete cartState[id].manualPrice;
             }
@@ -846,47 +846,39 @@
             if (!cartState[id]) cartState[id] = { q: n }; else cartState[id].q = n; 
             saveCartMem(); 
             
-            // PERBAIKAN BUG KRITIS: Surgical DOM Update (Tanpa Re-Render Seluruh List)
-            if (isCartMode) {
-                let item = db.find(x => String(x.id) === id);
+            let grandTotal = 0;
+            
+            Object.keys(cartState).forEach(k => {
+                const item = db.find(x => String(x.id) === k);
                 if (item && !item.deleted) {
+                    const q = cartState[k].q, p1 = item.p1, p2 = item.p2;
+                    const iq = Math.max(1, item.iq || 1);
+                    
                     let subTotal = 0;
-                    if (cartState[id].manualPrice !== undefined) {
-                        subTotal = cartState[id].manualPrice;
+                    if (cartState[k].manualPrice !== undefined) {
+                        subTotal = cartState[k].manualPrice;
                     } else {
-                        let p1 = item.p1, p2 = item.p2, iq = Math.max(1, item.iq || 1);
                         if (p1 > 0 && p2 > 0 && iq > 1) {
-                            if (n >= iq) { subTotal = (Math.floor(n / iq) * p2) + Math.round((n % iq) * p1); } 
-                            else { subTotal = Math.round(n * p1); }
-                        } else { subTotal = Math.round(n * p1); }
+                            if (q >= iq) {
+                                let grosirBlocks = Math.floor(q / iq);
+                                let ecerQty = q % iq;
+                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
+                            } else { subTotal = Math.round(q * p1); }
+                        } else { subTotal = Math.round(q * p1); }
                     }
-                    
-                    let subEl = $('sub-' + id);
-                    if (subEl && cartState[id].manualPrice === undefined) subEl.value = fmt(subTotal);
-                    
-                    let qtyLabel = $('qty-label-' + id);
-                    if (qtyLabel) qtyLabel.innerText = formatQtyBreakdown(n, item.iq, item.u1, item.u2);
+                    grandTotal += subTotal;
+
+                    const elemSub = $('sub-' + k); 
+                    if (elemSub && (!document.activeElement || document.activeElement !== elemSub)) {
+                        elemSub.value = fmt(subTotal);
+                    }
+                    const elemLabel = $('qty-label-' + k);
+                    if (elemLabel) {
+                        elemLabel.innerHTML = formatQtyBreakdown(q, item.iq, item.u1, item.u2);
+                    }
                 }
-                
-                let grandTotal = 0;
-                Object.keys(cartState).forEach(k => {
-                    const it = db.find(x => String(x.id) === k);
-                    if (it && !it.deleted) {
-                        if (cartState[k].manualPrice !== undefined) { 
-                            grandTotal += cartState[k].manualPrice; 
-                        } else {
-                            const qq = cartState[k].q, ip1 = it.p1, ip2 = it.p2, iiq = Math.max(1, it.iq || 1);
-                            if (ip1 > 0 && ip2 > 0 && iiq > 1) {
-                                if (qq >= iiq) { grandTotal += (Math.floor(qq / iiq) * ip2) + Math.round((qq % iiq) * ip1); } 
-                                else { grandTotal += Math.round(qq * ip1); }
-                            } else { grandTotal += Math.round(qq * ip1); }
-                        }
-                    }
-                });
-                $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
-            } else {
-                applyFiltersAndRender();
-            }
+            });
+            $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
 
         function handleBlurQty(id, inputElem) {
@@ -929,7 +921,7 @@
  
                     html += `<div class="cp-item-wrap"><div class="cp-trash-bg" onclick="deleteCartItem('${id}')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div><div class="cp-item-front" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}')"><div class="cpi-info"><div class="cpi-name">${escapeHTML(item.n)}</div><div class="cpi-calc" id="qty-label-${id}">${qtyDisplay}</div></div><div style="display:flex; align-items:center; gap: 12px; pointer-events: auto;">
                     
-                                        <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
+                    <div style="display:flex; align-items:center; background:var(--wa-card); border:1px solid var(--border-color); border-radius:8px; padding:0 8px;">
                         <span style="font-size:12px; font-weight:700; color:var(--text-muted); padding-right:4px;">Rp</span>
                         <input class="cpi-total" id="sub-${id}" type="tel" value="${fmt(subTotal)}" onfocus="this.dataset.oldVal = this.value; this.value=''" oninput="let v = this.value.replace(/[^0-9]/g, ''); this.value = fmt(v); updateManualPrice('${id}', v);" onblur="if(this.value==='') this.value=this.dataset.oldVal;" style="background:transparent; border:none; width:90px; outline:none; text-align:right; font-family:'Montserrat', sans-serif; padding:8px 0; color:var(--mono-main); font-weight:800; font-size:14px;">
                     </div>
@@ -947,19 +939,17 @@
         }
         
         function updateManualPrice(id, rawVal) {
-            // Mengizinkan nominal Rp 0 untuk fitur Barang Gratis / Promo
             let cleanVal = parseInt(rawVal, 10); 
             
             if (!isNaN(cleanVal) && cleanVal >= 0) {
                 if (!cartState[id]) cartState[id] = { q: 1 };
                 cartState[id].manualPrice = cleanVal;
             } else {
-                delete cartState[id].manualPrice; // Hapus paksa jika dikosongkan total
+                delete cartState[id].manualPrice; 
             }
 
             saveCartMem();
             
-            // Panggil paksa update kalkulasi total tanpa me-render ulang seluruh layar
             let grandTotal = 0;
             Object.keys(cartState).forEach(k => {
                 const item = db.find(x => String(x.id) === k);
@@ -1027,10 +1017,9 @@
             const isModOpen = activeModals.includes('mod');
             if (isScanning || (isAnyModalOpen && !isModOpen)) return;
             
-                        const t = Date.now(), timeDiff = t - lastKeyTime; lastKeyTime = t;
+            const t = Date.now(), timeDiff = t - lastKeyTime; lastKeyTime = t;
             
-            // INJEKSI BUG FIX (Typist Hijack): Diperlebar menjadi 50ms untuk support scanner low-end
-            if (timeDiff > 50) physicalInputBuffer = ""; 
+            if (timeDiff > 40) physicalInputBuffer = ""; 
             
             const isInputFocused = (document.activeElement && (document.activeElement.tagName.toLowerCase() === 'input' || document.activeElement.tagName.toLowerCase() === 'textarea'));
             
@@ -1087,7 +1076,7 @@
                     modifyCartItem(item.id, qtyToAdd); 
                 } else { 
                     $('pp-name').innerText = item.n; $('pp-price').innerText = "Rp " + fmt(item.p1); 
-                                        let textGrosir = ""; 
+                    let textGrosir = ""; 
                     if (item.p1 > 0 && item.p2 > 0) { 
                         textGrosir = `Grosir: Rp ${fmt(item.p2)} / ${escapeHTML(String(item.u2 || 'Grosir'))}`; 
                         if (item.iq > 1) textGrosir += `\n(Grosir otomatis aktif jika beli ${item.iq} ${escapeHTML(String(item.u1 || 'pcs'))})`; 
@@ -1099,138 +1088,185 @@
         
         function closePricePopup(e, force = false) { if (force || e.target === $('price-popup')) { untrackModal('price'); $('price-popup').style.display = 'none'; checkModalOpen(); $('q').value = ''; clearSearch(); } }
         
-                function handleSearchLogic(query) { 
-            const q = query.trim();
-            const exact = barcodeMap.get(q.toUpperCase()); 
-            if (exact && q.length > 0) { 
-                currentSearchReqId++; workerResult = [exact]; applyFiltersAndRender(); 
-            } else { 
-                if (worker) {
-                    worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); 
-                } else {
-                    // PERBAIKAN: Fallback pencarian manual jika sistem Worker mati
-                    const qL = q.toLowerCase();
-                    workerResult = db.filter(i => !i.deleted && ((i.n || '').toLowerCase().includes(qL) || (i.t || '').toLowerCase() === qL));
-                    applyFiltersAndRender();
+        function handleSearchLogic(query) { 
+            const q = query.trim(), qL = q.toLowerCase();
+            const exact = barcodeMap.get(q.toUpperCase()) || acronymMap.get(qL); 
+            if (exact && q.length > 0) { currentSearchReqId++; workerResult = [exact]; applyFiltersAndRender(); } else { if(worker) worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); }
+        }
+        const searchInput = $('q'), searchDropdown = $('search-dropdown'), sdContent = $('sd-content');
+        
+        const workerScript = `
+        let workerList = []; let popMap = {}; let latestReqId = 0; 
+
+        function levenshtein(a, b) {
+            if(a.length === 0) return b.length; if(b.length === 0) return a.length;
+            let matrix = [];
+            for(let i=0; i<=b.length; i++){ matrix[i] = [i]; }
+            for(let j=0; j<=a.length; j++){ matrix[0][j] = j; }
+            for(let i=1; i<=b.length; i++){
+                for(let j=1; j<=a.length; j++){
+                    if(b.charAt(i-1) == a.charAt(j-1)) matrix[i][j] = matrix[i-1][j-1];
+                    else matrix[i][j] = Math.min(matrix[i-1][j-1]+1, Math.min(matrix[i][j-1]+1, matrix[i-1][j]+1));
                 }
             }
+            return matrix[b.length][a.length];
         }
 
-        const searchInput = $('q'), searchDropdown = $('search-dropdown'), sdContent = $('sd-content');
-        // --- INJEKSI KECERDASAN WORKER ---
-        const workerScript = `
-        let workerList = []; let latestReqId = 0; let trendMap = {};
-        
-        const prep = (item) => {
-            const rawText = \`\${item.n || ''} \${item.t || ''} \${item.b || ''} \${item.b2 || ''}\`.toLowerCase();
-            item._s = rawText;
-            item._sNoSpace = rawText.replace(/\\s+/g, ''); 
-            item._p1 = parseInt(item.p1) || 0;
-            item._p2 = parseInt(item.p2) || 0;
-            return item;
-        };
-
         self.onmessage = function(e) { 
-            if (e.data.type === 'init') { 
-                workerList = e.data.db.map(prep); 
-                trendMap = e.data.trend || {}; 
-            } 
-            else if (e.data.type === 'add') { workerList.push(prep(e.data.item)); } 
-            else if (e.data.type === 'update') { workerList = workerList.filter(x => String(x.id) !== String(e.data.item.id)); workerList.push(prep(e.data.item)); } 
-            else if (e.data.type === 'remove') { workerList = workerList.filter(x => String(x.id) !== String(e.data.id)); } 
+            if (e.data.type === 'init') { workerList = e.data.db; if(e.data.pop) popMap = e.data.pop; } 
+            else if (e.data.type === 'pop_update') { popMap = e.data.pop; }
+            else if (e.data.type === 'add') workerList.push(e.data.item); 
+            else if (e.data.type === 'update') { workerList = workerList.filter(x => String(x.id) !== String(e.data.item.id)); workerList.push(e.data.item); } 
+            else if (e.data.type === 'remove') workerList = workerList.filter(x => String(x.id) !== String(e.data.id)); 
             else if (e.data.type === 'search') { 
                 latestReqId = e.data.reqId; 
-                let query = (e.data.query || '').toLowerCase().trim(); 
+                let rawQuery = (e.data.query || '').toLowerCase().trim(); 
+                if(!rawQuery) return;
+
+                let isNumericBarcode = /^[0-9]+$/.test(rawQuery) && rawQuery.length >= 6;
+                let priceOp = null, priceVal = 0, textQuery = rawQuery;
                 
-                let priceFilter = null;
-                const matchSemantic = query.match(/([<>]=?|=)\\s*(\\d+)/);
-                if (matchSemantic) {
-                    priceFilter = { operator: matchSemantic[1], value: parseInt(matchSemantic[2], 10) };
-                    query = query.replace(matchSemantic[0], '').trim();
+                let priceMatch = rawQuery.match(/(.*?)\\s*(<=|>=|<|>|=)\\s*(\\d+)/);
+                if(priceMatch) {
+                    textQuery = priceMatch[1].trim();
+                    priceOp = priceMatch[2];
+                    priceVal = parseInt(priceMatch[3], 10);
                 }
 
-                const terms = query.split(/\\s+/).filter(Boolean); 
-                const queryNoSpace = query.replace(/\\s+/g, '');
-                
+                let terms = textQuery.split(' ').filter(Boolean); 
                 let hasil = [];
-                for (let i = 0; i < workerList.length; i++) {
-                    if (latestReqId !== e.data.reqId) return; 
-                    
-                    const item = workerList[i];
 
-                    if (priceFilter) {
-                        const val = priceFilter.value;
-                        const op = priceFilter.operator;
-                        const p1 = item._p1; const p2 = item._p2;
-                        
-                        let pass = false;
-                        if (op === '<') pass = (p1 > 0 && p1 < val) || (p2 > 0 && p2 < val);
-                        else if (op === '<=') pass = (p1 > 0 && p1 <= val) || (p2 > 0 && p2 <= val);
-                        else if (op === '>') pass = p1 > val || p2 > val;
-                        else if (op === '>=') pass = p1 >= val || p2 >= val;
-                        else if (op === '=') pass = p1 === val || p2 === val;
-                        
-                        if (!pass) continue; 
+                for (let i = 0; i < workerList.length; i++) {
+                    const item = workerList[i];
+                    const n = (item.n || '').toLowerCase(), t = (item.t || '').toLowerCase(), b = (item.b || '').toLowerCase(), b2 = (item.b2 || '').toLowerCase(); 
+                    const p1 = item.p1 || 0;
+
+                    if(priceOp) {
+                        if(priceOp === '<' && !(p1 < priceVal)) continue;
+                        if(priceOp === '<=' && !(p1 <= priceVal)) continue;
+                        if(priceOp === '>' && !(p1 > priceVal)) continue;
+                        if(priceOp === '>=' && !(p1 >= priceVal)) continue;
+                        if(priceOp === '=' && !(p1 === priceVal)) continue;
                     }
 
-                    let match = true;
-                    let score = 0;
+                    if (isNumericBarcode) {
+                        if (b.includes(rawQuery) || b2.includes(rawQuery)) {
+                            hasil.push({ item: item, score: 1000 + (b === rawQuery || b2 === rawQuery ? 500 : 0) });
+                        }
+                        continue;
+                    }
 
-                    if (item._sNoSpace.includes(queryNoSpace) && queryNoSpace.length > 0) {
-                        score += 80;
-                    } else {
-                        for (let j = 0; j < terms.length; j++) {
-                            const term = terms[j];
-                            const idx = item._s.indexOf(term);
-                            if (idx === -1) { match = false; break; }
-                            
-                            if ((item.t && item.t.toLowerCase() === term) || (item.b === term.toUpperCase()) || (item.b2 === term.toUpperCase())) {
-                                score += 100; 
-                            } else if (idx === 0 || item._s.charAt(idx - 1) === ' ') {
-                                score += 50;  
-                            } else {
-                                score += 10;  
+                    let isMatch = false; let score = 0;
+
+                    if (terms.length > 0) {
+                        isMatch = terms.every(term => n.includes(term) || t.includes(term));
+                        
+                        if (isMatch) {
+                            if (n === textQuery || t === textQuery) score = 100;
+                            else if (n.startsWith(textQuery) || t.startsWith(textQuery)) score = 80;
+                            else if (terms.some(term => n.split(' ').some(w => w.startsWith(term)))) score = 50;
+                            else score = 20;
+                        } else {
+                            if (terms.length <= 2 && textQuery.length > 3) {
+                                let words = n.split(' '); let bestDist = 99;
+                                for(let w of words) {
+                                    if(Math.abs(w.length - textQuery.length) <= 2) {
+                                        let d = levenshtein(textQuery, w);
+                                        if(d < bestDist) bestDist = d;
+                                    }
+                                }
+                                let acrDist = levenshtein(textQuery, t);
+                                if(bestDist <= 2 || (acrDist <= 1 && t.length >= 2)) {
+                                    isMatch = true; score = 10 - Math.min(bestDist, acrDist); 
+                                }
                             }
                         }
+                    } else if (!terms.length && priceOp) {
+                        isMatch = true; score = 10; 
                     }
 
-                                        if (trendMap[item.n]) {
-                        score += (trendMap[item.n] * 1.5); 
-                    }
-
-                    // BUG FIX LOGIKA: Jika kasir HANYA mengetik `<5000` (tanpa nama barang), masukan semua barang ke hasil, urutkan murni dari trend popularitas.
-                    // Jika kasir mengetik nama barang (terms.length > 0), pastikan harus ADA kecocokan nama, dilarang masuk ke hasil jika match = false (kecuali skor anti-typo >= 80)
-                    if (terms.length === 0 && priceFilter) {
-                        item._score = score; // Skor utamanya dari trendMap
-                        hasil.push(item);
-                    } else if ((match && score > 0) || (!match && score >= 80)) {
-                        item._score = score;
-                        hasil.push(item);
+                    if (isMatch) {
+                        let popBonus = Math.min((popMap[item.id] || 0), 15); 
+                        hasil.push({ item: item, score: score + popBonus });
                     }
                 }
                 
-                hasil.sort((a, b) => b._score - a._score || (a.n || '').localeCompare(b.n || ''));
-                if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil, query: e.data.query, reqId: e.data.reqId }); }
-                        } 
+                hasil.sort((a, b) => b.score - a.score || (a.item.n || '').localeCompare(b.item.n || ''));
+                if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil.map(h => h.item), query: e.data.query, reqId: e.data.reqId }); }
+            } 
         };`;
+
+        worker = new Worker(URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' })));
         
-        // PERBAIKAN: Penanganan Crash Ekstrem pada mode Local WebView (content://)
-        try {
-            worker = new Worker(URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' })));
-            worker.onmessage = function(e) { 
-                if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
-                    workerResult = e.data.data; 
-                    window.scrollTo({ top: 0, behavior: 'instant' }); 
-                    applyFiltersAndRender(); 
-                } 
-            };
-        } catch (workerErr) {
-            console.warn("Worker diblokir WebView Android. Menggunakan mode aman.", workerErr);
-            worker = null;
+        worker.onmessage = function(e) { 
+            if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
+                workerResult = e.data.data; 
+                window.scrollTo({ top: 0, behavior: 'instant' }); 
+                
+                if(workerResult.length === 0 && e.data.query.trim() !== '') {
+                    try {
+                        let missed = JSON.parse(localStorage.getItem('DB_WA_ANALYTICS_MISS') || '{}');
+                        let qL = e.data.query.trim().toLowerCase();
+                        missed[qL] = (missed[qL] || 0) + 1;
+                        if(Object.keys(missed).length > 100) delete missed[Object.keys(missed)[0]]; 
+                        localStorage.setItem('DB_WA_ANALYTICS_MISS', JSON.stringify(missed));
+                    } catch(err) {}
+                }
+
+                applyFiltersAndRender(); 
+            } 
+        };
+
+        let voiceRecognition = null;
+        function startVoiceSearch() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return tampilkanToast("Browser/HP tidak mendukung Voice Search!", "var(--warning)");
+            }
+            if (!voiceRecognition) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                voiceRecognition = new SpeechRecognition();
+                voiceRecognition.lang = 'id-ID';
+                voiceRecognition.interimResults = false;
+                voiceRecognition.maxAlternatives = 1;
+                
+                voiceRecognition.onstart = function() {
+                    $('mic-btn').classList.add('listening');
+                    $('q').placeholder = "Mendengarkan...";
+                };
+                voiceRecognition.onresult = function(event) {
+                    const speechResult = event.results[0][0].transcript;
+                    $('q').value = speechResult;
+                    $('q-x').style.display = 'flex';
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    handleSearchLogic(speechResult);
+                };
+                voiceRecognition.onerror = function() {
+                    tampilkanToast("Suara tidak terdengar. Coba lagi.", "var(--danger)");
+                };
+                voiceRecognition.onend = function() {
+                    $('mic-btn').classList.remove('listening');
+                    $('q').placeholder = "search...";
+                };
+            }
+            try { voiceRecognition.start(); } catch(e) {}
+        }
+
+        function buildPopularityData() {
+            let pMap = {};
+            try {
+                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                hist.forEach(h => {
+                    if (Array.isArray(h.items)) {
+                        h.items.forEach(it => {
+                            if(it.id) pMap[it.id] = (pMap[it.id] || 0) + parseFloat(it.q || 1);
+                        });
+                    }
+                });
+            } catch(e) {}
+            return pMap;
         }
 
         function recordSearchLog(term) { 
-
             const c = term.trim(); if(!c) return; 
             recentSearches = [c, ...recentSearches.filter(t => t.toLowerCase() !== c.toLowerCase())].slice(0, 5); localStorage.setItem('DB_WA_RECENT', JSON.stringify(recentSearches)); 
             trendingSearches[c.toLowerCase()] = (trendingSearches[c.toLowerCase()] || 0) + 1; const keys = Object.keys(trendingSearches); 
@@ -1271,32 +1307,32 @@
         });
 
         function toggleMenu(e) { e.stopPropagation(); $('dropdown-menu').classList.toggle('hidden'); }
-        function closeCustomAlert() { untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; $('alert-title').style.fontStyle = "normal"; }
+        function closeCustomAlert() { untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; }
         function applyModalColor(title, customColor) { const c = customColor || TemaNotifikasi[title] || "var(--mono-main)"; $('alert-title').innerText = title; $('alert-title').style.color = c; $('alert-box').style.borderColor = c; return c; }
         
         function showAlert(msg, title = "Info", color = null) { 
-    const c = applyModalColor(title, color); 
-    $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
-    $('alert-btns').innerHTML = `<button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" onclick="closeCustomAlert()">OKE</button>`; 
-    
-    $('custom-alert').style.zIndex = '9999'; // Perbaikan: Isolasi Z-Index untuk mencegah Collision
-    $('custom-alert').style.display = 'flex'; 
-    
-    document.body.classList.add('modal-open'); 
-    trackModal('alert'); 
-}     
+            const c = applyModalColor(title, color); 
+            $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
+            $('alert-btns').innerHTML = `<button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" onclick="closeCustomAlert()">OKE</button>`; 
+            
+            $('custom-alert').style.zIndex = '5500'; 
+            $('custom-alert').style.display = 'flex'; 
+            
+            document.body.classList.add('modal-open'); 
+            trackModal('alert'); 
+        }
 
         function showConfirm(msg, title, color, callbackOk, confirmText = "OKE", callbackCancel = null) { 
-    const c = applyModalColor(title, color); 
-    $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
-    $('alert-btns').innerHTML = `<button class="btn-main btn-cancel" id="confirm-cancel-btn">BATAL</button><button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" id="confirm-ok-btn">${escapeHTML(String(confirmText))}</button>`; 
-    $('confirm-ok-btn').onclick = () => { closeCustomAlert(); callbackOk(); }; 
-    $('confirm-cancel-btn').onclick = () => { closeCustomAlert(); if(callbackCancel) callbackCancel(); }; 
-    $('custom-alert').style.zIndex = '9999'; // Perbaikan: Isolasi Z-Index untuk mencegah Collision
-    $('custom-alert').style.display = 'flex'; 
-    document.body.classList.add('modal-open'); 
-    trackModal('alert'); 
-}
+            const c = applyModalColor(title, color); 
+            $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
+            $('alert-btns').innerHTML = `<button class="btn-main btn-cancel" id="confirm-cancel-btn">BATAL</button><button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" id="confirm-ok-btn">${escapeHTML(String(confirmText))}</button>`; 
+            $('confirm-ok-btn').onclick = () => { closeCustomAlert(); callbackOk(); }; 
+            $('confirm-cancel-btn').onclick = () => { closeCustomAlert(); if(callbackCancel) callbackCancel(); }; 
+            $('custom-alert').style.zIndex = '5500';
+            $('custom-alert').style.display = 'flex'; 
+            document.body.classList.add('modal-open'); 
+            trackModal('alert'); 
+        }
         
         function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
@@ -1668,8 +1704,7 @@
                             } 
                         }); 
                         db = Array.from(tempMap.values()); updateMaps(); 
-                        const currentTrendMap = buildTrendMap();
-                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
+                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                     }
                     
@@ -1750,8 +1785,7 @@
                         }); 
                         tx.oncomplete = () => { 
                             db = Array.from(tempMap.values()); updateMaps(); 
-                            const currentTrendMap = buildTrendMap();
-                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
+                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                             currentIndex += chunkSize; requestAnimationFrame(processNextChunk); 
                         }; 
                         tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
@@ -1901,8 +1935,7 @@
                                 s.put(item); 
                             });
                             tx.oncomplete = () => { 
-                                const currentTrendMap = buildTrendMap();
-                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
+                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                                 updateMaps(); clearSearch(); renderCartUI(); applyFiltersAndRender();
                                 isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                                 
@@ -2132,7 +2165,7 @@
                     executePrint(grandTotal, parsedBayar, itemsPrint);
                     resetPrintModalStyle();
                 };
-            }            
+            }
 
             $('custom-alert').style.setProperty('align-items', 'flex-start', 'important');
             $('custom-alert').style.setProperty('padding-top', '15px', 'important'); 
@@ -2237,26 +2270,18 @@
                 </div>
             </div>`;
  
-            // PENAMBALAN BUG PHANTOM TRANSACTION (PRIORITY 1)
             if (!isReprint) {
                 let totalModal = items.reduce((sum, i) => sum + (i.modal || 0), 0);
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                let newTx = { id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal };
-                hist.unshift(newTx);
-                
-                // Reset State Keranjang Kasir SECARA AMAN di awal sebelum Storage Eksekusi
-                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
-                
+                hist.unshift({ id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal });
                 try {
                     localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 4000)));
                 } catch (e) {
                     console.warn("Storage penuh! Auto-shrink riwayat ekstrem.");
-                    try {
-                        localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 300))); 
-                    } catch (fatalErr) {
-                        tampilkanToast("Peringatan: Memori HP Penuh, riwayat gagal tersimpan!", "var(--danger)");
-                    }
+                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 500)));
                 }
+
+                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
             }
 
             let printFrame = document.getElementById('receipt-spooler-frame');
@@ -2496,12 +2521,20 @@
                     } else {
                         tampilkanToast(`Riwayat tanggal ${dStr} sudah sinkron!`, "#87CEFA");
                     }
-                        } else {
+                } else {
                     showAlert(`<div style="margin-top:5px; font-size:11px; font-weight:700; color:#aaa; letter-spacing:0.5px;">TIDAK ADA RIWAYAT TRANSAKSI TGL ${dStr}</div>`, "KOSONG", "var(--danger)");
+                    
                     $('alert-title').style.fontStyle = 'italic';
+                    setTimeout(() => {
+                        const btn = $('alert-btns').querySelector('button');
+                        if (btn) {
+                            const oldClick = btn.onclick;
+                            btn.onclick = () => { $('alert-title').style.fontStyle = 'normal'; if (oldClick) oldClick(); };
+                        }
+                    }, 50);
                 }
             })
-            .catch(err => {        
+            .catch(err => {
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
                 $('loading-title').style.fontStyle = origStyle;
@@ -2519,71 +2552,15 @@
             }, "HAPUS");
         }
 
-        /* --- FITUR KECERDASAN TAMBAHAN (VOICE & TRENDING) --- */
-        let speechRecog = null;
-        function startVoiceSearch() {
-            const micBtn = $('q-mic');
-            if (micBtn.classList.contains('mic-active')) return;
-
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                return tampilkanToast("Browser tidak mendukung pencarian suara!", "var(--warning)");
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!speechRecog) {
-                speechRecog = new SpeechRecognition();
-                speechRecog.lang = 'id-ID';
-                speechRecog.interimResults = false;
-                speechRecog.maxAlternatives = 1;
-
-                speechRecog.onstart = () => {
-                    micBtn.classList.add('mic-active');
-                    tampilkanToast("🎙️ Mendengarkan...", "#87CEFA");
-                };
-
-                speechRecog.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    const cleanText = transcript.replace(/[^\w\s\<\>\=]/gi, '').trim(); 
-                    $('q').value = cleanText;
-                    $('q-x').style.display = 'flex';
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                    handleSearchLogic(cleanText);
-                };
-
-                speechRecog.onerror = (event) => {
-                    if (event.error !== 'no-speech') tampilkanToast("Error mikrofon: " + event.error, "var(--danger)");
-                };
-
-                speechRecog.onend = () => {
-                    micBtn.classList.remove('mic-active');
-                };
-            }
-            
-            try { speechRecog.start(); } catch(e) { /* Ignore */ }
-        }
-
-        function buildTrendMap() {
-            let hist = [];
-            try { hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e){}
-            let map = {};
-            hist.forEach(tx => {
-                if(Array.isArray(tx.items)) {
-                    tx.items.forEach(it => { map[it.n] = (map[it.n] || 0) + (parseFloat(it.q) || 1); });
-                }
-            });
-            return map;
-        }
-
         /* --- INIT APP & APP LIFECYCLE --- */
         let isDbReady = false, pendingLaunchFile = null; 
+        
         async function initApp() { 
             try { 
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`; 
                 await initDB(); db = await loadAllFromIDB(); 
                 
-                // INJEKSI BEHAVIORAL SCORING: Menarik data popularitas dan mengirim ke Worker
-                const currentTrendMap = buildTrendMap();
-                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), trend: currentTrendMap }); 
+                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                 
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; } checkOfflineLedger();
@@ -2612,6 +2589,7 @@
             }); 
         }
 
+        let activeModals = [];
         function trackModal(id) { activeModals.push(id); history.pushState({ modalOpen: true }, ''); }
         function untrackModal(id) { const idx = activeModals.lastIndexOf(id); if (idx > -1) activeModals.splice(idx, 1); }
         window.addEventListener('popstate', (e) => { if (activeModals.length > 0) { const topModal = activeModals.pop(); closeModalById(topModal); } });
