@@ -21,7 +21,7 @@
         body::before { content: ""; position: fixed; top: -2px; left: 0; right: 0; height: 4px; background-color: #000000; z-index: 999999; pointer-events: none; }
         .hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
-        body.modal-open { overflow: hidden !important; touch-action: none; }
+        body.modal-open { overflow: hidden !important; }
         .sticky-roof-group { z-index: 900; } .sticky-roof-group::after { z-index: 901; } .header { z-index: 1000; } .dropdown-content { z-index: 2000; } .search-dropdown-box { z-index: 2000; } .scanner-overlay { z-index: 3510; } .scan-stop, .btn-torch{ z-index: 3520; } .modal { z-index: 4000; } #sync-custom-options { z-index: 4100; } #scanner-wrap { z-index: 4500; } #loading-modal { z-index: 5500; } #toast-notification { z-index: 6000; }
         .header { padding: calc(15px + env(safe-area-inset-top, 0px)) 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--wa-header); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); margin-bottom: 15px; border-top: none !important; border-bottom: none !important; }
         .header-left { display: flex; flex-direction: column; justify-content: center; } .header h1 { font-size: 18px; margin: 0; color: var(--text-light); } .header-date-location { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; letter-spacing: 0.5px; } .top-btns { display: flex; gap: 10px; color: var(--text-light); align-items: center; } .icon-btn { cursor: pointer; background: none; border: none; padding: 6px; color: inherit; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; width: 44px; height: 44px; outline: none; } .icon-btn:active { transform: scale(0.9); opacity: 0.8; } .header-upload-btn { display: flex; flex-direction: column; gap: 2px; color: #87CEFA; padding: 0; } .dropdown-wrapper { position: relative; display: flex; align-items: center; } .dropdown-content { position: absolute; top: 48px; right: 0; background: rgba(21, 21, 21, 0.98); backdrop-filter: blur(8px); min-width: 180px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; border: 1px solid var(--border-color); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.05); } .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--text-light); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 44px; } .dropdown-item:last-child { border-bottom: none; } .dropdown-item:active { background-color: rgba(255,255,255,0.15); } .dropdown-item input[type="file"] { display: none; }
@@ -30,7 +30,7 @@
         .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } .search-box input { width: 100%; background: transparent; border: none; padding: 14px 74px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } .q-clear { position: absolute; right: 36px; top: 2px; bottom: 2px; display: none; width: 44px; cursor: pointer; align-items: center; justify-content: center; z-index: 10; } .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
         .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; pointer-events: auto !important; }.btn-main:active { transform: scale(0.96); }.btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none !important; } #price-popup-box { border-color: var(--mono-main) !important; text-align: center; } .pp-price-anim { animation: pulseWhite 1s infinite alternate; } @keyframes pulseWhite { 0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); } 100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); transform: scale(1.05); } } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; } .picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
         /* --- INJEKSI CSS VOICE SEARCH --- */
         .q-mic { position: absolute; right: 2px; top: 2px; bottom: 2px; width: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; z-index: 5; }
         .q-mic:active { transform: scale(0.9); }
@@ -131,7 +131,6 @@
     </div>
     
     <div class="scroll-letter" id="scroll-letter">A</div>
-
     <button class="fab" onclick="showMod()">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
@@ -312,12 +311,12 @@
     </div>
 
     <div id="custom-alert" class="modal">
-        <div class="modal-box" id="alert-box" style="text-align: center;">
-            <h3 id="alert-title" style="margin-top:0; font-size:15px; text-transform:uppercase;">Info</h3>
-            <p id="alert-msg" style="font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;"></p>
-            <div class="modal-btns" id="alert-btns"></div>
-        </div>
+    <div class="modal-box" id="alert-box" style="text-align: center;">
+        <h3 id="alert-title" style="margin-top:0; font-size:15px; text-transform:uppercase;">Info</h3>
+        <div id="alert-msg" style="font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;"></div>
+        <div class="modal-btns" id="alert-btns"></div>
     </div>
+</div>
 
     <div id="loading-modal" class="modal">
         <div class="modal-box" id="loading-box" style="text-align: center;">
@@ -403,13 +402,14 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbz0NqeBRXVNWdwswVKgBNLffXX4nEP_WXqnPufBpNoG5Krv9n0UZuGyDTrseLf0p6SF/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxN4GwVTlywH_NcE53KOO8E9kjGW8_JRHIWr4E6wOpID9n9oiq376Apc88ex17kygSP/exec";
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        const APP_SECURE_PIN = localStorage.getItem('APP_PIN') || '170823';
+                const APP_SECURE_PIN = localStorage.getItem('APP_PIN') || '170823';
 
         let db = [], idb, worker, workerResult = null, filteredData = [], listOffsets = [];
+        let activeModals = []; // PERBAIKAN: Evakuasi dari zona bahaya (TDZ)
         
         let layoutCache = { listTop: 188, offsetBuffer: 135, lastUpdate: 0 };
         function invalidateLayoutCache() { layoutCache.lastUpdate = 0; }
@@ -833,7 +833,7 @@
             return `${numQ} ${escapeHTML(eUnit)}`;
         }
 
-        function updateCartQtyManual(id, val) {
+         function updateCartQtyManual(id, val) {
             let cleanVal = String(val).replace(',', '.'); 
             let n = parseFloat(cleanVal);
             if (isNaN(n)) n = 0; 
@@ -846,10 +846,44 @@
             if (!cartState[id]) cartState[id] = { q: n }; else cartState[id].q = n; 
             saveCartMem(); 
             
-            // BUG FIX KRITIS: Wajib merender ulang keranjang, BUKAN mencoba update DOM yang sudah hilang
+            // PERBAIKAN BUG KRITIS: Surgical DOM Update (Tanpa Re-Render Seluruh List)
             if (isCartMode) {
-                // Gunakan requestAnimationFrame agar tidak menabrak alur input keyboard user
-                requestAnimationFrame(() => renderCartUI()); 
+                let item = db.find(x => String(x.id) === id);
+                if (item && !item.deleted) {
+                    let subTotal = 0;
+                    if (cartState[id].manualPrice !== undefined) {
+                        subTotal = cartState[id].manualPrice;
+                    } else {
+                        let p1 = item.p1, p2 = item.p2, iq = Math.max(1, item.iq || 1);
+                        if (p1 > 0 && p2 > 0 && iq > 1) {
+                            if (n >= iq) { subTotal = (Math.floor(n / iq) * p2) + Math.round((n % iq) * p1); } 
+                            else { subTotal = Math.round(n * p1); }
+                        } else { subTotal = Math.round(n * p1); }
+                    }
+                    
+                    let subEl = $('sub-' + id);
+                    if (subEl && cartState[id].manualPrice === undefined) subEl.value = fmt(subTotal);
+                    
+                    let qtyLabel = $('qty-label-' + id);
+                    if (qtyLabel) qtyLabel.innerText = formatQtyBreakdown(n, item.iq, item.u1, item.u2);
+                }
+                
+                let grandTotal = 0;
+                Object.keys(cartState).forEach(k => {
+                    const it = db.find(x => String(x.id) === k);
+                    if (it && !it.deleted) {
+                        if (cartState[k].manualPrice !== undefined) { 
+                            grandTotal += cartState[k].manualPrice; 
+                        } else {
+                            const qq = cartState[k].q, ip1 = it.p1, ip2 = it.p2, iiq = Math.max(1, it.iq || 1);
+                            if (ip1 > 0 && ip2 > 0 && iiq > 1) {
+                                if (qq >= iiq) { grandTotal += (Math.floor(qq / iiq) * ip2) + Math.round((qq % iiq) * ip1); } 
+                                else { grandTotal += Math.round(qq * ip1); }
+                            } else { grandTotal += Math.round(qq * ip1); }
+                        }
+                    }
+                });
+                $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
             } else {
                 applyFiltersAndRender();
             }
@@ -993,10 +1027,10 @@
             const isModOpen = activeModals.includes('mod');
             if (isScanning || (isAnyModalOpen && !isModOpen)) return;
             
-            const t = Date.now(), timeDiff = t - lastKeyTime; lastKeyTime = t;
+                        const t = Date.now(), timeDiff = t - lastKeyTime; lastKeyTime = t;
             
-            // INJEKSI BUG FIX (Typist Hijack): Diperketat menjadi 25ms
-            if (timeDiff > 25) physicalInputBuffer = ""; 
+            // INJEKSI BUG FIX (Typist Hijack): Diperlebar menjadi 50ms untuk support scanner low-end
+            if (timeDiff > 50) physicalInputBuffer = ""; 
             
             const isInputFocused = (document.activeElement && (document.activeElement.tagName.toLowerCase() === 'input' || document.activeElement.tagName.toLowerCase() === 'textarea'));
             
@@ -1065,19 +1099,24 @@
         
         function closePricePopup(e, force = false) { if (force || e.target === $('price-popup')) { untrackModal('price'); $('price-popup').style.display = 'none'; checkModalOpen(); $('q').value = ''; clearSearch(); } }
         
-        function handleSearchLogic(query) { 
+                function handleSearchLogic(query) { 
             const q = query.trim();
-            // BUG LOGIC FIX: Hapus acronymMap dari exact bypass, biarkan worker yang memproses cerdas
             const exact = barcodeMap.get(q.toUpperCase()); 
             if (exact && q.length > 0) { 
                 currentSearchReqId++; workerResult = [exact]; applyFiltersAndRender(); 
             } else { 
-                if(worker) worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); 
+                if (worker) {
+                    worker.postMessage({ type: 'search', query: q, reqId: ++currentSearchReqId }); 
+                } else {
+                    // PERBAIKAN: Fallback pencarian manual jika sistem Worker mati
+                    const qL = q.toLowerCase();
+                    workerResult = db.filter(i => !i.deleted && ((i.n || '').toLowerCase().includes(qL) || (i.t || '').toLowerCase() === qL));
+                    applyFiltersAndRender();
+                }
             }
         }
 
         const searchInput = $('q'), searchDropdown = $('search-dropdown'), sdContent = $('sd-content');
-        
         // --- INJEKSI KECERDASAN WORKER ---
         const workerScript = `
         let workerList = []; let latestReqId = 0; let trendMap = {};
@@ -1172,19 +1211,26 @@
                 
                 hasil.sort((a, b) => b._score - a._score || (a.n || '').localeCompare(b.n || ''));
                 if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil, query: e.data.query, reqId: e.data.reqId }); }
-            } 
+                        } 
         };`;
-        worker = new Worker(URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' })));
         
-        worker.onmessage = function(e) { 
-            if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
-                workerResult = e.data.data; 
-                window.scrollTo({ top: 0, behavior: 'instant' }); 
-                applyFiltersAndRender(); 
-            } 
-        };
+        // PERBAIKAN: Penanganan Crash Ekstrem pada mode Local WebView (content://)
+        try {
+            worker = new Worker(URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' })));
+            worker.onmessage = function(e) { 
+                if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
+                    workerResult = e.data.data; 
+                    window.scrollTo({ top: 0, behavior: 'instant' }); 
+                    applyFiltersAndRender(); 
+                } 
+            };
+        } catch (workerErr) {
+            console.warn("Worker diblokir WebView Android. Menggunakan mode aman.", workerErr);
+            worker = null;
+        }
 
         function recordSearchLog(term) { 
+
             const c = term.trim(); if(!c) return; 
             recentSearches = [c, ...recentSearches.filter(t => t.toLowerCase() !== c.toLowerCase())].slice(0, 5); localStorage.setItem('DB_WA_RECENT', JSON.stringify(recentSearches)); 
             trendingSearches[c.toLowerCase()] = (trendingSearches[c.toLowerCase()] || 0) + 1; const keys = Object.keys(trendingSearches); 
@@ -1225,32 +1271,32 @@
         });
 
         function toggleMenu(e) { e.stopPropagation(); $('dropdown-menu').classList.toggle('hidden'); }
-        function closeCustomAlert() { untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; }
+        function closeCustomAlert() { untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; $('alert-title').style.fontStyle = "normal"; }
         function applyModalColor(title, customColor) { const c = customColor || TemaNotifikasi[title] || "var(--mono-main)"; $('alert-title').innerText = title; $('alert-title').style.color = c; $('alert-box').style.borderColor = c; return c; }
         
         function showAlert(msg, title = "Info", color = null) { 
-            const c = applyModalColor(title, color); 
-            $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
-            $('alert-btns').innerHTML = `<button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" onclick="closeCustomAlert()">OKE</button>`; 
-            
-            $('custom-alert').style.zIndex = '5500'; 
-            $('custom-alert').style.display = 'flex'; 
-            
-            document.body.classList.add('modal-open'); 
-            trackModal('alert'); 
-        }
+    const c = applyModalColor(title, color); 
+    $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
+    $('alert-btns').innerHTML = `<button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" onclick="closeCustomAlert()">OKE</button>`; 
+    
+    $('custom-alert').style.zIndex = '9999'; // Perbaikan: Isolasi Z-Index untuk mencegah Collision
+    $('custom-alert').style.display = 'flex'; 
+    
+    document.body.classList.add('modal-open'); 
+    trackModal('alert'); 
+}     
 
         function showConfirm(msg, title, color, callbackOk, confirmText = "OKE", callbackCancel = null) { 
-            const c = applyModalColor(title, color); 
-            $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
-            $('alert-btns').innerHTML = `<button class="btn-main btn-cancel" id="confirm-cancel-btn">BATAL</button><button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" id="confirm-ok-btn">${escapeHTML(String(confirmText))}</button>`; 
-            $('confirm-ok-btn').onclick = () => { closeCustomAlert(); callbackOk(); }; 
-            $('confirm-cancel-btn').onclick = () => { closeCustomAlert(); if(callbackCancel) callbackCancel(); }; 
-            $('custom-alert').style.zIndex = '5500';
-            $('custom-alert').style.display = 'flex'; 
-            document.body.classList.add('modal-open'); 
-            trackModal('alert'); 
-        }
+    const c = applyModalColor(title, color); 
+    $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
+    $('alert-btns').innerHTML = `<button class="btn-main btn-cancel" id="confirm-cancel-btn">BATAL</button><button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" id="confirm-ok-btn">${escapeHTML(String(confirmText))}</button>`; 
+    $('confirm-ok-btn').onclick = () => { closeCustomAlert(); callbackOk(); }; 
+    $('confirm-cancel-btn').onclick = () => { closeCustomAlert(); if(callbackCancel) callbackCancel(); }; 
+    $('custom-alert').style.zIndex = '9999'; // Perbaikan: Isolasi Z-Index untuk mencegah Collision
+    $('custom-alert').style.display = 'flex'; 
+    document.body.classList.add('modal-open'); 
+    trackModal('alert'); 
+}
         
         function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
@@ -2086,7 +2132,7 @@
                     executePrint(grandTotal, parsedBayar, itemsPrint);
                     resetPrintModalStyle();
                 };
-            }
+            }            
 
             $('custom-alert').style.setProperty('align-items', 'flex-start', 'important');
             $('custom-alert').style.setProperty('padding-top', '15px', 'important'); 
@@ -2450,20 +2496,12 @@
                     } else {
                         tampilkanToast(`Riwayat tanggal ${dStr} sudah sinkron!`, "#87CEFA");
                     }
-                } else {
+                        } else {
                     showAlert(`<div style="margin-top:5px; font-size:11px; font-weight:700; color:#aaa; letter-spacing:0.5px;">TIDAK ADA RIWAYAT TRANSAKSI TGL ${dStr}</div>`, "KOSONG", "var(--danger)");
-                    
                     $('alert-title').style.fontStyle = 'italic';
-                    setTimeout(() => {
-                        const btn = $('alert-btns').querySelector('button');
-                        if (btn) {
-                            const oldClick = btn.onclick;
-                            btn.onclick = () => { $('alert-title').style.fontStyle = 'normal'; if (oldClick) oldClick(); };
-                        }
-                    }, 50);
                 }
             })
-            .catch(err => {
+            .catch(err => {        
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
                 $('loading-title').style.fontStyle = origStyle;
@@ -2574,7 +2612,6 @@
             }); 
         }
 
-        let activeModals = [];
         function trackModal(id) { activeModals.push(id); history.pushState({ modalOpen: true }, ''); }
         function untrackModal(id) { const idx = activeModals.lastIndexOf(id); if (idx > -1) activeModals.splice(idx, 1); }
         window.addEventListener('popstate', (e) => { if (activeModals.length > 0) { const topModal = activeModals.pop(); closeModalById(topModal); } });
