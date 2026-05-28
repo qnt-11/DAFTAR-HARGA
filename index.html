@@ -799,8 +799,15 @@
 
         function toggleSort() { sortAZ = !sortAZ; $('s-btn-tabs').classList.toggle('active', sortAZ); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); }
 
-        function modifyCartItem(id, qtyChange) {
+                function modifyCartItem(id, qtyChange) {
             if (!cartState[id]) cartState[id] = { q: 0 };
+            
+            // SECURITY FIX: Normalisasi unit jika kasir mencampur input manual Desimal (Dus) dan Scanner (Pcs)
+            const item = db.find(x => String(x.id) === id);
+            if (item && item.iq > 1 && cartState[id].q % 1 !== 0) {
+                cartState[id].q = Math.round(cartState[id].q * item.iq);
+            }
+            
             cartState[id].q += qtyChange;
             delete cartState[id].manualPrice; 
             
@@ -817,17 +824,21 @@
             return s.length > 3 ? s.charAt(0).toUpperCase() + s.slice(1,3) : s.charAt(0).toUpperCase() + s.slice(1);
         }
 
-        function formatQtyBreakdown(q, iq, u1, u2) {
+                function formatQtyBreakdown(q, iq, u1, u2) {
             let eUnit = String(u1 || '').trim(); eUnit = eUnit ? (eUnit.charAt(0).toUpperCase() + eUnit.slice(1)) : 'Satuan';
             let gUnit = String(u2 || '').trim(); gUnit = gUnit ? (gUnit.charAt(0).toUpperCase() + gUnit.slice(1)) : 'Grosir';
             
             let iqNum = Math.max(1, parseInt(iq) || 1);
             let numQ = parseFloat(String(q).replace(',', '.')) || 0; 
             
+            // PINTASAN DESIMAL GROSIR: Tampilkan unit grosir jika ketik angka desimal
+            if (iqNum > 1 && numQ % 1 !== 0) {
+                return `${numQ} ${escapeHTML(gUnit)}`;
+            }
+            
             if (iqNum > 1 && numQ >= iqNum) {
                 let gQty = Math.floor(numQ / iqNum);
                 let eQty = parseFloat((numQ % iqNum).toFixed(3)); 
-
                 if (eQty === 0) return `${gQty} ${escapeHTML(gUnit)}`;
                 return `${gQty} ${escapeHTML(gUnit)} ${eQty} ${escapeHTML(eUnit)}`;
             }
@@ -859,10 +870,10 @@
                         subTotal = cartState[k].manualPrice;
                     } else {
                         if (p1 > 0 && p2 > 0 && iq > 1) {
-                            if (q >= iq) {
-                                let grosirBlocks = Math.floor(q / iq);
-                                let ecerQty = q % iq;
-                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
+                            if (q % 1 !== 0) {
+                                subTotal = Math.round(q * p2); // Kalkulasi Setengah Grosir
+                            } else if (q >= iq) {
+                                subTotal = Math.round(q * (p2 / iq)); // HARGA GROSIR MERATA
                             } else { subTotal = Math.round(q * p1); }
                         } else { subTotal = Math.round(q * p1); }
                     }
@@ -905,15 +916,15 @@
                     const iq = Math.max(1, item.iq || 1);
                     let qtyDisplay = formatQtyBreakdown(q, item.iq, item.u1, item.u2);
                     
-                    let subTotal = 0;
+                                        let subTotal = 0;
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
                         if (p1 > 0 && p2 > 0 && iq > 1) {
-                            if (q >= iq) {
-                                let grosirBlocks = Math.floor(q / iq);
-                                let ecerQty = q % iq;
-                                subTotal = (grosirBlocks * p2) + Math.round(ecerQty * p1);
+                            if (q % 1 !== 0) {
+                                subTotal = Math.round(q * p2); // Kalkulasi Setengah Grosir
+                            } else if (q >= iq) {
+                                subTotal = Math.round(q * (p2 / iq)); // HARGA GROSIR MERATA
                             } else { subTotal = Math.round(q * p1); }
                         } else { subTotal = Math.round(q * p1); }
                     }
@@ -954,14 +965,17 @@
             Object.keys(cartState).forEach(k => {
                 const item = db.find(x => String(x.id) === k);
                 if (item && !item.deleted) {
-                    let subTotal = 0;
+                                        let subTotal = 0;
                     if (cartState[k].manualPrice !== undefined) {
                         subTotal = cartState[k].manualPrice;
                     } else {
                         const q = cartState[k].q, p1 = item.p1, p2 = item.p2, iq = Math.max(1, item.iq || 1);
                         if (p1 > 0 && p2 > 0 && iq > 1) {
-                            if (q >= iq) { subTotal = (Math.floor(q / iq) * p2) + Math.round((q % iq) * p1); } 
-                            else { subTotal = Math.round(q * p1); }
+                            if (q % 1 !== 0) {
+                                subTotal = Math.round(q * p2); // Kalkulasi Setengah Grosir
+                            } else if (q >= iq) { 
+                                subTotal = Math.round(q * (p2 / iq)); // HARGA GROSIR MERATA
+                            } else { subTotal = Math.round(q * p1); }
                         } else { subTotal = Math.round(q * p1); }
                     }
                     grandTotal += subTotal;
@@ -2104,26 +2118,44 @@
             
             let grandTotal = 0; let itemsPrint = [];
             
-            Object.keys(cartState).forEach(id => {
+                        Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     
                     let subTotal = 0;
+                    let finalModal = 0;
+                    let printUnit = String(item.u1 || 'Pcs').trim();
+
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q % 1 !== 0) {
+                            finalModal = Math.round(q * iq * (item.hpp || 0));
+                            printUnit = String(item.u2 || 'Grosir').trim();
+                        } else {
+                            finalModal = Math.round(q * (item.hpp || 0));
+                        }
                     } else {
                         if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                            if (q >= iq) {
-                                let grosirBlocks = Math.floor(q / iq);
-                                let ecerQty = q % iq;
-                                subTotal = (grosirBlocks * item.p2) + Math.round(ecerQty * item.p1);
-                            } else { subTotal = Math.round(q * item.p1); }
-                        } else { subTotal = Math.round(q * item.p1); }
+                            if (q % 1 !== 0) {
+                                subTotal = Math.round(q * item.p2);
+                                finalModal = Math.round(q * iq * (item.hpp || 0)); // Modal ditarik full dari satuan untuk cegah rugi fiktif
+                                printUnit = String(item.u2 || 'Grosir').trim();
+                            } else if (q >= iq) {
+                                subTotal = Math.round(q * (item.p2 / iq)); // HARGA GROSIR MERATA
+                                finalModal = Math.round(q * (item.hpp || 0));
+                            } else { 
+                                subTotal = Math.round(q * item.p1); 
+                                finalModal = Math.round(q * (item.hpp || 0));
+                            }
+                        } else { 
+                            subTotal = Math.round(q * item.p1); 
+                            finalModal = Math.round(q * (item.hpp || 0));
+                        }
                     }
                     grandTotal += subTotal;
 
-                    itemsPrint.push({ n: item.n, q: q, u: String(item.u1||'Pcs').trim(), sub: subTotal, modal: Math.round(q * (item.hpp || 0)), iq: item.iq, u1: item.u1, u2: item.u2 });
+                    itemsPrint.push({ n: item.n, q: q, u: printUnit, sub: subTotal, modal: finalModal, iq: item.iq, u1: item.u1, u2: item.u2 });
                 }
             });
 
@@ -2234,13 +2266,17 @@
                 let qtyText = `${i.q}x${fmt(hrgSatuan)}`; 
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 
-                if (i.iq !== undefined && iqNum > 1 && i.q >= iqNum) {
+                                if (i.iq !== undefined && iqNum > 1) {
                     let eU = formatShortUnit(i.u1);
                     let gU = formatShortUnit(i.u2);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
-                    let gQ = Math.floor(nQ / iqNum);
-                    let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                    qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                    if (nQ % 1 !== 0) {
+                        qtyText = `${nQ} ${gU}`;
+                    } else if (nQ >= iqNum) {
+                        let gQ = Math.floor(nQ / iqNum);
+                        let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                        qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                    } else { qtyText = `${i.q} ${eU}`; }
                 } else if (i.u1) { 
                     qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
                 }
@@ -2342,15 +2378,22 @@
                     let itemsHtml = '';
                     if (Array.isArray(h.items)) {
                         h.items.forEach(it => {
-                            let qtyText = `${it.q}x`;
+                                                        let qtyText = `${it.q}x`;
                             let iqNum = Math.max(1, parseInt(it.iq) || 1);
-                            if (it.iq !== undefined && iqNum > 1 && it.q >= iqNum) {
+                            if (it.iq !== undefined && iqNum > 1) {
                                 let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
                                 let gU = String(it.u2 || '').trim(); gU = gU ? (gU.charAt(0).toUpperCase() + gU.slice(1)) : 'Grosir';
                                 let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
-                                let gQ = Math.floor(nQ / iqNum);
-                                let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                                qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                                if (nQ % 1 !== 0) {
+                                    qtyText = `${nQ} ${gU}`;
+                                } else if (nQ >= iqNum) {
+                                    let gQ = Math.floor(nQ / iqNum);
+                                    let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                                    qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                                } else { qtyText = `${nQ} ${eU}`; }
+                            } else if (it.u1) {
+                                let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
+                                qtyText = `${it.q} ${eU}`;
                             }
 
                             itemsHtml += `
@@ -2439,16 +2482,20 @@
                     let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                     let safeN = i.n.length > 20 ? i.n.substring(0, 19) + '…' : i.n;
                     
-                    let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
+                                        let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
                     let iqNum = Math.max(1, parseInt(i.iq) || 1);
                     
-                    if (i.iq !== undefined && iqNum > 1 && i.q >= iqNum) {
+                    if (i.iq !== undefined && iqNum > 1) {
                         let eU = formatShortUnit(i.u1);
                         let gU = formatShortUnit(i.u2);
                         let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
-                        let gQ = Math.floor(nQ / iqNum);
-                        let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                        qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                        if (nQ % 1 !== 0) {
+                            qtyText = `${nQ} ${gU}`;
+                        } else if (nQ >= iqNum) {
+                            let gQ = Math.floor(nQ / iqNum);
+                            let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                            qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                        } else { qtyText = `${i.q} ${eU}`; }
                     } else if (i.u1) {
                         qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
                     }
