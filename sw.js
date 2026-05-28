@@ -2,8 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-// PENTING: Naikkan angka APP_VERSION setiap kali Anda mengubah isi index.html, CSS, atau logika sistem!
-const APP_VERSION = '14.0'; 
+const APP_VERSION = '15.0'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -24,10 +23,8 @@ const cdnDomains = [
 // MANAJEMEN MEMORI (ANTI-LAG)
 // ==========================================
 
-// Gembok per-namespace agar pembersihan CDN dan Dynamic tidak saling memblokir
 let isTrimming = {}; 
 
-// Menghapus file lama agar CPU HP tidak macet
 async function trimCache(cacheName, maxItems) {
   if (isTrimming[cacheName]) return; 
   isTrimming[cacheName] = true;
@@ -47,13 +44,11 @@ async function trimCache(cacheName, maxItems) {
   }
 }
 
-// Mengecek sisa kapasitas penyimpanan HP
 async function manageStorage() {
   if (navigator.storage && navigator.storage.estimate) {
     try {
       const quota = await navigator.storage.estimate();
       if (quota.usage / quota.quota > 0.8) {
-        console.log('[SW] Memori penuh, melakukan pembersihan ekstra...');
         await trimCache(CACHE_DYNAMIC, 20); 
       }
     } catch(e) {}
@@ -67,7 +62,6 @@ async function manageStorage() {
 self.addEventListener('install', event => {
   self.skipWaiting(); 
   
-  // FIX KRITIS: Pisahkan file KRUSIAL dan OPSIONAL untuk mencegah "Atomic Install Trap (Error 404)"
   const criticalUrls = ['./', './index.html'];
   const optionalUrls = [
     OFFLINE_URL, 
@@ -79,15 +73,17 @@ self.addEventListener('install', event => {
 
   event.waitUntil(
     caches.open(CACHE_CORE).then(async cache => {
-      // 1. Wajib Mutlak (SW batal install HANYA jika index.html gagal)
       await cache.addAll(criticalUrls);
       
-      // 2. Opsional & CDN (Aman dari kegagalan berantai jika server mati/file 404)
-      optionalUrls.forEach(url => {
-        fetch(new Request(url, { cache: 'reload' }))
-          .then(res => { if (res.ok) cache.put(url, res); })
-          .catch(err => console.warn('[SW] Aset opsional tertunda (aman):', url));
-      });
+      await Promise.allSettled(
+        optionalUrls.map(url => 
+          fetch(new Request(url, { cache: 'reload' }))
+            .then(res => { 
+              if (res.ok || res.type === 'opaque') return cache.put(url, res); 
+            })
+            .catch(err => console.warn('[SW] Aset opsional tertunda:', url))
+        )
+      );
     }).catch(err => console.error('[SW] Instalasi PWA Gagal Total:', err))
   );
 });
@@ -96,7 +92,6 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(keys.map(key => {
-        // Hapus versi aplikasi yang sudah usang
         if (key !== CACHE_CORE && key !== CACHE_DYNAMIC && key !== CACHE_CDN) {
           return caches.delete(key); 
         }
@@ -116,11 +111,10 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // BYPASS: Abaikan permintaan non-GET dan API Google Sheets
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
 
   // ---------------------------------------------------------
-  // STRATEGI 1: Stale-While-Revalidate untuk File Utama HTML (Anti Race-Condition)
+  // STRATEGI 1: Stale-While-Revalidate untuk File Utama HTML
   // ---------------------------------------------------------
   if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.includes('index.html')) {
     event.respondWith(
@@ -130,7 +124,6 @@ self.addEventListener('fetch', event => {
 
         try {
           const cache = await caches.open(CACHE_CORE);
-          // Prioritas 1: Berikan UI dari memori lokal (Fastest Response)
           cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
                       await cache.match('./index.html', { ignoreSearch: true }) || 
                       await cache.match('./', { ignoreSearch: true });
@@ -138,36 +131,30 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-        // Jalankan Fetch di background tanpa waitUntil ganda (mengamankan Lifecycle)
         const fetchPromise = fetch(req).then(async (res) => {
           if (res.ok && !res.redirected && res.type !== 'opaque') {
             try {
               const cache = await caches.open(CACHE_CORE);
               await cache.put(cleanReqUrl, res.clone());
-            } catch (e) {} // Abaikan error jika storage korup saat menyimpan
+            } catch (e) {} 
           }
           return res;
         }).catch(() => null);
 
-        // Jika cache ada, langsung kirimkan ke layar (0 ms load time)
         if (cachedRes) {
-           // Background sync tetap berjalan secara asinkron (mengunci pembaruan di latar belakang)
            event.waitUntil(fetchPromise); 
            return cachedRes;
         }
 
-        // Jika tidak ada di cache (Install pertama kali atau memori kehapus), tunggu jaringan
         const networkRes = await fetchPromise;
-        if (networkRes) return networkRes;
+        if (networkRes && networkRes.ok) return networkRes;
 
-        // Failsafe 1: Coba ambil halaman darurat (offline.html)
         try {
           const cache = await caches.open(CACHE_CORE);
           const offlinePage = await cache.match(OFFLINE_URL, { ignoreSearch: true });
           if (offlinePage) return offlinePage;
         } catch (e) {}
 
-        // Failsafe Absolut: Tampilkan HTML statis Peringatan Jaringan
         return new Response(
           `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan Anda tersambung ke internet untuk sinkronisasi awal aplikasi ke dalam perangkat.</p></body></html>`,
           { headers: { 'Content-Type': 'text/html' }, status: 503 }
@@ -183,13 +170,11 @@ self.addEventListener('fetch', event => {
   if (cdnDomains.some(domain => url.hostname.includes(domain))) {
     event.respondWith(
       caches.match(req).then(cachedRes => {
-        // Jika ada di cache, langsung kembalikan TANPA request ke jaringan (Anti Bocor Kuota)
         if (cachedRes) return cachedRes; 
         
-        // Jika tidak ada di cache, baru download dan simpan
         const fetchPromiseCDN = fetch(req).then(res => {
           const contentType = res.headers.get('content-type') || '';
-          if (res.ok && res.type !== 'opaque' && !contentType.includes('text/html')) {
+          if ((res.ok || res.type === 'opaque') && !contentType.includes('text/html')) {
             const resClone = res.clone();
             caches.open(CACHE_CDN).then(async cache => { 
               await cache.put(req, resClone); 
@@ -210,7 +195,7 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   const fetchPromiseDyn = fetch(req).then(res => {
     const contentType = res.headers.get('content-type') || '';
-    if (res.ok && res.type !== 'opaque' && !contentType.includes('text/html')) {
+    if ((res.ok || res.type === 'opaque') && !contentType.includes('text/html')) {
       const resClone = res.clone();
       caches.open(CACHE_DYNAMIC).then(async cache => {
         const cleanUrl = req.url.split('?')[0];
@@ -223,7 +208,6 @@ self.addEventListener('fetch', event => {
     return res;
   }).catch(() => null);
 
-  // Eksekusi WaitUntil Sinkron
   event.waitUntil(fetchPromiseDyn);
 
   event.respondWith(
