@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '15.1'; 
+const APP_VERSION = '15.2'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -216,3 +216,60 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// ==========================================
+// BACKGROUND SYNC (OFFLINE MUTATION)
+// ==========================================
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-transaksi-cloud') {
+    event.waitUntil(processOfflineBackup());
+  }
+});
+
+async function processOfflineBackup() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('HargaDB_Pro', 3);
+    req.onsuccess = (e) => {
+      const idb = e.target.result;
+      if (!idb.objectStoreNames.contains('sync-outbox')) return resolve();
+      
+      const tx = idb.transaction('sync-outbox', 'readonly');
+      const store = tx.objectStore('sync-outbox');
+      const getReq = store.get('pending-backup');
+      
+      getReq.onsuccess = async () => {
+        if (!getReq.result) return resolve();
+        const payload = getReq.result;
+        
+        try {
+          // GANTI URL INI DENGAN URL DEPLOY GOOGLE APPS SCRIPT ANDA JIKA BERBEDA
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxK6T5rZs75o7gqDH7PC-fDDISp1GK3uGH-OoegRR1g0jKhDlkjp7--OQBmVhJidrTl/exec";
+          
+          // 1. Eksekusi Backup Data Barang (Validasi JSON ketat)
+          const resData = await fetch(CLOUD_API, {
+            method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
+          });
+          if (!resData.ok) throw new Error("Network Error");
+          const jsonResData = await resData.json();
+          if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
+
+          // 2. Eksekusi Backup Riwayat (Validasi JSON ketat)
+          const resHist = await fetch(CLOUD_API, {
+            method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
+          });
+          if (!resHist.ok) throw new Error("Network Error");
+          const jsonResHist = await resHist.json();
+          if (jsonResHist.status !== "success") throw new Error("Server Sibuk: Riwayat gagal disinkronkan");
+
+          // 3. Hapus antrean jika 100% SUKSES mendarat di Cloud
+          const txDel = idb.transaction('sync-outbox', 'readwrite');
+          txDel.objectStore('sync-outbox').delete('pending-backup');
+          txDel.oncomplete = () => resolve();
+        } catch (err) {
+          reject(err); // Biarkan Service Worker mencoba lagi (retry) di masa depan jika gagal/server sibuk
+        }
+      };
+    };
+    req.onerror = () => reject();
+  });
+}
