@@ -92,25 +92,21 @@
             title.innerText = "✅ Sinyal Ditemukan!"; 
             title.style.color = "#3CB371"; 
             statusCard.style.borderColor = "#3CB371";
-            desc.innerText = "Internet kembali. Menyimpan catatan dan memuat ulang..."; 
+            desc.innerText = "Internet kembali! Silakan ketuk tombol di bawah untuk masuk ke aplikasi utama."; 
             
+            btn.innerText = "MUAT ULANG KASIR";
+            btn.style.backgroundColor = "#3CB371";
+            btn.style.color = "#ffffff";
+            btn.style.border = "none";
+            
+            // Simpan paksa tanpa mereload secara otomatis untuk mencegah disrupsi UX saat mengetik
             const currentText = document.getElementById('offline-ledger').value;
-            const executeReload = () => triggerReload("Memuat Ulang...");
-
+            try { localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText); } catch(e) {}
             if (db) {
                 try {
                     const tx = db.transaction([STORE_NAME], 'readwrite');
                     tx.objectStore(STORE_NAME).put({ id: 1, text: currentText });
-                    
-                    tx.oncomplete = executeReload;
-                    tx.onerror = executeReload;
-                } catch (e) {
-                    localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText);
-                    executeReload();
-                }
-            } else {
-                localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText);
-                executeReload();
+                } catch (e) {}
             }
         });
 
@@ -138,17 +134,25 @@
                 const tx = db.transaction([STORE_NAME], 'readonly');
                 const store = tx.objectStore(STORE_NAME);
                 const req = store.get(1);
+                
+                const fallbackLoader = () => {
+                    const fallbackText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
+                    if (fallbackText && ledger.value === '') {
+                        ledger.value = fallbackText;
+                        saveLedger(); 
+                    }
+                };
+
                 req.onsuccess = function() { 
                     if (req.result && req.result.text && ledger.value === '') { 
                         ledger.value = req.result.text; 
                     } else if (!req.result || !req.result.text) {
-                        const fallbackText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-                        if (fallbackText && ledger.value === '') {
-                            ledger.value = fallbackText;
-                            saveLedger(); 
-                        }
+                        fallbackLoader();
                     }
                 };
+                
+                req.onerror = fallbackLoader; // INJEKSI PERISAI ERROR HANDLING
+
             } catch (error) {
                 const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
                 if (t && ledger.value === '') ledger.value = t; 
@@ -159,7 +163,7 @@
         function saveLedger() {
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
-                localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value);
+                try { localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value); } catch(e) {}
                 if (db) {
                     try {
                         const tx = db.transaction([STORE_NAME], 'readwrite');
@@ -173,7 +177,7 @@
             if (document.visibilityState === 'hidden') {
                 if (saveTimeout) clearTimeout(saveTimeout); 
                 if (ledger && ledger.value !== undefined) {
-                    localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value);
+                    try { localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value); } catch(e) {}
                     if (db) {
                         try {
                             const tx = db.transaction([STORE_NAME], 'readwrite');
@@ -184,7 +188,7 @@
             }
         });
 
-        // --- SISTEM KALKULATOR (DIPERBAIKI) ---
+        // --- SISTEM KALKULATOR ---
         const display = document.getElementById('calc-display'); 
         let calcVal = '0';
         let isResultDisplayed = false; 
@@ -256,7 +260,7 @@
             }
         }
 
-        // --- DUKUNGAN KEYBOARD FISIK (DIPERBAIKI) ---
+        // --- DUKUNGAN KEYBOARD FISIK ---
         document.addEventListener('keydown', (e) => {
             if (document.activeElement.tagName === 'TEXTAREA') return;
 
