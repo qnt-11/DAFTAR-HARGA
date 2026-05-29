@@ -2854,28 +2854,35 @@
             history.pushState({ modalOpen: true }, ''); 
         }
         
-                let pendingBack = false;
+                let skipPopStateCount = 0; // Perisai Absolut Anti-Lag
+
         function untrackModal(id) { 
             const idx = activeModals.lastIndexOf(id); 
             if (idx > -1) {
                 activeModals.splice(idx, 1); 
-                if (!isPoppingState && !pendingBack) {
-                    pendingBack = true;
+                // Hitung setiap history.back() yang dipicu oleh sistem secara absolut
+                if (!isPoppingState) {
+                    skipPopStateCount++;
                     history.back();
-                    setTimeout(() => { pendingBack = false; }, 50);
                 }
             }
         }
         
         window.addEventListener('popstate', (e) => { 
+            // PERISAI ABSOLUT: Kurangi konter dan batalkan eksekusi jika back berasal dari sistem
+            if (skipPopStateCount > 0) {
+                skipPopStateCount--;
+                return; 
+            }
+
             if (activeModals.length > 0) { 
                 isPoppingState = true; 
                 const topModal = activeModals.pop(); 
                 closeModalById(topModal); 
-                setTimeout(() => { isPoppingState = false; }, 50); // Lepas bendera setelah DOM selesai
+                setTimeout(() => { isPoppingState = false; }, 50); 
             } 
         });
-        
+                        
         function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { isClosingScan = true; $('scanner-wrap').style.display = 'none'; checkModalOpen(); if(torchState) toggleFlashlight(); if(isScanning && html5QrCode){ html5QrCode.stop().catch(()=>{}); } isScanning=false; isClosingScan=false; requestWakeLock(); }
