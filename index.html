@@ -409,7 +409,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxK6T5rZs75o7gqDH7PC-fDDISp1GK3uGH-OoegRR1g0jKhDlkjp7--OQBmVhJidrTl/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -449,7 +449,7 @@
             if (worker) worker.postMessage({ type: 'search', query: val, reqId: currentSearchReqId });
         }
 
-        function toggleCartMode() {
+                function toggleCartMode() {
             isCartMode = !isCartMode;
             invalidateLayoutCache(); // BUG FIX: Reset cache tinggi DOM agar virtual scroll tidak blank saat tinggi header berubah
             if (isCartMode) {
@@ -496,6 +496,97 @@
             }
         }
 
+                // --- START: MESIN LIVE INJECTOR KERANJANG ---
+                function handleLiveQty(id, el) {
+            let val = el.value.replace(/,/g, '.');
+            let parsed = parseFloat(val);
+            if (isNaN(parsed) || parsed <= 0) return; // Abaikan jika kosong/nol saat sedang mengetik
+            
+            cartState[id].q = parsed;
+            delete cartState[id].manualPrice; // Reset override harga jika qty berubah
+            saveCartMem();
+            
+            updateRowVisuals(id);
+            updateGrandTotal();
+        }
+
+        function validateQtyBlur(id, el) {
+            // ANTI GHOST-ITEM BUG: Jika kasir membiarkan kotak kosong/nol lalu pergi, otomatis kembalikan ke 1
+            let val = el.value.replace(/,/g, '.');
+            let parsed = parseFloat(val);
+            if (isNaN(parsed) || parsed <= 0) {
+                el.value = "1";
+                cartState[id].q = 1;
+                delete cartState[id].manualPrice;
+                saveCartMem();
+                updateRowVisuals(id);
+                updateGrandTotal();
+            }
+        }
+
+              function handleLivePrice(id, el) {
+            let val = parseInt(el.value.replace(/\D/g, ''), 10);
+            if (isNaN(val)) {
+                delete cartState[id].manualPrice;
+                saveCartMem();
+                updateRowVisuals(id);
+                updateGrandTotal();
+                return;
+            }
+            
+            cartState[id].manualPrice = val;
+            saveCartMem();
+            updateGrandTotal();
+        }
+        
+        function updateRowVisuals(id) {
+            const item = db.find(x => String(x.id) === id);
+            if(!item) return;
+            
+            const q = cartState[id].q || 1;
+            const iq = Math.max(1, item.iq || 1);
+            let subTotal = 0;
+            
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                if (q >= iq) subTotal = Math.round(q * (item.p2 / iq));
+                else subTotal = Math.round(q * item.p1);
+            } else {
+                subTotal = Math.round(q * item.p1);
+            }
+            
+            let priceInput = document.getElementById('price-input-' + id);
+            if(priceInput) priceInput.value = fmt(subTotal);
+            
+            let unitText = document.getElementById('unit-text-' + id);
+            if(unitText) unitText.innerText = formatQtyBreakdown(q, iq, item.u1, item.u2);
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            Object.keys(cartState).forEach(k => {
+                const item = db.find(x => String(x.id) === k);
+                if (item && !item.deleted) {
+                    const q = cartState[k].q || 1;
+                    const iq = Math.max(1, item.iq || 1);
+                    
+                    if (cartState[k].manualPrice !== undefined) {
+                        grandTotal += cartState[k].manualPrice;
+                    } else {
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                            if (q >= iq) grandTotal += Math.round(q * (item.p2 / iq));
+                            else grandTotal += Math.round(q * item.p1);
+                        } else {
+                            grandTotal += Math.round(q * item.p1);
+                        }
+                    }
+                }
+            });
+            const gtEl = document.getElementById('cp-grand-total');
+            if(gtEl) gtEl.innerText = `Rp ${fmt(grandTotal)}`;
+        }
+        // --- END: MESIN LIVE INJECTOR ---
+
+        // --- START: FUNGSI RENDER UI KERANJANG BARU ---
         function renderCartUI() {
             const list = $('cp-list');
             if (!list) return;
@@ -516,33 +607,48 @@
                     const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0;
                     
-                    if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                        if (q % 1 !== 0) subTotal = Math.round(q * item.p2);
-                        else if (q >= iq) subTotal = Math.round(q * (item.p2 / iq));
-                        else subTotal = Math.round(q * item.p1);
+                    // Eksekusi Logika Finansial Override (Chaos Protected)
+                    if (cartState[id].manualPrice !== undefined) {
+                        subTotal = cartState[id].manualPrice;
                     } else {
-                        subTotal = Math.round(q * item.p1);
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                            if (q >= iq) subTotal = Math.round(q * (item.p2 / iq));
+                            else subTotal = Math.round(q * item.p1);
+                        } else {
+                            subTotal = Math.round(q * item.p1);
+                        }
                     }
                     
                     grandTotal += subTotal;
                     
-                    html += `
+                    // Injeksi Matrix DOM Baru
+                                                                                html += `
                     <div class="cp-item-wrap">
                         <div class="cp-trash-bg" onclick="modifyCartItem('${item.id}', -9999)">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </div>
-                        <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${item.id}')">
-                            <div class="cpi-info" onclick="promptEditQty('${item.id}', ${q})" style="cursor:pointer; pointer-events:auto;">
-                                <div class="cpi-name">${escapeHTML(item.n)}</div>
-                                <div class="cpi-calc" style="color:#87CEFA; font-weight:700; text-decoration:underline;">Ubah Qty: ${q} x Rp ${fmt(item.p1)}</div>
+                        
+                        <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${item.id}')" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            
+                            <div class="cpi-info" style="flex: 1; min-width: 0; padding: 0;">
+                                <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
+                                <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
                             </div>
-                            <div style="display:flex; align-items:center;">
-                                <div class="cpi-total">Rp ${fmt(subTotal)}</div>
-                                <div style="display:flex; flex-direction:column; margin-left:15px; gap:4px;">
-                                    <button class="cp-btn" style="padding:4px 10px;" onclick="modifyCartItem('${item.id}', 1)">+</button>
-                                    <button class="cp-btn" style="padding:4px 10px;" onclick="modifyCartItem('${item.id}', -1)">-</button>
-                                </div>
+                            
+                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
+                                <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off"
+                                       oninput="formatRp(this); handleLivePrice('${item.id}', this)" 
+                                       style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
+
+                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
+                                <input type="tel" value="${q}" autocomplete="off"
+                                       oninput="handleLiveQty('${item.id}', this)" 
+                                       onblur="validateQtyBlur('${item.id}', this)"
+                                       style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
+                            </div>
+
                         </div>
                     </div>`;
                 }
@@ -551,12 +657,16 @@
             list.innerHTML = html;
             $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
+        // --- END: FUNGSI RENDER UI KERANJANG BARU ---
 
-        function modifyCartItem(id, qty) {
+                function modifyCartItem(id, qty) {
             if (!cartState[id]) {
                 if (qty > 0) cartState[id] = { q: qty };
             } else {
-                cartState[id].q += qty;
+                cartState[id].q = parseFloat((cartState[id].q + qty).toFixed(4));
+                // SURGICAL FIX: Hancurkan harga beku (override) jika Qty diubah dari luar keranjang (Scanner/List)
+                delete cartState[id].manualPrice; 
+                
                 if (cartState[id].q <= 0) delete cartState[id];
             }
             saveCartMem();
@@ -584,7 +694,6 @@
             let gU = formatShortUnit(u2) || 'Grosir';
             let nQ = parseFloat(String(q).replace(',', '.')) || 0;
             if (iqNum > 1) {
-                if (nQ % 1 !== 0) return `${nQ} ${gU}`;
                 if (nQ >= iqNum) {
                     let gQ = Math.floor(nQ / iqNum);
                     let eQ = parseFloat((nQ % iqNum).toFixed(3));
@@ -617,30 +726,46 @@
             }
         }
 
+                let touchStartY = 0; // Tambahan aman untuk deteksi vertikal
         function handleMainTouchStart(e) {
             if (e.touches.length > 1) return;
             const card = e.target.closest('.card') || e.target.closest('.cp-item-front');
             if (!card) return;
             isMainSwiping = false;
             touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
             touchCurrentX = touchStartX;
             card.style.transition = 'none';
         }
 
-        function handleMainTouchMove(e, card) {
+                function handleMainTouchMove(e, card) {
             if (e.touches.length > 1) return;
             touchCurrentX = e.touches[0].clientX;
+            let touchCurrentY = e.touches[0].clientY;
             const diffX = touchStartX - touchCurrentX;
-            if (diffX > 15) isMainSwiping = true;
-            if (diffX > 0 && diffX < 90) {
+            const diffY = Math.abs(touchStartY - touchCurrentY);
+            
+            // Prioritaskan scroll vertikal
+            if (diffY > diffX && diffY > 10) return;
+            
+            // DEADZONE SUPER LEBAR (30px): Mencegah layar bergeser akibat getaran jari saat mengetik
+            if (diffX > 30 && diffX < 90) {
+                isMainSwiping = true; 
                 card.style.transform = `translateX(-${diffX}px)`;
             }
         }
 
-        function handleMainTouchEnd(e, card, id) {
+                function handleMainTouchEnd(e, card, id) {
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
             const diffX = touchStartX - touchCurrentX;
-            if (diffX > 40) {
+            
+            // ANTI-GHOST SWIPE: Hapus jejak memori koordinat usang agar tap berikutnya tidak terbaca sebagai swipe
+            touchStartX = 0;
+            touchCurrentX = 0;
+            touchStartY = 0;
+            
+            // Niat geser harus panjang dan sangat disengaja (di atas 60px)
+            if (diffX > 60) { 
                 card.style.transform = `translateX(-80px)`;
                 swipedCardElem = card;
             } else {
@@ -957,17 +1082,16 @@
             return !s ? "" : String(s).trim().split(/([\s\-\/&()+,])/).map(w => w && !/[\s\-\/&()+,]/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : w).join('').replace(/\s+/g, ' '); 
         }
         
-        function highlightMatch(text, term) { 
-            const safeText = escapeHTML(text || ""); 
-            if (!term || String(term).trim() === '') return safeText; 
-            
+                function highlightMatch(text, term) { 
+            let str = text || "";
+            if (!term || String(term).trim() === '') return escapeHTML(str);
             const terms = String(term).trim().split(/\s+/).filter(Boolean);
-            if (terms.length === 0) return safeText;
-
-            const regexStr = terms.map(t => escapeHTML(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'); 
-            const regex = new RegExp(`(${regexStr})`, 'gi'); 
-            
-            return safeText.replace(regex, '<span class="highlight">$1</span>'); 
+            if (terms.length === 0) return escapeHTML(str);
+            const regexStr = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            const regex = new RegExp(`(${regexStr})`, 'gi');
+            return str.replace(regex, "\u200B$1\u200B").split("\u200B")
+                      .map((p, i) => i % 2 === 1 ? `<span class="highlight">${escapeHTML(p)}</span>` : escapeHTML(p))
+                      .join('');
         }
         
         function formatRp(input) { 
@@ -1942,7 +2066,7 @@
  
         async function closeScanner() { if(isClosingScan) return; isClosingScan = true; untrackModal('scanner'); $('scanner-wrap').style.display = 'none'; checkModalOpen(); if (torchState) toggleFlashlight(); if (isScanning && html5QrCode) { try { await html5QrCode.stop(); html5QrCode.clear(); } catch(e) {} } isScanning = false; isClosingScan = false; requestWakeLock(); }
 
-        document.addEventListener('touchstart', function(e) { if (swipedCardElem && !swipedCardElem.contains(e.target) && !e.target.closest('.trash-trigger')) { swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; swipedCardElem.style.transform = 'translateX(0px)'; swipedCardElem = null; } }, { passive: true });
+           document.addEventListener('touchstart', function(e) { if (swipedCardElem && !swipedCardElem.contains(e.target) && !e.target.closest('.trash-trigger') && !e.target.closest('.cp-trash-bg')) { swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; swipedCardElem.style.transform = 'translateX(0px)'; swipedCardElem = null; } }, { passive: true });
         
         async function processUrlParameters() { 
             const urlParams = new URLSearchParams(window.location.search); const action = urlParams.get('action'); 
@@ -2058,23 +2182,21 @@
                     let finalModal = 0;
                     let printUnit = String(item.u1 || 'Pcs').trim();
 
-                    if (cartState[id].manualPrice !== undefined) {
+                                        if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q % 1 !== 0) {
-                            finalModal = Math.round(q * iq * (item.hpp || 0));
+                        // ANTI-MUTANT MODAL: Menggunakan logika q >= iq yang presisi
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
+                            finalModal = Math.round(q * (item.hpp || 0));
                             printUnit = String(item.u2 || 'Grosir').trim();
                         } else {
                             finalModal = Math.round(q * (item.hpp || 0));
                         }
                     } else {
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                            if (q % 1 !== 0) {
-                                subTotal = Math.round(q * item.p2);
-                                finalModal = Math.round(q * iq * (item.hpp || 0)); 
-                                printUnit = String(item.u2 || 'Grosir').trim();
-                            } else if (q >= iq) {
+                                                if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                            if (q >= iq) {
                                 subTotal = Math.round(q * (item.p2 / iq)); 
                                 finalModal = Math.round(q * (item.hpp || 0));
+                                printUnit = String(item.u2 || 'Grosir').trim();
                             } else { 
                                 subTotal = Math.round(q * item.p1); 
                                 finalModal = Math.round(q * (item.hpp || 0));
@@ -2197,13 +2319,11 @@
                 let qtyText = `${i.q}x${fmt(hrgSatuan)}`; 
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 
-                if (i.iq !== undefined && iqNum > 1) {
+                                if (i.iq !== undefined && iqNum > 1) {
                     let eU = formatShortUnit(i.u1);
                     let gU = formatShortUnit(i.u2);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
-                    if (nQ % 1 !== 0) {
-                        qtyText = `${nQ} ${gU}`;
-                    } else if (nQ >= iqNum) {
+                    if (nQ >= iqNum) {
                         let gQ = Math.floor(nQ / iqNum);
                         let eQ = parseFloat((nQ % iqNum).toFixed(3));
                         qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
@@ -2465,13 +2585,12 @@
                         let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
                         let iqNum = Math.max(1, parseInt(i.iq) || 1);
                         
-                        if (i.iq !== undefined && iqNum > 1) {
+                                               if (i.iq !== undefined && iqNum > 1) {
                             let eU = formatShortUnit(i.u1);
                             let gU = formatShortUnit(i.u2);
                             let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
-                            if (nQ % 1 !== 0) {
-                                qtyText = `${nQ} ${gU}`;
-                            } else if (nQ >= iqNum) {
+                            if (nQ >= iqNum) {
+ 
                                 let gQ = Math.floor(nQ / iqNum);
                                 let eQ = parseFloat((nQ % iqNum).toFixed(3));
                                 qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
