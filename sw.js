@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '15.3'; 
+const APP_VERSION = '15.5'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -48,6 +48,7 @@ async function manageStorage() {
   if (navigator.storage && navigator.storage.estimate) {
     try {
       const quota = await navigator.storage.estimate();
+      // Mitigasi Bug Kritis: Mencegah NaN Crash jika API Quota diblokir browser
       if (quota.quota && (quota.usage / quota.quota > 0.8)) {
         await trimCache(CACHE_DYNAMIC, 20); 
       }
@@ -131,16 +132,14 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
+        // Mitigasi Lie-Fi: Circuit Breaker Timeout 4 Detik agar UI tidak White Screen
+        const pFetch = fetch(req);
+        pFetch.catch(() => {}); // Cegah Unhandled Rejection Leak
+        
         const fetchPromise = Promise.race([
-          fetch(req),
+          pFetch,
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 4000))
-        ]).then(async (res) => {
-          if (res.ok && !res.redirected && res.type !== 'opaque') {
-            try {
-              const cache = await caches.open(CACHE_CORE);
-              await cache.put(cleanReqUrl, res.clone());
-            } catch (e) {} 
-          }
+        ]).then((res) => {
           return res;
         }).catch(() => null);
 
@@ -245,36 +244,34 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          // GANTI URL INI DENGAN URL DEPLOY GOOGLE APPS SCRIPT ANDA JIKA BERBEDA
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxK6T5rZs75o7gqDH7PC-fDDISp1GK3uGH-OoegRR1g0jKhDlkjp7--OQBmVhJidrTl/exec";
+          // GANTI URL INI DENGAN URL DEPLOY GOOGLE APPS SCRIPT ANDA
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec";
           
-          // 1. Eksekusi Backup Data Barang (Validasi JSON ketat)
+          // 1. Eksekusi Backup Data Barang
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
           });
-          if (!resData.ok) throw new Error("Network Error"); // Boleh di-retry jika TimeOut
+          if (!resData.ok) throw new Error("Network Error"); 
           
           let jsonResData;
-          try { jsonResData = await resData.json(); } 
-          catch(e) { 
-            const txDel = idb.transaction('sync-outbox', 'readwrite');
-            txDel.objectStore('sync-outbox').delete('pending-backup');
-            return resolve(); // Fatal: Endpoint korup. Hancurkan antrean agar tidak infinite loop!
+          try { 
+            jsonResData = await resData.json(); 
+          } catch(e) { 
+            return reject(new Error("API mengembalikan non-JSON (Tercegat Captive Portal/Wi-Fi). Sync ditunda demi keamanan data."));
           }
           if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
 
-          // 2. Eksekusi Backup Riwayat (Validasi JSON ketat)
+          // 2. Eksekusi Backup Riwayat
           const resHist = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
           });
           if (!resHist.ok) throw new Error("Network Error");
           
           let jsonResHist;
-          try { jsonResHist = await resHist.json(); }
-          catch(e) {
-            const txDel = idb.transaction('sync-outbox', 'readwrite');
-            txDel.objectStore('sync-outbox').delete('pending-backup');
-            return resolve(); // Fatal: Endpoint korup. Hancurkan antrean!
+          try { 
+            jsonResHist = await resHist.json(); 
+          } catch(e) {
+            return reject(new Error("Gagal parsing JSON Riwayat. Sinkronisasi ditunda."));
           }
           if (jsonResHist.status !== "success") throw new Error("Server Sibuk: Riwayat gagal disinkronkan");
 
@@ -283,7 +280,8 @@ async function processOfflineBackup() {
           txDel.objectStore('sync-outbox').delete('pending-backup');
           txDel.oncomplete = () => resolve();
         } catch (err) {
-          reject(err); // Biarkan Service Worker mencoba lagi (retry) di masa depan jika gagal/server sibuk
+          // Rejeksi untuk memicu retry otomatis oleh Service Worker saat jaringan stabil
+          reject(err); 
         }
       };
     };
