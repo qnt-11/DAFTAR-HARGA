@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '15.2'; 
+const APP_VERSION = '15.3'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -48,7 +48,7 @@ async function manageStorage() {
   if (navigator.storage && navigator.storage.estimate) {
     try {
       const quota = await navigator.storage.estimate();
-      if (quota.usage / quota.quota > 0.8) {
+      if (quota.quota && (quota.usage / quota.quota > 0.8)) {
         await trimCache(CACHE_DYNAMIC, 20); 
       }
     } catch(e) {}
@@ -131,7 +131,10 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-        const fetchPromise = fetch(req).then(async (res) => {
+        const fetchPromise = Promise.race([
+          fetch(req),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 4000))
+        ]).then(async (res) => {
           if (res.ok && !res.redirected && res.type !== 'opaque') {
             try {
               const cache = await caches.open(CACHE_CORE);
@@ -249,8 +252,15 @@ async function processOfflineBackup() {
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
           });
-          if (!resData.ok) throw new Error("Network Error");
-          const jsonResData = await resData.json();
+          if (!resData.ok) throw new Error("Network Error"); // Boleh di-retry jika TimeOut
+          
+          let jsonResData;
+          try { jsonResData = await resData.json(); } 
+          catch(e) { 
+            const txDel = idb.transaction('sync-outbox', 'readwrite');
+            txDel.objectStore('sync-outbox').delete('pending-backup');
+            return resolve(); // Fatal: Endpoint korup. Hancurkan antrean agar tidak infinite loop!
+          }
           if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
 
           // 2. Eksekusi Backup Riwayat (Validasi JSON ketat)
@@ -258,7 +268,14 @@ async function processOfflineBackup() {
             method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
           });
           if (!resHist.ok) throw new Error("Network Error");
-          const jsonResHist = await resHist.json();
+          
+          let jsonResHist;
+          try { jsonResHist = await resHist.json(); }
+          catch(e) {
+            const txDel = idb.transaction('sync-outbox', 'readwrite');
+            txDel.objectStore('sync-outbox').delete('pending-backup');
+            return resolve(); // Fatal: Endpoint korup. Hancurkan antrean!
+          }
           if (jsonResHist.status !== "success") throw new Error("Server Sibuk: Riwayat gagal disinkronkan");
 
           // 3. Hapus antrean jika 100% SUKSES mendarat di Cloud
