@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '15.0'; 
+const APP_VERSION = '15.1'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -79,7 +79,7 @@ self.addEventListener('install', event => {
         optionalUrls.map(url => 
           fetch(new Request(url, { cache: 'reload' }))
             .then(res => { 
-              if (res.ok || res.type === 'opaque') return cache.put(url, res); 
+              if (res.ok) return cache.put(url, res); 
             })
             .catch(err => console.warn('[SW] Aset opsional tertunda:', url))
         )
@@ -114,7 +114,7 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
 
   // ---------------------------------------------------------
-  // STRATEGI 1: Stale-While-Revalidate untuk File Utama HTML
+  // STRATEGI 1: Network-First untuk File Utama HTML
   // ---------------------------------------------------------
   if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.includes('index.html')) {
     event.respondWith(
@@ -141,13 +141,12 @@ self.addEventListener('fetch', event => {
           return res;
         }).catch(() => null);
 
-        if (cachedRes) {
-           event.waitUntil(fetchPromise); 
-           return cachedRes;
-        }
-
         const networkRes = await fetchPromise;
         if (networkRes && networkRes.ok) return networkRes;
+
+        if (cachedRes) {
+           return cachedRes;
+        }
 
         try {
           const cache = await caches.open(CACHE_CORE);
@@ -174,7 +173,7 @@ self.addEventListener('fetch', event => {
         
         const fetchPromiseCDN = fetch(req).then(res => {
           const contentType = res.headers.get('content-type') || '';
-          if ((res.ok || res.type === 'opaque') && !contentType.includes('text/html')) {
+          if (res.ok && !contentType.includes('text/html')) {
             const resClone = res.clone();
             caches.open(CACHE_CDN).then(async cache => { 
               await cache.put(req, resClone); 
@@ -195,7 +194,7 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   const fetchPromiseDyn = fetch(req).then(res => {
     const contentType = res.headers.get('content-type') || '';
-    if ((res.ok || res.type === 'opaque') && !contentType.includes('text/html')) {
+    if (res.ok && !contentType.includes('text/html')) {
       const resClone = res.clone();
       caches.open(CACHE_DYNAMIC).then(async cache => {
         const cleanUrl = req.url.split('?')[0];
