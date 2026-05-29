@@ -13,6 +13,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+    // ==========================================
+    // ERROR MONITORING PROTOCOL (STEALTH MODE)
+    // ==========================================
+    (function() {
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec"; 
+        const MAX_ERRORS_PER_SESSION = 5; 
+        let errorCount = 0;
+
+        window.sendStealthError = function(errData) {
+            if (errorCount >= MAX_ERRORS_PER_SESSION) return; 
+            errorCount++;
+            try {
+                let safeStack = String(errData.stack || '-').substring(0, 1000);
+                let safeMsg = String(errData.msg || 'Unknown Error').substring(0, 300);
+
+                let payload = JSON.stringify({
+                    action: 'logError',
+                    data: {
+                        type: errData.type,
+                        msg: safeMsg,
+                        url: errData.url || window.location.href,
+                        line: errData.line || 0,
+                        col: errData.col || 0,
+                        stack: safeStack,
+                        ua: navigator.userAgent,
+                        time: Date.now()
+                    }
+                });
+
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(CLOUD_API_URL, payload);
+                } else {
+                    fetch(CLOUD_API_URL, { method: 'POST', body: payload, keepalive: true }).catch(e => {});
+                }
+            } catch (fatal) {}
+        };
+
+        window.addEventListener('error', function(event) {
+            window.sendStealthError({
+                type: 'Sync/Syntax Error',
+                msg: event.message,
+                url: event.filename,
+                line: event.lineno,
+                col: event.colno,
+                stack: event.error ? event.error.stack : ''
+            });
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            window.sendStealthError({
+                type: 'Async Promise Error',
+                msg: event.reason ? (event.reason.message || event.reason) : 'Unhandled Rejection',
+                url: window.location.href,
+                stack: event.reason && event.reason.stack ? event.reason.stack : ''
+            });
+        });
+    })();
+    </script>
     <style>
         :root { --wa-bg: #000000; --wa-card: #151515; --wa-header: #000000; --text-light: #ffffff; --text-muted: #a0a0a0; --border-color: #333333; --danger: #ff3b30; --warning: #FFD700; --highlight-bg: rgba(255, 255, 255, 0.2); --mono-main: #ffffff; --mono-sec: #aaaaaa; --cart-h: 40vh; }
         html { overscroll-behavior: none; background-color: #000000; }
@@ -41,9 +100,6 @@
     </style>
 </head>
 <body>
-    <video id="wakelock-video" loop muted playsinline style="width:1px;height:1px;position:absolute;top:-100px;left:-100px;opacity:0.01;pointer-events:none;z-index:-1;">
-        <source src="data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAAR/7GBA0JngQCgQIaBAH/gQACiQISRA0SrgQBdqgEDQpqBAl2qAQA+AAAAAABO/7CDA0JngQCgQIeBAn/gQACiQIWRA0SrgQCdxAEPQp2BAl2qAQA+AAAAAABO/7CBA0JngQCgQIaBAH/gQACiQISRA0SrgQBdqgEDQpqBAl2qAQA+AAAAAABO/7CDA0JngQCgQIeBAn/gQACiQIWRA0SrgQCdxAEPQp2BAl2qAQA+AAAAAABO/7A=" type="video/webm">
-    </video>
 
     <div class="header" id="header-bar">
         <div class="header-left">
@@ -409,7 +465,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxrQBTCHO-u0QDK6dEdamF-CMFqsf30fTtCPgOGi43Ovh-sItWGBy-UqNZgAB17Z-gv/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxxQqHYzg5lZpswUYvFgKmR70p8jOcF9psrRHPb0h1s0r1iMEW7hkKrd8ZhPIpWkgBQ/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -427,13 +483,17 @@
         
         let lastStartIndex = -1, lastEndIndex = -1, currentSearchReqId = 0;
         let barcodeMap = new Map(), acronymMap = new Map();
+        
+        let currentInjectedQty = 1;
+        let currentCleanQuery = '';
+        let pendingAutoAdds = new Set();
+        
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
         let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout, cartSaveTimer = null;
         const Picker = { sel: new Date(), targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
         let recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || [];
         let trendingSearches = JSON.parse(localStorage.getItem('DB_WA_TRENDING')) || {};
 
-                // DEKLARASI DOM & STATE KASIR YANG HILANG
         const searchInput = $('q');
         const searchDropdown = $('search-dropdown');
         const sdContent = $('sd-content');
@@ -443,22 +503,37 @@
         let isApiLoading = false; 
         let cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; 
 
-        // INJEKSI FUNGSI LOGIKA SILUMAN (SEARCH, KASIR & TOUCH INTERACTION)
         function handleSearchLogic(val) {
             currentSearchReqId++;
-            if (worker) worker.postMessage({ type: 'search', query: val, reqId: currentSearchReqId });
+            currentInjectedQty = 1;
+            currentCleanQuery = val.trim();
+            
+            const qtyMatch = currentCleanQuery.match(/^(\d{1,4})[x\*]\s*(.*)/i);
+            if (qtyMatch) {
+                currentInjectedQty = parseInt(qtyMatch[1], 10);
+                currentCleanQuery = qtyMatch[2].trim(); 
+            }
+            
+            if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
         }
 
-                function toggleCartMode() {
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && isCartMode) {
+                if (/^[0-9]{6,}$/.test(currentCleanQuery)) return; 
+                if (currentCleanQuery !== '') {
+                    pendingAutoAdds.add(currentSearchReqId); 
+                }
+            }
+        });
+
+        function toggleCartMode() {
             isCartMode = !isCartMode;
-            invalidateLayoutCache(); // BUG FIX: Reset cache tinggi DOM agar virtual scroll tidak blank saat tinggi header berubah
+            invalidateLayoutCache();
             if (isCartMode) {
                 document.body.classList.add('mode-kasir');
                 $('t-cart').classList.add('active');
-                
                 tab = 'all';
                 ['all', 'fav', 'exp'].forEach(x => $(`t-${x}`).className = 'all' === x ? 'tab active' : 'tab');
-                
                 renderCartUI();
                 applyFiltersAndRender();
             } else {
@@ -477,15 +552,14 @@
             window.scrollTo({ top: 0, behavior: 'instant' });
             applyFiltersAndRender();
         }
-       
-                // --- START: MESIN LIVE INJECTOR KERANJANG ---
-                function handleLiveQty(id, el) {
+
+        function handleLiveQty(id, el) {
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
-            if (isNaN(parsed) || parsed <= 0) return; // Abaikan jika kosong/nol saat sedang mengetik
+            if (isNaN(parsed) || parsed <= 0) return; 
             
             cartState[id].q = parsed;
-            delete cartState[id].manualPrice; // Reset override harga jika qty berubah
+            delete cartState[id].manualPrice; 
             saveCartMem();
             
             updateRowVisuals(id);
@@ -493,7 +567,6 @@
         }
 
         function validateQtyBlur(id, el) {
-            // ANTI GHOST-ITEM BUG: Jika kasir membiarkan kotak kosong/nol lalu pergi, otomatis kembalikan ke 1
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
             if (isNaN(parsed) || parsed <= 0) {
@@ -506,7 +579,7 @@
             }
         }
 
-              function handleLivePrice(id, el) {
+        function handleLivePrice(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val)) {
                 delete cartState[id].manualPrice;
@@ -515,7 +588,6 @@
                 updateGrandTotal();
                 return;
             }
-            
             cartState[id].manualPrice = val;
             saveCartMem();
             updateGrandTotal();
@@ -543,37 +615,41 @@
             if(unitText) unitText.innerText = formatQtyBreakdown(q, iq, item.u1, item.u2);
         }
 
-                function updateGrandTotal() {
+        function updateGrandTotal() {
             let grandTotal = 0;
-            
-            // Surgical Fix: O(1) Lookup Map untuk menahan Brutal Stress Load
+            let needsSave = false; 
             let dbLookup = {};
+            
             for (let i = 0; i < db.length; i++) dbLookup[db[i].id] = db[i];
 
             Object.keys(cartState).forEach(k => {
                 const item = dbLookup[k];
-                if (item && !item.deleted) {
-                    const q = cartState[k].q || 1;
-                    const iq = Math.max(1, item.iq || 1);
-                    
-                    if (cartState[k].manualPrice !== undefined) {
-                        grandTotal += cartState[k].manualPrice;
+                if (!item || item.deleted) {
+                    delete cartState[k];
+                    needsSave = true;
+                    return; 
+                }
+                const q = cartState[k].q || 1;
+                const iq = Math.max(1, item.iq || 1);
+                
+                if (cartState[k].manualPrice !== undefined) {
+                    grandTotal += cartState[k].manualPrice;
+                } else {
+                    if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                        if (q >= iq) grandTotal += Math.round(q * (item.p2 / iq));
+                        else grandTotal += Math.round(q * item.p1);
                     } else {
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                            if (q >= iq) grandTotal += Math.round(q * (item.p2 / iq));
-                            else grandTotal += Math.round(q * item.p1);
-                        } else {
-                            grandTotal += Math.round(q * item.p1);
-                        }
+                        grandTotal += Math.round(q * item.p1);
                     }
                 }
             });
+
+            if (needsSave) saveCartMem();
+            
             const gtEl = document.getElementById('cp-grand-total');
             if(gtEl) gtEl.innerText = `Rp ${fmt(grandTotal)}`;
         }
-        // --- END: MESIN LIVE INJECTOR ---
 
-        // --- START: FUNGSI RENDER UI KERANJANG BARU ---
         function renderCartUI() {
             const list = $('cp-list');
             if (!list) return;
@@ -594,7 +670,6 @@
                     const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0;
                     
-                    // Eksekusi Logika Finansial Override (Chaos Protected)
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
@@ -608,52 +683,37 @@
                     
                     grandTotal += subTotal;
                     
-                    // Injeksi Matrix DOM Baru
-                                                                                html += `
+                    html += `
                     <div class="cp-item-wrap">
                         <div class="cp-trash-bg" onclick="modifyCartItem('${item.id}', -9999)">
                             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </div>
-                        
                         <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${item.id}')" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            
                             <div class="cpi-info" style="flex: 1; min-width: 0; padding: 0;">
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
                             </div>
-                            
                             <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
-                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off"
-                                       oninput="formatRp(this); handleLivePrice('${item.id}', this)" 
-                                       style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
-
                             <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
-                                <input type="tel" value="${q}" autocomplete="off"
-                                       oninput="handleLiveQty('${item.id}', this)" 
-                                       onblur="validateQtyBlur('${item.id}', this)"
-                                       style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" value="${q}" autocomplete="off" oninput="handleLiveQty('${item.id}', this)" onblur="validateQtyBlur('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
                             </div>
-
                         </div>
                     </div>`;
                 }
             });
-            
             list.innerHTML = html;
             $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
-        // --- END: FUNGSI RENDER UI KERANJANG BARU ---
 
-                function modifyCartItem(id, qty) {
+        function modifyCartItem(id, qty) {
             if (!cartState[id]) {
                 if (qty > 0) cartState[id] = { q: qty };
             } else {
                 cartState[id].q = parseFloat((cartState[id].q + qty).toFixed(4));
-                // SURGICAL FIX: Hancurkan harga beku (override) jika Qty diubah dari luar keranjang (Scanner/List)
                 delete cartState[id].manualPrice; 
-                
                 if (cartState[id].q <= 0) delete cartState[id];
             }
             saveCartMem();
@@ -690,14 +750,11 @@
             return `${nQ} ${eU}`;
         }
 
-                function handlePhysicalScanner(scannedText) {
+        function handlePhysicalScanner(scannedText) {
             const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText));
             if (ex) {
                 let addQty = 1;
-                // BUG FIX: Jika yang discan adalah Barcode Grosir, otomatis hitung dan tambah sesuai 'Isi Grosir'
-                if (String(ex.b2) === scannedText && ex.iq > 1) {
-                    addQty = ex.iq;
-                }
+                if (String(ex.b2) === scannedText && ex.iq > 1) addQty = ex.iq;
                 modifyCartItem(ex.id, addQty);
                 tampilkanToast(`+${addQty} ${ex.n}`, "var(--mono-main)");
             } else {
@@ -713,7 +770,7 @@
             }
         }
 
-                let touchStartY = 0; // Tambahan aman untuk deteksi vertikal
+        let touchStartY = 0; 
         function handleMainTouchStart(e) {
             if (e.touches.length > 1) return;
             const card = e.target.closest('.card') || e.target.closest('.cp-item-front');
@@ -725,33 +782,28 @@
             card.style.transition = 'none';
         }
 
-                function handleMainTouchMove(e, card) {
+        function handleMainTouchMove(e, card) {
             if (e.touches.length > 1) return;
             touchCurrentX = e.touches[0].clientX;
             let touchCurrentY = e.touches[0].clientY;
             const diffX = touchStartX - touchCurrentX;
             const diffY = Math.abs(touchStartY - touchCurrentY);
             
-            // Prioritaskan scroll vertikal
             if (diffY > diffX && diffY > 10) return;
-            
-            // DEADZONE SUPER LEBAR (30px): Mencegah layar bergeser akibat getaran jari saat mengetik
             if (diffX > 30 && diffX < 90) {
                 isMainSwiping = true; 
                 card.style.transform = `translateX(-${diffX}px)`;
             }
         }
 
-                function handleMainTouchEnd(e, card, id) {
+        function handleMainTouchEnd(e, card, id) {
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
             const diffX = touchStartX - touchCurrentX;
             
-            // ANTI-GHOST SWIPE: Hapus jejak memori koordinat usang agar tap berikutnya tidak terbaca sebagai swipe
             touchStartX = 0;
             touchCurrentX = 0;
             touchStartY = 0;
             
-            // Niat geser harus panjang dan sangat disengaja (di atas 60px)
             if (diffX > 60) { 
                 card.style.transform = `translateX(-80px)`;
                 swipedCardElem = card;
@@ -771,10 +823,18 @@
         function saveCartMem() { 
             if (cartSaveTimer) clearTimeout(cartSaveTimer);
             cartSaveTimer = setTimeout(() => {
-                localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
+                try {
+                    localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                        localStorage.removeItem('DB_WA_TRENDING');
+                        localStorage.removeItem('DB_WA_RECENT');
+                        try { localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); } catch(err){}
+                        tampilkanToast("Memori HP Penuh! Sistem membersihkan cache...", "var(--warning)");
+                    }
+                }
             }, 300);
         }
-
         document.addEventListener('focus', function(e) {
             if (e.target.tagName && e.target.tagName.toLowerCase() === 'input' && e.target.closest('.modal-box')) {
                 setTimeout(() => {
@@ -802,9 +862,7 @@
         }
 
         let wakeLockThrottleTimer;
-        const enableWakeLock = () => {
-            const v = $('wakelock-video');
-            if (v && v.paused) v.play().catch(()=>{});
+                const enableWakeLock = () => {
             if (wakeLockThrottleTimer) return;
             wakeLockThrottleTimer = setTimeout(() => {
                 requestWakeLock();
@@ -864,7 +922,6 @@
         
         async function saveItemToIDB(item) { 
             if (!idb) {
-                console.log("Menghubungkan ulang database...");
                 await initDB();
             }
             return new Promise((resolve, reject) => { 
@@ -874,7 +931,6 @@
                     tx.oncomplete = () => resolve(); 
                     tx.onerror = () => reject(new Error("Gagal menyimpan ke memori perangkat.")); 
                 } catch (e) { 
-                    console.warn("Koneksi DB terputus oleh HP. Mencoba memulihkan (Auto-Reconnect)...");
                     initDB().then(() => {
                         try {
                             const tx2 = idb.transaction('items', 'readwrite');
@@ -953,7 +1009,7 @@
                 gain.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + 0.1); 
                 osc.start(); 
                 osc.stop(globalAudioCtx.currentTime + 0.1); 
-            } catch(e) { console.warn(e); } 
+            } catch(e) {} 
         }
 
         function formatBulanTahun(dStr) { 
@@ -1004,13 +1060,10 @@
                     let cleanKey = k.replace(/[\u200B-\u200D\uFEFF\s_]/g, '').toUpperCase();
                     if (exactArray.includes(cleanKey)) return rawObj[k];
                 }
-                
                 for (let k of keys) {
                     let cleanKey = k.replace(/[\u200B-\u200D\uFEFF\s_]/g, '').toUpperCase();
-                    
                     let isColBarcode = cleanKey.includes('BARCODE');
                     let isColHarga = cleanKey.includes('HARGA');
-                    
                     let searchBarcode = fuzzyArray.some(kw => kw.includes('BARCODE'));
                     let searchHarga = fuzzyArray.some(kw => kw.includes('HARGA') || kw.includes('ECERAN') || kw.includes('GROSIR'));
                     
@@ -1064,12 +1117,9 @@
 
         function fmt(n) { return n ? new Intl.NumberFormat('id-ID').format(n) : "0"; }
         function escapeHTML(str) { return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
+        function prop(s) { return !s ? "" : String(s).trim().split(/([\s\-\/&()+,])/).map(w => w && !/[\s\-\/&()+,]/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : w).join('').replace(/\s+/g, ' '); }
         
-        function prop(s) { 
-            return !s ? "" : String(s).trim().split(/([\s\-\/&()+,])/).map(w => w && !/[\s\-\/&()+,]/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : w).join('').replace(/\s+/g, ' '); 
-        }
-        
-                function highlightMatch(text, term) { 
+        function highlightMatch(text, term) { 
             let str = text || "";
             if (!term || String(term).trim() === '') return escapeHTML(str);
             const terms = String(term).trim().split(/\s+/).filter(Boolean);
@@ -1115,7 +1165,15 @@
         }
 
         const workerScript = `
-        let workerList = []; let popMap = {}; let latestReqId = 0; 
+        let workerList = []; let popMap = {}; let phoneticMap = {}; let latestReqId = 0; 
+
+        function indoPhonetic(str) {
+            if(!str) return "";
+            return str.toLowerCase()
+                .replace(/[^a-z0-9]/g, '').replace(/gh/g, 'g').replace(/sh/g, 's')
+                .replace(/([a-z])\\1+/g, '$1').replace(/[fvw]/g, 'p')
+                .replace(/[z]/g, 'j').replace(/[cq]/g, 'k').replace(/[aeiouy]/g, '');
+        }
 
         function levenshtein(a, b, limit = 99) {
             if(Math.abs(a.length - b.length) > limit) return 99;
@@ -1136,11 +1194,28 @@
         }
 
         self.onmessage = function(e) { 
-            if (e.data.type === 'init') { workerList = e.data.db; if(e.data.pop) popMap = e.data.pop; } 
+            if (e.data.type === 'init') { 
+                workerList = e.data.db; 
+                phoneticMap = {}; 
+                for(let i=0; i<workerList.length; i++) phoneticMap[workerList[i].id] = indoPhonetic(workerList[i].n);
+                if(e.data.pop) popMap = e.data.pop; 
+            } 
             else if (e.data.type === 'pop_update') { popMap = e.data.pop; }
-            else if (e.data.type === 'add') workerList.push(e.data.item); 
-            else if (e.data.type === 'update') { workerList = workerList.filter(x => String(x.id) !== String(e.data.item.id)); workerList.push(e.data.item); } 
-            else if (e.data.type === 'remove') workerList = workerList.filter(x => String(x.id) !== String(e.data.id)); 
+            else if (e.data.type === 'add') {
+                workerList.push(e.data.item); 
+                phoneticMap[e.data.item.id] = indoPhonetic(e.data.item.n);
+            } 
+                        else if (e.data.type === 'update') { 
+                let idx = workerList.findIndex(x => String(x.id) === String(e.data.item.id));
+                if (idx !== -1) workerList[idx] = e.data.item;
+                else workerList.push(e.data.item);
+                phoneticMap[e.data.item.id] = indoPhonetic(e.data.item.n);
+            } 
+            else if (e.data.type === 'remove') {
+                let idx = workerList.findIndex(x => String(x.id) === String(e.data.id));
+                if (idx !== -1) workerList.splice(idx, 1);
+                delete phoneticMap[e.data.id];
+            }
             else if (e.data.type === 'search') { 
                 latestReqId = e.data.reqId; 
                 let rawQuery = (e.data.query || '').toLowerCase().trim(); 
@@ -1158,13 +1233,31 @@
 
                 let isTagSearch = textQuery.startsWith('#');
                 let cleanTag = isTagSearch ? textQuery.substring(1).trim().toLowerCase() : '';
-                let terms = isTagSearch ? [] : textQuery.split(' ').filter(Boolean); 
+                
+                let rawTerms = isTagSearch ? [] : textQuery.split(' ').filter(Boolean); 
+                let terms = []; let negTerms = [];
+                
+                for(let t of rawTerms) {
+                    if (t.startsWith('-') && t.length > 1) negTerms.push(t.substring(1));
+                    else terms.push(t);
+                }
+                
+                let queryPhonetic = terms.length > 0 ? indoPhonetic(terms.join('')) : '';
                 let hasil = [];
 
                 for (let i = 0; i < workerList.length; i++) {
                     const item = workerList[i];
-                    const n = (item.n || '').toLowerCase(), t = (item.t || '').toLowerCase(), b = (item.b || '').toLowerCase(), b2 = (item.b2 || '').toLowerCase(); 
+                    const n = (item.n || '').toLowerCase(), t = (item.t || '').toLowerCase(); 
+                    const b = (item.b || '').toLowerCase(), b2 = (item.b2 || '').toLowerCase();
                     const p1 = item.p1 || 0;
+
+                    if (negTerms.length > 0) {
+                        let isBanned = false;
+                        for (let neg of negTerms) {
+                            if (n.includes(neg) || t.includes(neg)) { isBanned = true; break; }
+                        }
+                        if (isBanned) continue; 
+                    }
 
                     if(priceOp) {
                         if(priceOp === '<' && !(p1 < priceVal)) continue;
@@ -1188,15 +1281,13 @@
                         score = isMatch ? 1000 : 0;
                     } else if (terms.length > 0) {
                         isMatch = terms.every(term => n.includes(term) || t.includes(term));
-                        
                         if (isMatch) {
                             if (n === textQuery || t === textQuery) score = 100;
                             else if (n.startsWith(textQuery) || t.startsWith(textQuery)) score = 80;
                             else if (terms.some(term => n.split(' ').some(w => w.startsWith(term)))) score = 50;
                             else score = 20;
                         } else {
-                                                        if (terms.length <= 2 && textQuery.length > 2) {
-                                // Rasio dinamis: 40% dari panjang kata, maksimal 5 huruf typo
+                            if (terms.length <= 2 && textQuery.length > 2) {
                                 let maxTypo = Math.min(5, Math.floor(textQuery.length * 0.4));
                                 let words = n.split(' '); let bestDist = 99;
                                 for(let w of words) {
@@ -1205,9 +1296,12 @@
                                         if(d < bestDist) bestDist = d;
                                     }
                                 }
-                                let acrDist = levenshtein(textQuery, t, 2); // Akronim tetap ketat (max 1-2)
-                                if(bestDist <= maxTypo || (acrDist <= 1 && t.length >= 2)) {
-                                    isMatch = true; score = 10 - Math.min(bestDist, acrDist); 
+                                let acrDist = levenshtein(textQuery, t, 2); 
+                                let phDist = levenshtein(queryPhonetic, phoneticMap[item.id] || '', 2);
+
+                                if (bestDist <= maxTypo || (acrDist <= 1 && t.length >= 2) || phDist <= 1) {
+                                    isMatch = true; 
+                                    score = phDist <= 1 ? 15 : (10 - Math.min(bestDist, acrDist)); 
                                 }
                             }
                         }
@@ -1228,11 +1322,38 @@
 
         worker = new Worker(URL.createObjectURL(new Blob([workerScript], { type: 'application/javascript' })));
         
+        worker.onerror = function(errorEvent) {
+            if (typeof window.sendStealthError === 'function') {
+                window.sendStealthError({
+                    type: 'Web Worker Crash',
+                    msg: errorEvent.message,
+                    url: errorEvent.filename,
+                    line: errorEvent.lineno,
+                    col: errorEvent.colno,
+                    stack: 'Worker Thread Failure'
+                });
+            }
+            errorEvent.preventDefault(); 
+        };
+
         worker.onmessage = function(e) { 
             if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
                 workerResult = e.data.data; 
-                window.scrollTo({ top: 0, behavior: 'instant' }); 
                 
+                if (pendingAutoAdds.has(e.data.reqId)) {
+                    pendingAutoAdds.delete(e.data.reqId);
+                    if (workerResult.length > 0) {
+                        const topItem = workerResult[0];
+                        modifyCartItem(topItem.id, currentInjectedQty);
+                        tampilkanToast(`+${currentInjectedQty} ${topItem.n}`, "var(--mono-main)");
+                        clearSearch(); 
+                        return; 
+                    } else {
+                        tampilkanToast("Barang tidak ditemukan!", "var(--warning)");
+                    }
+                }
+
+                window.scrollTo({ top: 0, behavior: 'instant' }); 
                 if(workerResult.length === 0 && e.data.query.trim() !== '') {
                     try {
                         let missed = JSON.parse(localStorage.getItem('DB_WA_ANALYTICS_MISS') || '{}');
@@ -1242,7 +1363,6 @@
                         localStorage.setItem('DB_WA_ANALYTICS_MISS', JSON.stringify(missed));
                     } catch(err) {}
                 }
-
                 applyFiltersAndRender(); 
             } 
         };
@@ -1280,6 +1400,7 @@
             }
             try { voiceRecognition.start(); } catch(e) {}
         }
+
         function buildPopularityData() {
             let pMap = {};
             try {
@@ -1314,7 +1435,9 @@
             trendingSearches[c.toLowerCase()] = (trendingSearches[c.toLowerCase()] || 0) + 1; const keys = Object.keys(trendingSearches); 
             if (keys.length > 50) { let min = keys.reduce((a, b) => trendingSearches[a] < trendingSearches[b] ? a : b); delete trendingSearches[min]; } localStorage.setItem('DB_WA_TRENDING', JSON.stringify(trendingSearches)); 
         }
+        
         function clearRecentLogs() { recentSearches = []; localStorage.setItem('DB_WA_RECENT', JSON.stringify([])); showSearchSuggestions(); }
+        
         function showSearchSuggestions() { 
             const val = searchInput.value.trim(); sdContent.innerHTML = ''; 
             if (val === '') { 
@@ -1324,7 +1447,16 @@
                 if(html) { sdContent.innerHTML = html; searchDropdown.classList.remove('hidden'); } else searchDropdown.classList.add('hidden'); 
             } else searchDropdown.classList.add('hidden'); 
         }
-        function executeQuickSearch(term) { searchInput.value = term; recordSearchLog(term); searchDropdown.classList.add('hidden'); $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(term); }
+        
+        function executeQuickSearch(term) { 
+            searchInput.value = term; 
+            recordSearchLog(term); 
+            searchDropdown.classList.add('hidden'); 
+            $('q-x').style.display = 'flex'; 
+            window.scrollTo({ top: 0, behavior: 'instant' }); 
+            pendingAutoAdds.clear(); 
+            handleSearchLogic(term); 
+        }
         
         const handleSearchInput = debounce(() => { 
             const val = searchInput.value.trim(); 
@@ -1338,10 +1470,29 @@
             showSearchSuggestions(); 
         }, 150);
 
-        searchInput.addEventListener('input', (e) => { $('q-x').style.display = e.target.value.trim() ? 'flex' : 'none'; handleSearchInput(); });
-        searchInput.addEventListener('focus', showSearchSuggestions);
-        function clearSearch() { searchInput.value = ''; $('q-x').style.display = 'none'; workerResult = null; currentSearchReqId++; window.scrollTo({ top: 0, behavior: 'instant' }); showSearchSuggestions(); applyFiltersAndRender(); searchInput.blur(); }
+        searchInput.addEventListener('input', (e) => { 
+            if (voiceRecognition && $('mic-btn').classList.contains('listening')) {
+                try { voiceRecognition.abort(); } catch(err){}
+                $('mic-btn').classList.remove('listening');
+                $('q').placeholder = "search...";
+            }
+            $('q-x').style.display = e.target.value.trim() ? 'flex' : 'none'; 
+            handleSearchInput(); 
+        });
 
+        searchInput.addEventListener('focus', showSearchSuggestions);
+        
+        function clearSearch() { 
+            searchInput.value = ''; 
+            $('q-x').style.display = 'none'; 
+            workerResult = null; 
+            currentSearchReqId++; 
+            pendingAutoAdds.clear(); 
+            window.scrollTo({ top: 0, behavior: 'instant' }); 
+            showSearchSuggestions(); 
+            applyFiltersAndRender(); 
+            searchInput.blur(); 
+        }
         document.addEventListener('click', (e) => { 
             if (!$('dropdown-menu').classList.contains('hidden') && !e.target.closest('#kebab-btn')) $('dropdown-menu').classList.add('hidden'); 
             if (!$('search-dropdown').classList.contains('hidden') && !e.target.closest('.search-box')) $('search-dropdown').classList.add('hidden'); 
@@ -1356,10 +1507,8 @@
             const c = applyModalColor(title, color); 
             $('alert-msg').innerHTML = String(msg).replace(/\n/g, '<br>'); 
             $('alert-btns').innerHTML = `<button class="btn-main" style="border: 1px solid ${c}!important; color: ${c}!important; background:transparent!important;" onclick="closeCustomAlert()">OKE</button>`; 
-            
             $('custom-alert').style.zIndex = '5500'; 
             $('custom-alert').style.display = 'flex'; 
-            
             document.body.classList.add('modal-open'); 
             trackModal('alert'); 
         }
@@ -1455,7 +1604,7 @@
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let expDate = new Date(i.exp); expDate = new Date(expDate.getFullYear(), expDate.getMonth() + 1, 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
             
             if (!q || tab === 'exp') { 
-                if (tab === 'exp') { filteredData.sort((a, b) => new Date(a.exp || '9999-12-31').getTime() - new Date(b.exp || '9999-12-31').getTime()); } 
+                if (tab === 'exp') { filteredData.sort((a, b) => (a.exp || '9999-12-31').localeCompare(b.exp || '9999-12-31')); }
                 else if (sortAZ) { filteredData.sort((a,b) => String(a.n||"").localeCompare(String(b.n||"")) || (b.updatedAt||0) - (a.updatedAt||0)); } 
                 else { filteredData.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0)); }
             }
@@ -1529,7 +1678,6 @@
         let scrollTimeoutLock;
         window.addEventListener('scroll', () => { 
             if (isMainSwiping) return; 
-            
             let sy = window.scrollY; document.body.classList.add('is-scrolling'); clearTimeout(scrollTimeoutLock); scrollTimeoutLock = setTimeout(() => document.body.classList.remove('is-scrolling'), 150);
             if (!$('dropdown-menu').classList.contains('hidden')) $('dropdown-menu').classList.add('hidden');
             
@@ -1617,18 +1765,12 @@
                     await saveItemToIDB(db[idx]); 
                     
                     if (worker) worker.postMessage({ type: 'update', item: db[idx] }); 
-                    if (workerResult) { 
-                        const wIdx = workerResult.findIndex(x => String(x.id) === String(activeId)); 
-                        if (wIdx > -1) workerResult[wIdx] = db[idx]; 
-                    }
                 } else {
-                    let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36);
+                    let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
                     const nIt = { id: newId, b, b2, n: cleanName, hpp, p1, p2, f: false, exp, t, u1, u2, iq, updatedAt: ts, deleted: false }; 
                     db.push(nIt); 
                     await saveItemToIDB(nIt); 
-                    
                     if (worker) worker.postMessage({ type: 'add', item: nIt }); 
-                    if (workerResult) workerResult.unshift(nIt); 
                 }
                 
                 try {
@@ -1636,11 +1778,9 @@
                         let clean = String(val).trim().toLowerCase();
                         if(!clean || clean.length > 15) return; 
                         clean = clean.charAt(0).toUpperCase() + clean.slice(1);
-                        
                         let hist = [];
                         try { hist = JSON.parse(localStorage.getItem(key)); } catch(e){}
                         if (!Array.isArray(hist)) hist = defaults;
-                        
                         hist = hist.filter(x => x !== clean); 
                         hist.unshift(clean); 
                         if(hist.length > 3) hist = hist.slice(0, 3); 
@@ -1648,7 +1788,7 @@
                     };
                     saveChipHist(u1, 'CHIP_U1_HIST', ['Pcs', 'Bks', 'Renceng']);
                     saveChipHist(u2, 'CHIP_U2_HIST', ['Slop', 'Dus', 'Karton']);
-                } catch(chipErr) { console.warn("Chip memory terblokir sistem", chipErr); }
+                } catch(chipErr) {}
 
                 updateMaps(); 
                 hideMod(); 
@@ -1656,7 +1796,6 @@
                 tampilkanToast("Barang Tersimpan!");
 
             } catch (err) { 
-                console.error("Error saat menyimpan:", err);
                 showAlert("Proses Gagal: " + err.message, "Error");
             } finally { 
                 isSaving = false; 
@@ -1671,7 +1810,6 @@
                 async () => {
                     db[idx].deleted = true; db[idx].updatedAt = Date.now(); await saveItemToIDB(db[idx]); 
                     if(worker) worker.postMessage({ type: 'remove', id: String(id) });
-                    if (workerResult) workerResult = workerResult.filter(x => String(x.id) !== String(id));
                     if (cartState[id]) { delete cartState[id]; saveCartMem(); renderCartUI(); } 
                     swipedCardElem = null; updateMaps(); applyFiltersAndRender(); tampilkanToast("Dihapus!", "var(--danger)");
                 }, "HAPUS", () => { if (cardToReset) cardToReset.style.transform = `translateX(0px)`; swipedCardElem = null; }
@@ -1690,7 +1828,7 @@
         async function toggleFav(id, btn) { 
             const idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) { 
                 db[idx].f = !db[idx].f; db[idx].updatedAt = Date.now(); await saveItemToIDB(db[idx]); 
-                if (workerResult) { const wIdx = workerResult.findIndex(x => String(x.id) === String(id)); if (wIdx > -1) workerResult[wIdx].f = db[idx].f; }
+                if (worker) worker.postMessage({ type: 'update', item: db[idx] });
                 if (btn) { btn.style.color = db[idx].f ? 'var(--mono-main)' : 'var(--text-muted)'; btn.innerHTML = `<svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="${db[idx].f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`; } 
                 if (tab === 'fav') applyFiltersAndRender(); 
             } 
@@ -1711,11 +1849,9 @@
         
         function backupToCloud() { 
             if (db.length === 0 || isApiLoading) return;
-            
             showConfirm("Upload data Harga dan Riwayat Transaksi", "Upload Cloud", "#87CEFA", () => { 
                 isApiLoading = true; 
                 showLoading("Upload Data...<br>Mohon Tunggu sebentar.", "#87CEFA"); 
-                
                 const lastSyncTime = parseInt(localStorage.getItem('DB_LAST_SYNC')) || 0;
                 
                 fetchWithTimeout(CLOUD_URL + "?action=load&lastSync=" + lastSyncTime + "&t=" + Date.now(), {}, 30000)
@@ -1755,27 +1891,21 @@
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                     }
-                    
                     return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db }) }, 30000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
                     if (backupRes.status !== 'success') throw new Error(backupRes.message);
-
                     let historyData = [];
                     try { historyData = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e){}
-                    
                     return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 30000);
                 })
                 .then(r => r.json())
                 .then(historyRes => {
                     if (historyRes.status !== 'success') throw new Error(historyRes.message);
-   
                     isApiLoading = false; 
-
                     hideLoading(); 
                     tampilkanToast("Upload Data Berhasil!", "var(--mono-main)"); 
-                    
                     const tx = idb.transaction('items', 'readwrite'); 
                     const store = tx.objectStore('items'); 
                     store.clear(); 
@@ -1788,12 +1918,10 @@
                             let histBackup = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
                             const tx = idb.transaction('sync-outbox', 'readwrite');
                             tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db, history: histBackup, timestamp: Date.now() });
-                            
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
                             };
-                            tx.onerror = () => { throw new Error("IDB Write Failed"); };
                         } catch(e) { showAlert("Gagal melindungi data ke antrean offline.", "Error Kritis"); }
                     } else { showAlert("Periksa Jaringan. Silakan coba lagi.", "Error"); }
                 }); 
@@ -1822,7 +1950,7 @@
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
                         if (chunk.length === 0) {
-                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none';
+                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none'; pendingAutoAdds.clear();
                             if (isCartMode) renderCartUI(); applyFiltersAndRender(); isApiLoading = false; hideLoading(); 
                             if (rejectedCloudCount > 0) { showAlert(`Update Selesai!<br><br><span style="color:var(--warning);">⚠️ ${rejectedCloudCount} data ditolak dari Cloud (Format rusak).</span>`, "Peringatan Sinkronisasi", "var(--warning)"); } else { tampilkanToast(forceSync ? "Berhasil memuat ulang semua data!" : `Berhasil update ${dataCloud.length} data!`, "var(--mono-main)"); }
                             return;
@@ -1831,9 +1959,7 @@
                         chunk.forEach(rawItem => { 
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
-                            
-                           if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-
+                            if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
                             if (forceSync) {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
                             } else {
@@ -1848,10 +1974,7 @@
                         }; 
                         tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
                     } catch (error) {
-                        console.error("Chunk Error:", error);
-                        isApiLoading = false; 
-                        hideLoading(); 
-                        showAlert("Gagal memproses data sinkronisasi. Harap coba lagi.", "Error");
+                        isApiLoading = false; hideLoading(); showAlert("Gagal memproses data sinkronisasi. Harap coba lagi.", "Error");
                     }
                 }
                 processNextChunk();
@@ -1973,7 +2096,6 @@
                             if (norm.b2 !== '') dbMapByBarcode.set(norm.b2, norm);
 
                             let currentTs = baseTs + i;
-                            
                             let existingItem = dbMapById.get(String(norm.id)) || dbMapByName.get(String(norm.n).toLowerCase());
                             
                             if (existingItem) { 
@@ -2016,7 +2138,6 @@
                             showAlert(`Tidak ada data valid yang bisa dibaca.<br>ℹ️ Baris kosong dilewati.`, "Info Import", "var(--warning)"); 
                         }
                     } catch (err) { 
-                        console.error("Critical Import Error: ", err); 
                         isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                         showAlert("Format File Excel tidak valid atau rusak! Pastikan tabel benar.", "Error"); 
                     }
@@ -2031,7 +2152,7 @@
         }
         
         let torchState = false; 
-        function toggleFlashlight() { const vid = document.querySelector('#reader video'); if (vid && vid.srcObject) { try { const track = vid.srcObject.getVideoTracks()[0], cap = track.getCapabilities(); if (cap.torch) { torchState = !torchState; track.applyConstraints({ advanced: [{ torch: torchState }] }).catch(e => console.log(e)); $('torch-btn').style.color = torchState ? "var(--warning)" : "white"; } else tampilkanToast("Kamera tidak dukung senter", "var(--warning)"); } catch(e) { console.log(e); } } }
+        function toggleFlashlight() { const vid = document.querySelector('#reader video'); if (vid && vid.srcObject) { try { const track = vid.srcObject.getVideoTracks()[0], cap = track.getCapabilities(); if (cap.torch) { torchState = !torchState; track.applyConstraints({ advanced: [{ torch: torchState }] }).catch(e => console.log(e)); $('torch-btn').style.color = torchState ? "var(--warning)" : "white"; } else tampilkanToast("Kamera tidak dukung senter", "var(--warning)"); } catch(e) {} } }
         
         let isClosingScan = false;
         async function openScanner(mode) { 
@@ -2055,7 +2176,7 @@
  
         async function closeScanner() { if(isClosingScan) return; isClosingScan = true; untrackModal('scanner'); $('scanner-wrap').style.display = 'none'; checkModalOpen(); if (torchState) toggleFlashlight(); if (isScanning && html5QrCode) { try { await html5QrCode.stop(); html5QrCode.clear(); } catch(e) {} } isScanning = false; isClosingScan = false; requestWakeLock(); }
 
-           document.addEventListener('touchstart', function(e) { if (swipedCardElem && !swipedCardElem.contains(e.target) && !e.target.closest('.trash-trigger') && !e.target.closest('.cp-trash-bg')) { swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; swipedCardElem.style.transform = 'translateX(0px)'; swipedCardElem = null; } }, { passive: true });
+        document.addEventListener('touchstart', function(e) { if (swipedCardElem && !swipedCardElem.contains(e.target) && !e.target.closest('.trash-trigger') && !e.target.closest('.cp-trash-bg')) { swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; swipedCardElem.style.transform = 'translateX(0px)'; swipedCardElem = null; } }, { passive: true });
         
         async function processUrlParameters() { 
             const urlParams = new URLSearchParams(window.location.search); const action = urlParams.get('action'); 
@@ -2147,11 +2268,9 @@
 
             for (let i = 1; i <= daysInMonth; i++) {
                 let isSelected = (fdpSelected.getFullYear() === y && fdpSelected.getMonth() === m && fdpSelected.getDate() === i);
-                
                 let style = isSelected 
                     ? `background: #fff; color: #000; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin: 0 auto; box-shadow: 0 4px 10px rgba(255,255,255,0.2);` 
                     : `color: #fff; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin: 0 auto;`;
-                    
                 html += `<div style="padding: 2px 0;"><div style="${style}" onclick="selectFDPDate(${y}, ${m}, ${i})">${i}</div></div>`;
             }
             $('fdp-grid').innerHTML = html;
@@ -2166,14 +2285,10 @@
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
-                    
-                    let subTotal = 0;
-                    let finalModal = 0;
-                    let printUnit = String(item.u1 || 'Pcs').trim();
+                    let subTotal = 0; let finalModal = 0; let printUnit = String(item.u1 || 'Pcs').trim();
 
-                                        if (cartState[id].manualPrice !== undefined) {
+                    if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
-                        // ANTI-MUTANT MODAL: Menggunakan logika q >= iq yang presisi
                         if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
                             finalModal = Math.round(q * (item.hpp || 0));
                             printUnit = String(item.u2 || 'Grosir').trim();
@@ -2181,7 +2296,7 @@
                             finalModal = Math.round(q * (item.hpp || 0));
                         }
                     } else {
-                                                if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
                             if (q >= iq) {
                                 subTotal = Math.round(q * (item.p2 / iq)); 
                                 finalModal = Math.round(q * (item.hpp || 0));
@@ -2196,7 +2311,6 @@
                         }
                     }
                     grandTotal += subTotal;
-
                     itemsPrint.push({ id: item.id, n: item.n, q: q, u: printUnit, sub: subTotal, modal: finalModal, iq: item.iq, u1: item.u1, u2: item.u2 });
                 }
             });
@@ -2212,10 +2326,7 @@
                 $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;';
             };
 
-            showConfirm(msgHTML, "PRINT", "var(--mono-main)", () => {
-            }, "PRINT STRUK", () => {
-                resetPrintModalStyle(); 
-            });
+            showConfirm(msgHTML, "PRINT", "var(--mono-main)", () => {}, "PRINT STRUK", () => { resetPrintModalStyle(); });
 
             let btnOk = $('confirm-ok-btn');
             if (btnOk) {
@@ -2243,7 +2354,6 @@
 
             $('custom-alert').style.setProperty('align-items', 'flex-start', 'important');
             $('custom-alert').style.setProperty('padding-top', '15px', 'important'); 
-            
             $('alert-box').style.setProperty('margin-top', '0px', 'important');
             $('alert-title').style.setProperty('margin-bottom', '8px', 'important');
             $('alert-msg').style.setProperty('margin-top', '0px', 'important');
@@ -2304,11 +2414,10 @@
             items.forEach(i => {
                 let safeN = escapeHTML(i.n);
                 let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
-                
                 let qtyText = `${i.q}x${fmt(hrgSatuan)}`; 
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 
-                                if (i.iq !== undefined && iqNum > 1) {
+                if (i.iq !== undefined && iqNum > 1) {
                     let eU = formatShortUnit(i.u1);
                     let gU = formatShortUnit(i.u2);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
@@ -2350,15 +2459,14 @@
                 let totalModal = items.reduce((sum, i) => sum + (i.modal || 0), 0);
                 let newTrx = { id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: total, bayar: bayar, items: items, modal: totalModal };
                 
-                try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').add(newTrx); } catch (e) { console.warn("IDB History err", e); }
+                try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').add(newTrx); } catch (e) {}
 
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
                 hist.unshift(newTrx);
-                try {
-                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 2000)));
+                                try {
+                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50)));
                 } catch (e) {
-                    console.warn("Storage penuh! Auto-shrink riwayat ekstrem.");
-                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 300))); } catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); }
+                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 10))); } catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); }
                 }
 
                 cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
@@ -2382,7 +2490,6 @@
                 printFrame.contentWindow.focus();
                 printFrame.contentWindow.print();
                 tampilkanToast(isReprint ? "Struk Dicetak Ulang!" : "Struk Dicetak!", "var(--mono-main)");
-                
                 setTimeout(() => { isPrinting = false; }, 1000); 
             }, 200);
         }
@@ -2474,7 +2581,6 @@
                         }
                         let qVal = parseFloat(it.q) || 0;
                         let iqVal = Math.max(1, parseInt(it.iq) || 1);
-                        
                         let baseQ = (qVal % 1 !== 0 && iqVal > 1) ? Math.round(qVal * iqVal) : qVal;
                         
                         itemAgg[key].q += baseQ;
@@ -2504,15 +2610,12 @@
 
             $('hist-omzet').innerText = `Rp ${fmt(totalOmzet)}`;
             $('hist-laba').innerText = `Rp ${fmt(totalOmzet - totalModal)}`;
-            
             globalItemAgg = itemAgg; 
-
             $('hist-list').innerHTML = html || '<div style="text-align:center; color:#555; padding: 40px 0; font-size: 12px; font-weight: 600; letter-spacing:1px;">KOSONG</div>';
         }
 
         function openTop10() {
             let top10Arr = Object.values(globalItemAgg).sort((a,b) => b.normQ - a.normQ).slice(0, 10);
-            
             let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => {
                 let displayQty = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2); 
                 return `
@@ -2528,11 +2631,7 @@
             trackModal('top10');
         }
 
-        function closeTop10() {
-            untrackModal('top10');
-            $('top10-modal').style.display = 'none';
-            checkModalOpen(); 
-        } 
+        function closeTop10() { untrackModal('top10'); $('top10-modal').style.display = 'none'; checkModalOpen(); } 
 
         function printHistory(id) {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
@@ -2550,7 +2649,6 @@
                 };
                 return;
             }
-
             let itemsToPrint = Array.isArray(h.items) ? h.items : [{ n: "Item Historis", q: h.items, u: "Item", sub: h.total }];
             executePrint(h.total, h.bayar, itemsToPrint, h.ts, true);
         }
@@ -2562,7 +2660,6 @@
             const doWaHistory = (hData) => {
                 let d = new Date(hData.ts);
                 let dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).substring(2)} - ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-
                 let text = "```\n";
                 text += `Toko Kelontong\nPs. Sunggingan Lt. 2\n------------------------\n${dateStr}\n------------------------\n`;
                 
@@ -2570,25 +2667,28 @@
                     hData.items.forEach(i => {
                         let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                         let safeN = i.n.length > 20 ? i.n.substring(0, 19) + '…' : i.n;
-                        
                         let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
                         let iqNum = Math.max(1, parseInt(i.iq) || 1);
-                        
-                                               if (i.iq !== undefined && iqNum > 1) {
+                        if (i.iq !== undefined && iqNum > 1) {
                             let eU = formatShortUnit(i.u1);
                             let gU = formatShortUnit(i.u2);
                             let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                             if (nQ >= iqNum) {
- 
                                 let gQ = Math.floor(nQ / iqNum);
                                 let eQ = parseFloat((nQ % iqNum).toFixed(3));
                                 qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
                             } else { qtyText = `${i.q} ${eU}`; }
-                        } else if (i.u1) {
+                                               } else if (i.u1) {
                             qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
                         }
-
-                        text += `${safeN}\n${qtyText} = ${fmt(i.sub)}\n`;
+                        
+                        // Pelindung URL Limit WhatsApp: Batasi maksimal 40 item pertama yang dirinci
+                        if (text.length < 1300) {
+                            text += `${safeN}\n${qtyText} = ${fmt(i.sub)}\n`;
+                        } else if (text.length >= 1300 && text.indexOf('(... item lainnya)') === -1) {
+                            text += `\n*(... item lainnya dirangkum)*\n`;
+                        }
+                        
                     });
                 } else {
                     text += `Item Terjual\n${hData.items} Item = Rp ${fmt(hData.total)}\n`;
@@ -2596,7 +2696,6 @@
 
                 let kembali = hData.bayar - hData.total;
                 let labelKembali = kembali < 0 ? "KURANG   " : "KEMBALIAN";
-
                 text += `------------------------\n`;
                 text += `TOTAL      Rp ${fmt(hData.total)}\n`;
                 text += `BAYAR      Rp ${fmt(hData.bayar)}\n`;
@@ -2664,7 +2763,7 @@
                             const tx = idb.transaction('history', 'readwrite');
                             const store = tx.objectStore('history');
                             response.data.forEach(cloudTx => store.put(cloudTx));
-                        } catch(e) { console.warn("Gagal simpan cloud hist ke IDB"); }
+                        } catch(e) {}
                         
                         localHist.sort((a, b) => b.ts - a.ts);
                         localStorage.setItem('DB_WA_HISTORY', JSON.stringify(localHist.slice(0, 2000)));
@@ -2675,7 +2774,6 @@
                     }
                 } else {
                     showAlert(`<div style="margin-top:5px; font-size:11px; font-weight:700; color:#aaa; letter-spacing:0.5px;">TIDAK ADA RIWAYAT TRANSAKSI TGL ${dStr}</div>`, "KOSONG", "var(--danger)");
-                    
                     $('alert-title').style.fontStyle = 'italic';
                     setTimeout(() => {
                         const btn = $('alert-btns').querySelector('button');
@@ -2696,7 +2794,6 @@
 
         function clearHistoryLocal() {
             const msgWarning = "<span style='color:var(--danger); font-weight:bold;'>⚠️ AWAS DATA HILANG!</span><br><br>Pastikan Anda sudah melakukan<b style='color:#87CEFA;'> UPLOAD CLOUD </b>sebelum membersihkan riwayat ini.<br><br>Yakin hapus?";
-            
             showConfirm(msgWarning, "WARNING!", "var(--danger)", () => {
                 localStorage.removeItem('DB_WA_HISTORY');
                 try {
@@ -2714,9 +2811,7 @@
             try { 
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`; 
                 await initDB(); db = await loadAllFromIDB(); 
-                
                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
-                
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; } checkOfflineLedger();
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
@@ -2751,10 +2846,35 @@
             }); 
         }
 
-        let activeModals = [];
-        function trackModal(id) { activeModals.push(id); history.pushState({ modalOpen: true }, ''); }
-        function untrackModal(id) { const idx = activeModals.lastIndexOf(id); if (idx > -1) activeModals.splice(idx, 1); }
-        window.addEventListener('popstate', (e) => { if (activeModals.length > 0) { const topModal = activeModals.pop(); closeModalById(topModal); } });
+                let activeModals = [];
+        let isPoppingState = false; // Bendera pelindung infinite loop
+
+        function trackModal(id) { 
+            activeModals.push(id); 
+            history.pushState({ modalOpen: true }, ''); 
+        }
+        
+                let pendingBack = false;
+        function untrackModal(id) { 
+            const idx = activeModals.lastIndexOf(id); 
+            if (idx > -1) {
+                activeModals.splice(idx, 1); 
+                if (!isPoppingState && !pendingBack) {
+                    pendingBack = true;
+                    history.back();
+                    setTimeout(() => { pendingBack = false; }, 50);
+                }
+            }
+        }
+        
+        window.addEventListener('popstate', (e) => { 
+            if (activeModals.length > 0) { 
+                isPoppingState = true; 
+                const topModal = activeModals.pop(); 
+                closeModalById(topModal); 
+                setTimeout(() => { isPoppingState = false; }, 50); // Lepas bendera setelah DOM selesai
+            } 
+        });
         
         function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
