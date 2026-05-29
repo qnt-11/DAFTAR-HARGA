@@ -159,15 +159,12 @@
         function saveLedger() {
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
+                localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value);
                 if (db) {
                     try {
                         const tx = db.transaction([STORE_NAME], 'readwrite');
                         tx.objectStore(STORE_NAME).put({ id: 1, text: ledger.value });
-                    } catch (e) {
-                        localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value);
-                    }
-                } else { 
-                    localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value); 
+                    } catch (e) {}
                 }
             }, 500); 
         }
@@ -177,6 +174,12 @@
                 if (saveTimeout) clearTimeout(saveTimeout); 
                 if (ledger && ledger.value !== undefined) {
                     localStorage.setItem('DB_WA_OFFLINE_LEDGER', ledger.value);
+                    if (db) {
+                        try {
+                            const tx = db.transaction([STORE_NAME], 'readwrite');
+                            tx.objectStore(STORE_NAME).put({ id: 1, text: ledger.value });
+                        } catch (e) {}
+                    }
                 }
             }
         });
@@ -205,6 +208,7 @@
             const p = calcVal.split(/[\+\-\*\/]/);
             const curr = p[p.length - 1]; 
             
+            if (n === '.' && curr === '') n = '0.'; 
             if (n === '.' && curr.includes('.')) return; 
             if (curr === '0' && n !== '.') calcVal = calcVal.slice(0, -1) + n; 
             else if (curr === '0' && n === '0') return; 
