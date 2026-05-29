@@ -409,7 +409,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxrQBTCHO-u0QDK6dEdamF-CMFqsf30fTtCPgOGi43Ovh-sItWGBy-UqNZgAB17Z-gv/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -425,8 +425,8 @@
         let layoutCache = { listTop: 188, offsetBuffer: 135, lastUpdate: 0 };
         function invalidateLayoutCache() { layoutCache.lastUpdate = 0; }
         
-        let lastStartIndex = -1, lastEndIndex = -1, currentSearchReqId = 0, inputBuffer = '', bufferTimer;
-        let barcodeMap = new Map(), acronymMap = new Map(), physicalInputBuffer = "", lastKeyTime = 0;
+        let lastStartIndex = -1, lastEndIndex = -1, currentSearchReqId = 0;
+        let barcodeMap = new Map(), acronymMap = new Map();
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
         let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout, cartSaveTimer = null;
         const Picker = { sel: new Date(), targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
@@ -477,25 +477,7 @@
             window.scrollTo({ top: 0, behavior: 'instant' });
             applyFiltersAndRender();
         }
-
-        function promptEditQty(id, currentQ) {
-            let newQ = prompt("Masukkan jumlah (Qty) baru secara manual:", currentQ);
-            if (newQ !== null && newQ.trim() !== "") {
-                let parsed = parseFloat(newQ.replace(',', '.'));
-                if (!isNaN(parsed) && parsed > 0) {
-                    cartState[id] = { q: parsed };
-                    saveCartMem();
-                    renderCartUI();
-                } else if (parsed === 0) {
-                    delete cartState[id];
-                    saveCartMem();
-                    renderCartUI();
-                } else {
-                    tampilkanToast("Input tidak valid!", "var(--danger)");
-                }
-            }
-        }
-
+       
                 // --- START: MESIN LIVE INJECTOR KERANJANG ---
                 function handleLiveQty(id, el) {
             let val = el.value.replace(/,/g, '.');
@@ -561,10 +543,15 @@
             if(unitText) unitText.innerText = formatQtyBreakdown(q, iq, item.u1, item.u2);
         }
 
-        function updateGrandTotal() {
+                function updateGrandTotal() {
             let grandTotal = 0;
+            
+            // Surgical Fix: O(1) Lookup Map untuk menahan Brutal Stress Load
+            let dbLookup = {};
+            for (let i = 0; i < db.length; i++) dbLookup[db[i].id] = db[i];
+
             Object.keys(cartState).forEach(k => {
-                const item = db.find(x => String(x.id) === k);
+                const item = dbLookup[k];
                 if (item && !item.deleted) {
                     const q = cartState[k].q || 1;
                     const iq = Math.max(1, item.iq || 1);
@@ -1322,7 +1309,7 @@
         }
 
         function recordSearchLog(term) { 
-            const c = term.trim(); if(!c) return; 
+            const c = term.trim(); if(!c || c.toLowerCase() === 'constructor' || c.toLowerCase() === '__proto__') return; 
             recentSearches = [c, ...recentSearches.filter(t => t.toLowerCase() !== c.toLowerCase())].slice(0, 5); localStorage.setItem('DB_WA_RECENT', JSON.stringify(recentSearches)); 
             trendingSearches[c.toLowerCase()] = (trendingSearches[c.toLowerCase()] || 0) + 1; const keys = Object.keys(trendingSearches); 
             if (keys.length > 50) { let min = keys.reduce((a, b) => trendingSearches[a] < trendingSearches[b] ? a : b); delete trendingSearches[min]; } localStorage.setItem('DB_WA_TRENDING', JSON.stringify(trendingSearches)); 
@@ -1845,7 +1832,7 @@
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
                             
-                            if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36);
+                           if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
 
                             if (forceSync) {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
@@ -1968,7 +1955,7 @@
                             if (norm.b2 !== '' && norm.iq < 2) norm.b2 = ''; 
                             
                             if (!norm.id || norm.id === "undefined" || norm.id === "") {
-                                norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36);
+                                norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
                             }
 
                             let isCollision = false;
