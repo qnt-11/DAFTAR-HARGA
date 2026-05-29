@@ -97,23 +97,19 @@
             const currentText = document.getElementById('offline-ledger').value;
             const executeReload = () => triggerReload("Memuat Ulang...");
 
-            if (currentText && currentText.trim() !== '') {
-                if (db) {
-                    try {
-                        const tx = db.transaction([STORE_NAME], 'readwrite');
-                        tx.objectStore(STORE_NAME).put({ id: 1, text: currentText });
-                        
-                        tx.oncomplete = executeReload;
-                        tx.onerror = executeReload;
-                    } catch (e) {
-                        localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText);
-                        executeReload();
-                    }
-                } else {
+            if (db) {
+                try {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).put({ id: 1, text: currentText });
+                    
+                    tx.oncomplete = executeReload;
+                    tx.onerror = executeReload;
+                } catch (e) {
                     localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText);
                     executeReload();
                 }
             } else {
+                localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText);
                 executeReload();
             }
         });
@@ -134,7 +130,7 @@
         };
         requestDB.onerror = function() { 
             const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-            if (t) ledger.value = t; 
+            if (t && ledger.value === '') ledger.value = t; 
         };
 
         function loadLedger() {
@@ -143,11 +139,11 @@
                 const store = tx.objectStore(STORE_NAME);
                 const req = store.get(1);
                 req.onsuccess = function() { 
-                    if (req.result && req.result.text) { 
+                    if (req.result && req.result.text && ledger.value === '') { 
                         ledger.value = req.result.text; 
-                    } else {
+                    } else if (!req.result || !req.result.text) {
                         const fallbackText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-                        if (fallbackText) {
+                        if (fallbackText && ledger.value === '') {
                             ledger.value = fallbackText;
                             saveLedger(); 
                         }
@@ -155,7 +151,7 @@
                 };
             } catch (error) {
                 const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-                if (t) ledger.value = t; 
+                if (t && ledger.value === '') ledger.value = t; 
             }
         }
 
