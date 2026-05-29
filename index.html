@@ -1208,16 +1208,18 @@
                             else if (terms.some(term => n.split(' ').some(w => w.startsWith(term)))) score = 50;
                             else score = 20;
                         } else {
-                            if (terms.length <= 2 && textQuery.length > 3) {
+                                                        if (terms.length <= 2 && textQuery.length > 2) {
+                                // Rasio dinamis: 40% dari panjang kata, maksimal 5 huruf typo
+                                let maxTypo = Math.min(5, Math.floor(textQuery.length * 0.4));
                                 let words = n.split(' '); let bestDist = 99;
                                 for(let w of words) {
-                                    if(Math.abs(w.length - textQuery.length) <= 2) {
-                                        let d = levenshtein(textQuery, w, 2);
+                                    if(Math.abs(w.length - textQuery.length) <= maxTypo) {
+                                        let d = levenshtein(textQuery, w, maxTypo);
                                         if(d < bestDist) bestDist = d;
                                     }
                                 }
-                                let acrDist = levenshtein(textQuery, t, 2);
-                                if(bestDist <= 2 || (acrDist <= 1 && t.length >= 2)) {
+                                let acrDist = levenshtein(textQuery, t, 2); // Akronim tetap ketat (max 1-2)
+                                if(bestDist <= maxTypo || (acrDist <= 1 && t.length >= 2)) {
                                     isMatch = true; score = 10 - Math.min(bestDist, acrDist); 
                                 }
                             }
