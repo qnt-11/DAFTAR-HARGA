@@ -132,8 +132,16 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-        // Mitigasi Lie-Fi: Circuit Breaker Timeout 4 Detik agar UI tidak White Screen
-        const pFetch = fetch(req);
+        // Mitigasi Lie-Fi & Pembaruan Cache Siluman (Anti-Bloat Param)
+        const pFetch = fetch(req).then(async (res) => {
+          if (res && res.ok) {
+            try {
+              const cache = await caches.open(CACHE_CORE);
+              await cache.put(cleanReqUrl, res.clone()); 
+            } catch (err) {}
+          }
+          return res;
+        });
         pFetch.catch(() => {}); // Cegah Unhandled Rejection Leak
         
         const fetchPromise = Promise.race([
@@ -230,7 +238,7 @@ self.addEventListener('sync', event => {
 
 async function processOfflineBackup() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('HargaDB_Pro', 3);
+    const req = indexedDB.open('HargaDB_Pro'); 
     req.onsuccess = (e) => {
       const idb = e.target.result;
       if (!idb.objectStoreNames.contains('sync-outbox')) return resolve();
@@ -244,8 +252,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          // GANTI URL INI DENGAN URL DEPLOY GOOGLE APPS SCRIPT ANDA
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxxQqHYzg5lZpswUYvFgKmR70p8jOcF9psrRHPb0h1s0r1iMEW7hkKrd8ZhPIpWkgBQ/exec";
           
           // 1. Eksekusi Backup Data Barang
           const resData = await fetch(CLOUD_API, {
