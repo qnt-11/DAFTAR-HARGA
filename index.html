@@ -1792,7 +1792,27 @@
 
                 updateMaps(); 
                 hideMod(); 
+                let savedItem = activeId ? db.find(x => String(x.id) === String(activeId)) : db[db.length - 1];
+                if (workerResult !== null && savedItem) {
+                    if (activeId) {
+                        let wIdx = workerResult.findIndex(x => String(x.id) === String(activeId));
+                        if (wIdx !== -1) workerResult[wIdx] = savedItem;
+                    } else {
+                        workerResult.unshift(savedItem); 
+                    }
+                }
+
                 applyFiltersAndRender(); 
+    
+                    if (isCartMode) {
+                    renderCartUI();
+                    updateGrandTotal();
+                }
+                if (searchInput.value.trim() !== '') {
+                    currentSearchReqId++; // Bunuh antrean pencarian lama yang membawa harga usang
+                    handleSearchLogic(searchInput.value.trim()); // Paksa worker membaca memori yang baru di-update
+                }
+
                 tampilkanToast("Barang Tersimpan!");
 
             } catch (err) { 
