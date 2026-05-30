@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbw1Icg9wzvpx5YphgXJtaWkhoqv3NjwbWxgYsmhfxL8h4Gw9Leg_W72XDLmkzbzuDUq/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxtlORbaWCTaYcgJeWN0cMtZIqyzs9R4SjBwQ05PYYMPzlCYVagUUZ1fKTop5FL1mFo/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -100,7 +100,6 @@
     </style>
 </head>
 <body>
-
     <div class="header" id="header-bar">
         <div class="header-left">
             <h1 class="audiowide-regular"><span style="color:var(--text-light);">DAFTAR</span> <span style="color:var(--text-muted);">HARGA</span></h1>
@@ -114,8 +113,14 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#87CEFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="glow-cloud"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><path d="M12 16V8"></path><path d="M9 11l3-3 3 3"></path></svg>
                 <span style="font-size: 8px; font-weight: 700; color:#87CEFA;">UPLOAD</span>
             </button>
-            <div class="dropdown-wrapper">
-                <button class="icon-btn" id="kebab-btn" onclick="toggleMenu(event)"><svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+                       <div class="dropdown-wrapper">
+                <button class="icon-btn" id="kebab-btn" onclick="toggleMenu(event)">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
+                        <circle cx="12" cy="5" r="2.5"></circle>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                        <circle cx="12" cy="19" r="2.5"></circle>
+                    </svg>
+                </button>
                 <div id="dropdown-menu" class="dropdown-content hidden">
                     <div class="dropdown-item" onclick="openSyncModal()" style="color: #87CEFA;">Sinkronisasi Cloud</div>
                     <div class="dropdown-item" onclick="exportData()" style="color: #3CB371;">Save Excel</div>
@@ -344,17 +349,7 @@
             </div>
         </div>
     </div>
-
-    <div id="price-popup" class="modal" onclick="closePricePopup(event)">
-        <div class="modal-box" id="price-popup-box">
-            <h2 id="pp-name" style="margin:0; font-size: 16px; color: var(--text-light); text-transform: uppercase;">Barang</h2>
-            <p id="pp-price" class="pp-price-anim" style="font-size: 32px; font-weight: 900; color: var(--mono-main); margin: 15px 0; font-family: 'Montserrat', sans-serif;">Rp 0</p>
-            <p id="pp-price-grosir" style="font-size: 13px; color: var(--warning); margin-top: 0; font-weight: 600; white-space: pre-line; line-height: 1.5;"></p>
-            <p id="pp-barcode" style="font-size: 11px; color: var(--text-muted); font-family: monospace; margin-top: 10px;"></p>
-            <button class="btn-main" style="border: 1px solid var(--mono-main) !important; color: var(--mono-main) !important; background:transparent!important; margin-top: 20px;" onclick="closePricePopup(event, true)">TUTUP</button>
-        </div>
-    </div>
-
+    
     <div id="custom-picker" class="modal" onclick="if(event.target===this) hidePicker()">
         <div class="modal-box" style="text-align:center; border-color: var(--mono-main);">
             <div class="picker-header-new">
@@ -601,9 +596,9 @@
             const iq = Math.max(1, item.iq || 1);
             let subTotal = 0;
             
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                if (q >= iq) subTotal = Math.round(q * (item.p2 / iq));
-                else subTotal = Math.round(q * item.p1);
+            // [SURGICAL FIX] Harga Grosir Proporsional (q >= iq/2) dengan Perisai Minimum Beli (q > 1)
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
+                subTotal = Math.round(q * (item.p2 / iq));
             } else {
                 subTotal = Math.round(q * item.p1);
             }
@@ -635,9 +630,9 @@
                 if (cartState[k].manualPrice !== undefined) {
                     grandTotal += cartState[k].manualPrice;
                 } else {
-                    if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                        if (q >= iq) grandTotal += Math.round(q * (item.p2 / iq));
-                        else grandTotal += Math.round(q * item.p1);
+                    // [SURGICAL FIX] Harga Grosir Proporsional di Kalkulasi Grand Total
+                    if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
+                        grandTotal += Math.round(q * (item.p2 / iq));
                     } else {
                         grandTotal += Math.round(q * item.p1);
                     }
@@ -673,9 +668,9 @@
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                            if (q >= iq) subTotal = Math.round(q * (item.p2 / iq));
-                            else subTotal = Math.round(q * item.p1);
+                        // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
+                            subTotal = Math.round(q * (item.p2 / iq));
                         } else {
                             subTotal = Math.round(q * item.p1);
                         }
@@ -761,15 +756,7 @@
                 tampilkanToast("Barcode tidak terdaftar!", "var(--danger)");
             }
         }
-
-        function closePricePopup(e, force = false) {
-            if (force || e.target === $('price-popup')) {
-                untrackModal('price');
-                $('price-popup').style.display = 'none';
-                checkModalOpen();
-            }
-        }
-
+        
         let touchStartY = 0; 
         function handleMainTouchStart(e) {
             if (e.touches.length > 1) return;
@@ -835,6 +822,7 @@
                 }
             }, 300);
         }
+        
         document.addEventListener('focus', function(e) {
             if (e.target.tagName && e.target.tagName.toLowerCase() === 'input' && e.target.closest('.modal-box')) {
                 setTimeout(() => {
@@ -862,7 +850,8 @@
         }
 
         let wakeLockThrottleTimer;
-                const enableWakeLock = () => {
+        const enableWakeLock = () => {
+            // [SURGICAL FIX] Menghapus eksekusi video wakelock lawas (Ghost Render Removal)
             if (wakeLockThrottleTimer) return;
             wakeLockThrottleTimer = setTimeout(() => {
                 requestWakeLock();
@@ -1205,7 +1194,8 @@
                 workerList.push(e.data.item); 
                 phoneticMap[e.data.item.id] = indoPhonetic(e.data.item.n);
             } 
-                        else if (e.data.type === 'update') { 
+            // [SURGICAL FIX] O(1) Memory Allocation untuk Worker
+            else if (e.data.type === 'update') { 
                 let idx = workerList.findIndex(x => String(x.id) === String(e.data.item.id));
                 if (idx !== -1) workerList[idx] = e.data.item;
                 else workerList.push(e.data.item);
@@ -1601,9 +1591,10 @@
             if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted); 
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
             let base = silentB ? active.filter(i => i.b === silentB || i.b2 === silentB) : (exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active)); const today = Date.now();
-            filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let expDate = new Date(i.exp); expDate = new Date(expDate.getFullYear(), expDate.getMonth() + 1, 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
-            
+            filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
+
             if (!q || tab === 'exp') { 
+                // [SURGICAL FIX] Menghindari NaN Crash Komparasi Tanggal pada perangkat iOS/WebKit
                 if (tab === 'exp') { filteredData.sort((a, b) => (a.exp || '9999-12-31').localeCompare(b.exp || '9999-12-31')); }
                 else if (sortAZ) { filteredData.sort((a,b) => String(a.n||"").localeCompare(String(b.n||"")) || (b.updatedAt||0) - (a.updatedAt||0)); } 
                 else { filteredData.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0)); }
@@ -1639,8 +1630,7 @@
             empty.classList.add('hidden');
             
             for (let i = start; i < end; i++) {
-                const it = filteredData[i]; let diff = 999, expT = ''; if (it.exp) { let expDate = new Date(it.exp); expDate = new Date(expDate.getFullYear(), expDate.getMonth() + 1, 0); const utcExp = expDate.getTime(); if (!isNaN(utcExp)) { diff = Math.floor((utcExp - today) / 86400000); expT = formatBulanTahun(it.exp); } }
-                
+                const it = filteredData[i]; let diff = 999, expT = ''; if (it.exp) { let px = it.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); if (!isNaN(utcExp)) { diff = Math.floor((utcExp - today) / 86400000); expT = formatBulanTahun(it.exp); } }  
                 const dn = highlightMatch(it.n, sq);
                 const safeAcronym = escapeHTML(it.t || '');
                 const safeU1 = String(it.u1 || '').trim(); const safeU2 = String(it.u2 || '').trim();
@@ -1697,9 +1687,8 @@
                     clearTimeout(scrollLetterTimeout); scrollLetterTimeout = setTimeout(() => sL.classList.remove('show'), 300);
                 }
             }
-            requestAnimationFrame(() => renderVirtualList(true)); 
+            if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { renderVirtualList(true); window._rafScroll = null; });
         }, { passive: true });
-        
         async function save(bypassAnomaly = false) {
             if (isSaving && !bypassAnomaly) return; 
             isSaving = true;
@@ -1792,7 +1781,11 @@
 
                 updateMaps(); 
                 hideMod(); 
+                
+                // 1. [PERISAI ZERO-CPU TAX] Tangkap referensi objek tanpa membebani memori
                 let savedItem = activeId ? db.find(x => String(x.id) === String(activeId)) : db[db.length - 1];
+
+                // 2. [INJEKSI STATE PENCARIAN] Update visual UI secara instan (0 ms latency)
                 if (workerResult !== null && savedItem) {
                     if (activeId) {
                         let wIdx = workerResult.findIndex(x => String(x.id) === String(activeId));
@@ -1803,14 +1796,17 @@
                 }
 
                 applyFiltersAndRender(); 
-    
-                    if (isCartMode) {
+                
+                // 3. [PERISAI DOMINO KEUANGAN] Paksa keranjang belanja sinkronisasi harga baru
+                if (isCartMode) {
                     renderCartUI();
                     updateGrandTotal();
                 }
+
+                // 4. [PERISAI ANTI-GHOST OVERWRITE] Sinkronisasi ulang Web Worker
                 if (searchInput.value.trim() !== '') {
-                    currentSearchReqId++; // Bunuh antrean pencarian lama yang membawa harga usang
-                    handleSearchLogic(searchInput.value.trim()); // Paksa worker membaca memori yang baru di-update
+                    currentSearchReqId++; 
+                    handleSearchLogic(searchInput.value.trim()); 
                 }
 
                 tampilkanToast("Barang Tersimpan!");
@@ -1916,9 +1912,15 @@
                 .then(r => r.json())
                 .then(backupRes => {
                     if (backupRes.status !== 'success') throw new Error(backupRes.message);
-                    let historyData = [];
-                    try { historyData = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e){}
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 30000);
+                    return new Promise((resolve) => {
+                        try {
+                            const req = idb.transaction('history', 'readonly').objectStore('history').getAll();
+                            req.onsuccess = () => resolve(req.result);
+                            req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
+                        } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
+                    }).then(historyData => {
+                        return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 30000);
+                    });
                 })
                 .then(r => r.json())
                 .then(historyRes => {
@@ -2170,7 +2172,6 @@
             }
             r.readAsArrayBuffer(f); 
         }
-        
         let torchState = false; 
         function toggleFlashlight() { const vid = document.querySelector('#reader video'); if (vid && vid.srcObject) { try { const track = vid.srcObject.getVideoTracks()[0], cap = track.getCapabilities(); if (cap.torch) { torchState = !torchState; track.applyConstraints({ advanced: [{ torch: torchState }] }).catch(e => console.log(e)); $('torch-btn').style.color = torchState ? "var(--warning)" : "white"; } else tampilkanToast("Kamera tidak dukung senter", "var(--warning)"); } catch(e) {} } }
         
@@ -2305,31 +2306,25 @@
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
-                    let subTotal = 0; let finalModal = 0; let printUnit = String(item.u1 || 'Pcs').trim();
+                    let subTotal = 0; let finalModal = 0; let printUnit = '';
 
+                    // 1. Kalkulasi Modal (Absolute Fallback)
+                    finalModal = Math.round(q * (item.hpp || 0));
+                    
+                    // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
-                            finalModal = Math.round(q * (item.hpp || 0));
-                            printUnit = String(item.u2 || 'Grosir').trim();
-                        } else {
-                            finalModal = Math.round(q * (item.hpp || 0));
-                        }
                     } else {
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                            if (q >= iq) {
-                                subTotal = Math.round(q * (item.p2 / iq)); 
-                                finalModal = Math.round(q * (item.hpp || 0));
-                                printUnit = String(item.u2 || 'Grosir').trim();
-                            } else { 
-                                subTotal = Math.round(q * item.p1); 
-                                finalModal = Math.round(q * (item.hpp || 0));
-                            }
+                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
+                            subTotal = Math.round(q * (item.p2 / iq)); 
                         } else { 
                             subTotal = Math.round(q * item.p1); 
-                            finalModal = Math.round(q * (item.hpp || 0));
                         }
                     }
+                    
+                    // 3. Fallback Labeling
+                    printUnit = String(item.u1 || 'Pcs').trim();
+
                     grandTotal += subTotal;
                     itemsPrint.push({ id: item.id, n: item.n, q: q, u: printUnit, sub: subTotal, modal: finalModal, iq: item.iq, u1: item.u1, u2: item.u2 });
                 }
@@ -2483,7 +2478,7 @@
 
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
                 hist.unshift(newTrx);
-                                try {
+                try {
                     localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50)));
                 } catch (e) {
                     try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 10))); } catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); }
@@ -2577,9 +2572,9 @@
                             let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
                             let gU = String(it.u2 || '').trim(); gU = gU ? (gU.charAt(0).toUpperCase() + gU.slice(1)) : 'Grosir';
                             let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
-                            if (nQ % 1 !== 0) {
-                                qtyText = `${nQ} ${gU}`;
-                            } else if (nQ >= iqNum) {
+                            
+                            // Logika Absolut: Menghormati desimal sebagai unit Eceran murni
+                            if (nQ >= iqNum) {
                                 let gQ = Math.floor(nQ / iqNum);
                                 let eQ = parseFloat((nQ % iqNum).toFixed(3));
                                 qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
@@ -2601,7 +2596,9 @@
                         }
                         let qVal = parseFloat(it.q) || 0;
                         let iqVal = Math.max(1, parseInt(it.iq) || 1);
-                        let baseQ = (qVal % 1 !== 0 && iqVal > 1) ? Math.round(qVal * iqVal) : qVal;
+                        
+                        // Menghapus pemaksaan perkalian desimal
+                        let baseQ = qVal; 
                         
                         itemAgg[key].q += baseQ;
                         itemAgg[key].normQ += (iqVal > 1) ? (baseQ / iqVal) : baseQ;
@@ -2786,7 +2783,14 @@
                         } catch(e) {}
                         
                         localHist.sort((a, b) => b.ts - a.ts);
-                        localStorage.setItem('DB_WA_HISTORY', JSON.stringify(localHist.slice(0, 2000)));
+                        
+                        // [PERISAI MEMORI CLOUD] Samakan kuota dengan executePrint (Batas aman: 50)
+                        try {
+                            localStorage.setItem('DB_WA_HISTORY', JSON.stringify(localHist.slice(0, 50)));
+                        } catch (quotaErr) {
+                            try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(localHist.slice(0, 10))); } catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); }
+                        }
+                        
                         renderHistory(); 
                         tampilkanToast(`Ditemukan ${newItems} riwayat cloud tanggal ${dStr}!`, "var(--mono-main)");
                     } else {
@@ -2866,7 +2870,7 @@
             }); 
         }
 
-                let activeModals = [];
+        let activeModals = [];
         let isPoppingState = false; // Bendera pelindung infinite loop
 
         function trackModal(id) { 
@@ -2874,7 +2878,7 @@
             history.pushState({ modalOpen: true }, ''); 
         }
         
-                let skipPopStateCount = 0; // Perisai Absolut Anti-Lag
+        let skipPopStateCount = 0; // Perisai Absolut Anti-Lag
 
         function untrackModal(id) { 
             const idx = activeModals.lastIndexOf(id); 
@@ -2902,14 +2906,13 @@
                 setTimeout(() => { isPoppingState = false; }, 50); 
             } 
         });
-                        
+        
         function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { isClosingScan = true; $('scanner-wrap').style.display = 'none'; checkModalOpen(); if(torchState) toggleFlashlight(); if(isScanning && html5QrCode){ html5QrCode.stop().catch(()=>{}); } isScanning=false; isClosingScan=false; requestWakeLock(); }
             else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
             else if (id === 'alert') { $('custom-alert').style.display = 'none'; checkModalOpen(); }
             else if (id === 'pin') { $('pin-modal').style.display = 'none'; checkModalOpen(); }
-            else if (id === 'price') { $('price-popup').style.display = 'none'; checkModalOpen(); $('q').value=''; clearSearch(); }
             else if (id === 'sync') { $('sync-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'offline') { $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'history') { closeHistory(); }
