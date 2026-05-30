@@ -144,14 +144,14 @@
                 };
 
                 req.onsuccess = function() { 
-                    if (req.result && req.result.text && ledger.value === '') { 
+                    if (req.result && typeof req.result.text === 'string' && ledger.value === '') { 
                         ledger.value = req.result.text; 
-                    } else if (!req.result || !req.result.text) {
+                    } else if (!req.result || typeof req.result.text !== 'string') {
                         fallbackLoader();
                     }
                 };
                 
-                req.onerror = fallbackLoader; // INJEKSI PERISAI ERROR HANDLING
+                req.onerror = fallbackLoader; 
 
             } catch (error) {
                 const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
@@ -255,8 +255,9 @@
                 isResultDisplayed = true; 
                 updateDisplay();
             } catch (e) { 
+                calcVal = '0';
+                isResultDisplayed = true;
                 display.innerText = "Error"; 
-                setTimeout(calcClear, 1000); 
             }
         }
 
