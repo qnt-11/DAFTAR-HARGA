@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '15.8'; 
+const APP_VERSION = '15.9'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -48,7 +48,6 @@ async function manageStorage() {
   if (navigator.storage && navigator.storage.estimate) {
     try {
       const quota = await navigator.storage.estimate();
-      // Mitigasi Bug Kritis: Mencegah NaN Crash jika API Quota diblokir browser
       if (quota.quota && (quota.usage / quota.quota > 0.8)) {
         await trimCache(CACHE_DYNAMIC, 20); 
       }
@@ -132,7 +131,6 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-        // Mitigasi Lie-Fi & Pembaruan Cache Siluman (Anti-Bloat Param)
         const pFetch = fetch(req).then(async (res) => {
           if (res && res.ok) {
             try {
@@ -142,7 +140,8 @@ self.addEventListener('fetch', event => {
           }
           return res;
         });
-        pFetch.catch(() => {}); // Cegah Unhandled Rejection Leak
+        pFetch.catch(() => {});
+        event.waitUntil(pFetch); // Mitigasi Lie-Fi: Menjaga background download tetap hidup
         
         const fetchPromise = Promise.race([
           pFetch,
@@ -181,14 +180,15 @@ self.addEventListener('fetch', event => {
       caches.match(req).then(cachedRes => {
         if (cachedRes) return cachedRes; 
         
-        const fetchPromiseCDN = fetch(req).then(res => {
+        const fetchPromiseCDN = fetch(req).then(async res => {
           const contentType = res.headers.get('content-type') || '';
           if (res.ok && !contentType.includes('text/html')) {
             const resClone = res.clone();
-            caches.open(CACHE_CDN).then(async cache => { 
+            try {
+              const cache = await caches.open(CACHE_CDN);
               await cache.put(req, resClone); 
               await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
-            }).catch(() => console.warn('[SW] Gagal simpan CDN lokal'));
+            } catch (err) { console.warn('[SW] Gagal simpan CDN lokal', err); }
           }
           return res;
         }).catch(() => new Response('', { status: 503 }));
@@ -202,17 +202,16 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-  const fetchPromiseDyn = fetch(req).then(res => {
+  const fetchPromiseDyn = fetch(req).then(async res => {
     const contentType = res.headers.get('content-type') || '';
     if (res.ok && !contentType.includes('text/html')) {
       const resClone = res.clone();
-      caches.open(CACHE_DYNAMIC).then(async cache => {
+      try {
+        const cache = await caches.open(CACHE_DYNAMIC);
         const cleanUrl = req.url.split('?')[0];
-        try {
-          await cache.put(cleanUrl, resClone); 
-          await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-        } catch (err) {}
-      });
+        await cache.put(cleanUrl, resClone); 
+        await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+      } catch (err) {}
     }
     return res;
   }).catch(() => null);
