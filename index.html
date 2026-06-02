@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbz8n4Tsqe0g2cWqcjMnOxq_tnrtKQ7ncgV1U2IifssgFzjMxwqzM8hmX2OzF39iWWaK/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyZNKXnZYnEOGg2osbtkhcTVCJEjzUhYn618UWqFu_7mSj_DfOpnCaHX_0_Qy6GUQA8/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -727,9 +727,36 @@
             });
         }
 
-        function formatShortUnit(unit) {
+                function formatShortUnit(unit) {
             if (!unit) return '';
-            return String(unit).trim().charAt(0).toUpperCase() + String(unit).trim().slice(1);
+            let str = String(unit).trim().toLowerCase();
+            if (str === '') return '';
+            
+            const dict = {
+                'renceng': 'Rcg', 'renteng': 'Rcg',
+                'bungkus': 'Bks',
+                'sachet': 'Sct', 'saset': 'Sct',
+                'karton': 'Ktn',
+                'lusin': 'Lsn',
+                'botol': 'Btl',
+                'kaleng': 'Klg',
+                'strip': 'Str',
+                'lembar': 'Lbr',
+                'slop': 'Slp',
+                'gelas': 'Gls'
+            };
+            
+            if (dict[str]) return dict[str];
+            
+            if (str.length <= 3) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+            
+            let firstChar = str.charAt(0);
+            let restStr = str.slice(1).replace(/[aiueo]/g, '');
+            let result = (firstChar + restStr).substring(0, 3);
+            
+            return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
         function formatQtyBreakdown(q, iq, u1, u2) {
@@ -966,11 +993,10 @@
             let words = String(name).toLowerCase().replace(/[0-9]/g, '').replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 0 && !/^(dan|yg|pcs|isi|dengan|rasa|untuk)$/.test(w)); 
             let numMatch = String(name).toLowerCase().match(/\d+/g); 
             let numbers = numMatch ? numMatch.join('') : ''; 
-            if (words.length === 0) return "xxx" + numbers; 
-            
-            let tryAcr = words.length === 1 ? 
+            let tryAcr = words.length === 0 ? "xxx" + numbers : 
+                (words.length === 1 ? 
                 (words[0].replace(/[aeiou]/g, '').length >= 2 ? words[0].replace(/[aeiou]/g, '').substring(0, 3) : words[0].substring(0, 3)) + numbers : 
-                words.slice(0, 5).map(w => w[0]).join('') + numbers; 
+                words.slice(0, 5).map(w => w[0]).join('') + numbers); 
                 
             if (!isAcronymUsed(tryAcr, excludeId, tempSet)) return tryAcr; 
             let c = 2; 
@@ -1469,7 +1495,14 @@
             handleSearchInput(); 
         });
 
-        searchInput.addEventListener('focus', showSearchSuggestions);
+             searchInput.addEventListener('focus', () => {
+            document.body.classList.add('search-focus');
+            showSearchSuggestions();
+        });
+        
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => document.body.classList.remove('search-focus'), 150);
+        });
         
         function clearSearch() { 
             searchInput.value = ''; 
@@ -2424,6 +2457,11 @@
             let d = timestamp ? new Date(timestamp) : new Date();
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
+                        // 1. Kalkulasi Ekstra untuk Standar Supermarket
+            let receiptNo = "TRX-" + d.getTime().toString().slice(-8); // Generate No Struk
+            let totalItemCount = 0;
+
+            // 2. Render Header & Meta Standar Supermarket
             let rawHTML = `
             <div style="width: 58mm; margin: 0 auto; padding: 0; color: #000; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.2;">
                 <div style="text-align: center; margin-bottom: 4px;">
@@ -2431,56 +2469,75 @@
                     Ps. Sunggingan Lt. 2<br>
                     Telp: 082226334999
                 </div>
-                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
                 <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
-                    <tr>
-                        <td style="text-align:left;">${dateStr}</td>
-                        <td style="text-align:right;">Kasir: Barla${isReprint ? ' [R]' : ''}</td>
-                    </tr>
+                    <tr><td style="text-align:left; width: 40px;">No</td><td style="text-align:left;">: ${receiptNo}</td></tr>
+                    <tr><td style="text-align:left;">Tgl</td><td style="text-align:left;">: ${dateStr}</td></tr>
+                    <tr><td style="text-align:left;">Kasir</td><td style="text-align:left;">: Dona${isReprint ? ' [R]' : ''}</td></tr>
                 </table>
-                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
             `;
 
+                        // 3. Render Daftar Barang dengan Indentasi Ritel
             items.forEach(i => {
-                let safeN = escapeHTML(i.n);
-                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
-                let qtyText = `${i.q}x${fmt(hrgSatuan)}`; 
+                let safeN = escapeHTML(i.n).toUpperCase(); // Nama selalu kapital di struk ritel
+                                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
+                let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                 
+                // Menghitung jumlah item berdasarkan bentuk fisik kemasan transaksi (Package-Based Counting)
+                if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                    totalItemCount += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
+                } else {
+                    totalItemCount += nQ || 1;
+                }
+
+                // Membungkus nama satuan ke dalam unitString agar tidak tertimpa
+                let unitString = "";
                 if (i.iq !== undefined && iqNum > 1) {
-                    let eU = formatShortUnit(i.u1);
-                    let gU = formatShortUnit(i.u2);
-                    let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
+                    let eU = formatShortUnit(i.u1) || 'Satuan';
+                    let gU = formatShortUnit(i.u2) || 'Grosir';
                     if (nQ >= iqNum) {
                         let gQ = Math.floor(nQ / iqNum);
                         let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                        qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                    } else { qtyText = `${i.q} ${eU}`; }
+                        unitString = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                    } else { unitString = `${i.q} ${eU}`; }
                 } else if (i.u1) { 
-                    qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
+                    unitString = `${i.q} ${formatShortUnit(i.u1)}`;
+                } else {
+                    unitString = `${i.q}`;
                 }
+                
+                // Menggabungkan Qty, Satuan, dan Harga Satuan
+                let qtyText = `${unitString} x ${fmt(hrgSatuan)}`;
 
                 rawHTML += `
                 <div style="margin-bottom: 4px;">
-                    <div style="text-align: left;">${safeN}</div>
+                    <div style="text-align: left; font-weight: bold;">${safeN}</div>
                     <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
                         <tr>
-                            <td style="text-align: left; padding: 0 0 0 6px; width: 60%;">${escapeHTML(qtyText)}</td>
+                            <td style="text-align: left; padding: 0 0 0 10px; width: 60%;">${escapeHTML(qtyText)}</td>
                             <td style="text-align: right; padding: 0; width: 40%;">${fmt(i.sub)}</td>
                         </tr>
                     </table>
                 </div>`;
             });
 
+            // 4. Render Summary & Footer Enterprise
             rawHTML += `
                 <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+                <div style="text-align: left; margin-bottom: 4px;">Total Item: ${Math.round(totalItemCount * 1000) / 1000}</div>
+                <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
                 <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
-                    <tr><td style="text-align:left; padding: 1px 0;">TOTAL</td><td style="text-align:right; padding: 1px 0;">${fmt(total)}</td></tr>
-                    <tr><td style="text-align:left; padding: 1px 0;">BAYAR</td><td style="text-align:right; padding: 1px 0;">${fmt(bayar)}</td></tr>
-                    <tr><td style="text-align:left; padding: 1px 0;">${labelKembali}</td><td style="text-align:right; padding: 1px 0;">${valKembali}</td></tr>
+                    <tr><td style="text-align:left; padding: 1px 0;">Total Belanja</td><td style="text-align:right; padding: 1px 0;">Rp</td><td style="text-align:right; padding: 1px 0;">${fmt(total)}</td></tr>
+                    <tr><td style="text-align:left; padding: 1px 0;">Tunai</td><td style="text-align:right; padding: 1px 0;">Rp</td><td style="text-align:right; padding: 1px 0;">${fmt(bayar)}</td></tr>
+                    <tr><td style="text-align:left; padding: 1px 0;">${labelKembali}</td><td style="text-align:right; padding: 1px 0;">Rp</td><td style="text-align:right; padding: 1px 0;">${valKembali}</td></tr>
                 </table>
-                <div style="border-bottom: 1px dashed #000; margin: 4px 0 6px 0;"></div>
-                <div style="text-align: center; font-family: inherit; font-size: inherit;">
+                <div style="border-bottom: 2px dashed #000; margin: 4px 0 6px 0;"></div>
+                <div style="text-align: center; font-family: inherit; font-size: 10px; margin-bottom: 6px;">                 
+                    Simpan struk sebagai bukti beli
+                </div>
+                <div style="text-align: center; font-family: inherit; font-size: 11px;">
                     Terima Kasih<br>Selamat Belanja Kembali
                 </div>
             </div>`;
@@ -2698,51 +2755,77 @@
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
-            const doWaHistory = (hData) => {
+                        const doWaHistory = (hData) => {
                 let d = new Date(hData.ts);
-                let dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).substring(2)} - ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                let text = "```\n";
-                text += `Toko Kelontong\nPs. Sunggingan Lt. 2\n------------------------\n${dateStr}\n------------------------\n`;
+                let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
-                if (Array.isArray(hData.items)) {
-                    hData.items.forEach(i => {
-                        let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
-                        let safeN = i.n.length > 20 ? i.n.substring(0, 19) + '…' : i.n;
-                        let qtyText = `${i.q}x${fmt(hrgSatuan)}`;
-                        let iqNum = Math.max(1, parseInt(i.iq) || 1);
-                        if (i.iq !== undefined && iqNum > 1) {
-                            let eU = formatShortUnit(i.u1);
-                            let gU = formatShortUnit(i.u2);
-                            let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
-                            if (nQ >= iqNum) {
-                                let gQ = Math.floor(nQ / iqNum);
-                                let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                                qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                            } else { qtyText = `${i.q} ${eU}`; }
-                                               } else if (i.u1) {
-                            qtyText = `${i.q} ${formatShortUnit(i.u1)}`;
-                        }
-                        
-                        // Pelindung URL Limit WhatsApp: Batasi maksimal 40 item pertama yang dirinci
-                        if (text.length < 1300) {
-                            text += `${safeN}\n${qtyText} = ${fmt(i.sub)}\n`;
-                        } else if (text.length >= 1300 && text.indexOf('(... item lainnya)') === -1) {
-                            text += `\n*(... item lainnya dirangkum)*\n`;
-                        }
-                        
-                    });
-                } else {
-                    text += `Item Terjual\n${hData.items} Item = Rp ${fmt(hData.total)}\n`;
-                }
+                // 1. Ekstraksi ID & Total Item
+                let receiptNo = "TRX-" + d.getTime().toString().slice(-8);
+                let totalItemCount = 0;
 
+                // 2. Render Header Standar Ritel
+                let text = "```\n";
+                text += `TOKO KELONTONG\nPs. Sunggingan Lt. 2\n========================\n`;
+                text += `No   : ${receiptNo}\n`;
+                text += `Tgl  : ${dateStr}\n`;
+                text += `========================\n`;
+                
+                // Normalisasi Data Historis Lawas menjadi Array (Bypass Ghost Item Bug)
+                let itemsArray = Array.isArray(hData.items) ? hData.items : [{ n: "Item Historis", q: parseFloat(hData.items) || 1, u1: "Item", sub: hData.total }];
+                
+                                itemsArray.forEach(i => {
+                    let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
+                    let itemName = i.n || "Item Tidak Diketahui";
+                    let safeN = itemName.length > 20 ? itemName.substring(0, 19).toUpperCase() + '…' : itemName.toUpperCase();
+                    let iqNum = Math.max(1, parseInt(i.iq) || 1);
+                    let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
+                    
+                    // Menghitung jumlah item berdasarkan bentuk fisik kemasan transaksi (Package-Based Counting)
+                    if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                        totalItemCount += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
+                    } else {
+                        totalItemCount += nQ || 1;
+                    }
+
+                    // Membungkus nama satuan ke dalam unitString dengan Proteksi Fallback Mutlak
+                    let unitString = "";
+                    if (i.iq !== undefined && iqNum > 1) {
+                        let eU = formatShortUnit(i.u1) || 'Satuan';
+                        let gU = formatShortUnit(i.u2) || 'Grosir';
+                        if (nQ >= iqNum) {
+                            let gQ = Math.floor(nQ / iqNum);
+                            let eQ = parseFloat((nQ % iqNum).toFixed(3));
+                            unitString = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
+                        } else { unitString = `${i.q} ${eU}`; }
+                    } else if (i.u1) {
+                        unitString = `${i.q} ${formatShortUnit(i.u1)}`;
+                    } else {
+                        unitString = `${i.q}`;
+                    }
+                    
+                    // Menggabungkan Qty, Satuan, dan Harga Satuan
+                    let qtyText = `${unitString} x ${fmt(hrgSatuan)}`;
+                    
+                    if (text.length < 1300) {
+                        text += `${safeN}\n  ${qtyText} = ${fmt(i.sub)}\n`;
+                    } else if (text.length >= 1300 && text.indexOf('(... item lainnya)') === -1) {
+                        text += `\n*(... item lainnya dirangkum)*\n`;
+                    }
+                });
+
+                // 3. Render Footer & PPN
                 let kembali = hData.bayar - hData.total;
                 let labelKembali = kembali < 0 ? "KURANG   " : "KEMBALIAN";
+                
+                text += `------------------------\n`;
+                text += `Total Item : ${Math.round(totalItemCount * 1000) / 1000}\n`;
                 text += `------------------------\n`;
                 text += `TOTAL      Rp ${fmt(hData.total)}\n`;
-                text += `BAYAR      Rp ${fmt(hData.bayar)}\n`;
+                text += `TUNAI      Rp ${fmt(hData.bayar)}\n`;
                 text += `${labelKembali}  Rp ${fmt(Math.abs(kembali))}\n`;
-                text += `------------------------\n`;
-                text += `Terimakasih\nAtas Kunjungan Anda\n\`\`\``;
+                text += `========================\n`;             
+                text += `Simpan struk sebagai bukti\n\n`;
+                text += `Terima Kasih\nSelamat Belanja Kembali\n\`\`\``;
 
                 let intentUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
                 let a = document.createElement('a');
