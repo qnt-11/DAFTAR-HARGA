@@ -85,7 +85,7 @@
         .header { padding: calc(15px + env(safe-area-inset-top, 0px)) 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--wa-header); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); margin-bottom: 15px; border-top: none !important; border-bottom: none !important; }
         .header-left { display: flex; flex-direction: column; justify-content: center; } .header h1 { font-size: 18px; margin: 0; color: var(--text-light); } .header-date-location { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; letter-spacing: 0.5px; } .top-btns { display: flex; gap: 10px; color: var(--text-light); align-items: center; } .icon-btn { cursor: pointer; background: none; border: none; padding: 6px; color: inherit; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; width: 44px; height: 44px; outline: none; } .icon-btn:active { transform: scale(0.9); opacity: 0.8; } .header-upload-btn { display: flex; flex-direction: column; gap: 2px; color: #87CEFA; padding: 0; } .dropdown-wrapper { position: relative; display: flex; align-items: center; } .dropdown-content { position: absolute; top: 48px; right: 0; background: rgba(21, 21, 21, 0.98); backdrop-filter: blur(8px); min-width: 180px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; border: 1px solid var(--border-color); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.05); } .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--text-light); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 44px; } .dropdown-item:last-child { border-bottom: none; } .dropdown-item:active { background-color: rgba(255,255,255,0.15); } .dropdown-item input[type="file"] { display: none; }
         @keyframes laser-updown-header { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } } .laser-beam-header { animation: laser-updown-header 1.5s infinite ease-in-out; filter: drop-shadow(0 0 2px red); will-change: transform; transform: translate3d(0,0,0); } .glow-cloud { filter: drop-shadow(0 0 6px rgba(135, 206, 250, 0.8)); }
-        .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-calc { font-size: 12px; color: var(--text-muted); font-weight: 600; } .cpi-total { font-size: 15px; font-weight: 800; color: var(--mono-main); text-align: right; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; } .qty-input-manual { width: 48px; text-align: center; background: var(--wa-card); border: 1px solid var(--border-color); color: var(--mono-main); font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; border-radius: 8px; padding: 8px 0; outline: none; margin-left: 15px; } .qty-input-manual:focus { border-color: var(--mono-main); }
+        .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; }
         .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } 
         .search-box input { width: 100%; background: transparent; border: none; padding: 14px 88px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } 
         .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } 
@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxzeJ5uanZALtP63g-rEHaxAGxgA0D2O_L78BiPXQt646ecZY_gHFdDTYFx3csYmY3Y/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbz8n4Tsqe0g2cWqcjMnOxq_tnrtKQ7ncgV1U2IifssgFzjMxwqzM8hmX2OzF39iWWaK/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -1688,8 +1688,8 @@
             }
             if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { renderVirtualList(true); window._rafScroll = null; });
         }, { passive: true });
-        async function save(bypassAnomaly = false) {
-            if (isSaving && !bypassAnomaly) return; 
+            async function save(bypassAnomaly = false) {
+            if (isSaving) return;
             isSaving = true;
             const btnSave = $('btn-save-item');
             const btnCancel = $('btn-cancel-item'); 
@@ -1913,8 +1913,16 @@
                     if (backupRes.status !== 'success') throw new Error(backupRes.message);
                     return new Promise((resolve) => {
                         try {
-                            const req = idb.transaction('history', 'readonly').objectStore('history').getAll();
-                            req.onsuccess = () => resolve(req.result);
+                    const store = idb.transaction('history', 'readonly').objectStore('history');
+                    const req = store.index('ts_idx').openCursor(null, 'prev');
+                    const results = [];
+                    req.onsuccess = (e) => {
+                        const cursor = e.target.result;
+                        if (cursor && results.length < 200) {
+                            results.push(cursor.value);
+                            cursor.continue();
+                        } else { resolve(results); }
+                    };
                             req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                         } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
                     }).then(historyData => {
@@ -1955,7 +1963,7 @@
         function selectSyncOption(mode, e) { e.stopPropagation(); $('sync-type').value = mode; $('sync-selected-text').innerText = mode === 'delta' ? 'Load Pembaruan' : 'Load Semua Data'; $('sync-selected-text').style.color = mode === 'delta' ? 'white' : 'var(--danger)'; $('sync-custom-options').classList.add('hidden'); handleSyncChange(); }
         function handleSyncChange() { const val = $('sync-type').value, warningArea = $('sync-warning-area'), modalBox = $('sync-modal-box'), title = $('sync-modal-title'), btnDownload = $('btn-sync-download'); if (val === 'force') { warningArea.innerHTML = "<span style='color: var(--danger); font-weight: 800;'>⚠️ PERINGATAN</span><br><span style='color: #ccc;'>Data yang belum di-Upload akan HILANG!</span>"; modalBox.style.borderColor = title.style.color = btnDownload.style.borderColor = btnDownload.style.color = "var(--danger)"; } else if (val === 'delta') { warningArea.innerHTML = "<span style='color: #87CEFA;'>💯 Aman</span><br><span style='color: #ccc;'>Load data baru tanpa menghapus data.</span>"; modalBox.style.borderColor = title.style.color = btnDownload.style.borderColor = btnDownload.style.color = "#87CEFA"; } else { warningArea.innerHTML = ""; modalBox.style.borderColor = "var(--border-color)"; title.style.color = "#87CEFA"; btnDownload.style.borderColor = "var(--border-color)"; btnDownload.style.color = "var(--text-muted)"; } }
         
-        function executeSyncBtn() { const val = $('sync-type').value; if (!val) { tampilkanToast("Silakan pilih mode sinkronisasi dulu!", "var(--warning)"); return; } const btn = $('btn-sync-download'); if (btn) { btn.disabled = true; btn.innerText = "MEMPROSES..."; } closeSyncModal(); loadFromCloud(val === 'force'); }
+        function executeSyncBtn() { const val = $('sync-type').value; if (!val) { tampilkanToast("Silakan pilih mode sinkronisasi dulu!", "var(--warning)"); return; } closeSyncModal(); loadFromCloud(val === 'force'); }
 
         function loadFromCloud(forceSync = false) { 
             if (isApiLoading) return; isApiLoading = true;
@@ -1980,7 +1988,7 @@
                         chunk.forEach(rawItem => { 
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
-                            if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent(norm.n + "_" + norm.b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+                            if (!norm.id) norm.id = generateUniqueId();
                             if (forceSync) {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
                             } else {
@@ -2165,9 +2173,13 @@
                 }, 100); 
             }; 
             
-            r.onerror = () => { 
+                        r.onerror = () => { 
                 isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                 showAlert("Gagal membaca file dari HP Anda!", "Error"); 
+            }
+            r.onabort = () => { 
+                isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
+                showAlert("Proses import terputus oleh sistem!", "Error"); 
             }
             r.readAsArrayBuffer(f); 
         }
@@ -2557,8 +2569,10 @@
                 });
             }
 
-            let totalOmzet = 0; let totalModal = 0; let html = '';
+                        let totalOmzet = 0; let totalModal = 0; let html = '';
             let itemAgg = {}; 
+            let dbLookup = {};
+            for (let i = 0; i < db.length; i++) dbLookup[db[i].id] = db[i]; // Hash Map O(1)
 
             hist.forEach(h => {
                 let d = new Date(h.ts);
@@ -2592,10 +2606,17 @@
                             <span>${escapeHTML(qtyText)} ${escapeHTML(it.n)}</span>
                             <span>Rp ${fmt(it.sub)}</span>
                         </div>`;
-                        
-                        let key = it.id || it.n;
+                                                                                                let key = it.id || it.n;
                         if (!itemAgg[key]) {
-                            itemAgg[key] = { n: it.n, q: 0, normQ: 0, iq: it.iq, u1: it.u1, u2: it.u2 };
+                            let liveData = it.id ? dbLookup[it.id] : null;
+                            itemAgg[key] = { 
+                                n: liveData ? liveData.n : it.n, 
+                                q: 0, 
+                                normQ: 0, 
+                                iq: liveData ? liveData.iq : it.iq, 
+                                u1: liveData ? liveData.u1 : it.u1, 
+                                u2: liveData ? liveData.u2 : it.u2 
+                            };
                         }
                         let qVal = parseFloat(it.q) || 0;
                         let iqVal = Math.max(1, parseInt(it.iq) || 1);
