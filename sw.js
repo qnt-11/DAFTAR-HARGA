@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '16.2'; 
+const APP_VERSION = '16.3'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -202,16 +202,16 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-  const fetchPromiseDyn = fetch(req).then(async res => {
+  const fetchPromiseDyn = fetch(req).then(res => {
     const contentType = res.headers.get('content-type') || '';
     if (res.ok && !contentType.includes('text/html')) {
       const resClone = res.clone();
-      try {
-        const cache = await caches.open(CACHE_DYNAMIC);
+      // Melepas await (Non-Blocking Task) agar stream response langsung dilempar ke UI tanpa hambatan I/O disk
+      caches.open(CACHE_DYNAMIC).then(cache => {
         const cleanUrl = req.url.split('?')[0];
-        await cache.put(cleanUrl, resClone); 
-        await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-      } catch (err) {}
+        cache.put(cleanUrl, resClone); 
+        trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+      }).catch(() => {});
     }
     return res;
   }).catch(() => null);
@@ -251,7 +251,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbz8n4Tsqe0g2cWqcjMnOxq_tnrtKQ7ncgV1U2IifssgFzjMxwqzM8hmX2OzF39iWWaK/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyZNKXnZYnEOGg2osbtkhcTVCJEjzUhYn618UWqFu_7mSj_DfOpnCaHX_0_Qy6GUQA8/exec";
           
           // 1. Eksekusi Backup Data Barang
           const resData = await fetch(CLOUD_API, {
