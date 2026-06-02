@@ -573,13 +573,13 @@
             }
         }
 
-        function handleLivePrice(id, el) {
+            function handleLivePrice(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val)) {
-                delete cartState[id].manualPrice;
+                // Biarkan UI kosong, set harga manual menjadi 0 agar Total Belanja akurat
+                cartState[id].manualPrice = 0;
                 saveCartMem();
-                updateRowVisuals(id);
-                updateGrandTotal();
+                updateGrandTotal(); // PENTING: Jangan panggil updateRowVisuals di sini!
                 return;
             }
             cartState[id].manualPrice = val;
