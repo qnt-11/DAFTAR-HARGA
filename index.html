@@ -2180,7 +2180,7 @@
             isStartingScan = true; scanMode = mode; $('scanner-wrap').style.display = 'block'; document.body.classList.add('modal-open'); trackModal('scanner');
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader"); 
             torchState = false; $('torch-btn').style.color = "white"; 
-            try { 
+                        try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
                 await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
                     playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
@@ -2189,6 +2189,10 @@
                     else if (scanMode === 'input-grosir') $('i-b2').value = scannedText; else $('i-b').value = scannedText; 
                 }); 
                 isScanning = true; isStartingScan = false; 
+                                
+                if ($('scanner-wrap').style.display === 'none') {
+                    closeScanner();
+                }
             } catch (e) { 
                 isStartingScan = false; isScanning = false; await closeScanner(); let errMsg = "Kamera Error. Coba muat ulang aplikasi."; if (e && (e.name === "NotAllowedError" || (e.message && e.message.includes("Permission denied")))) { errMsg = "Izin ditolak! Izinkan akses kamera di pengaturan browser Anda."; } showAlert(errMsg, "Error", "var(--danger)"); 
             } 
