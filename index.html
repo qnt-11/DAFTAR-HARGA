@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyZNKXnZYnEOGg2osbtkhcTVCJEjzUhYn618UWqFu_7mSj_DfOpnCaHX_0_Qy6GUQA8/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwHWEBQOjChfzBOcCKDIo22LzuiI9whlYXc2kzQua3yBoqAte9bZzyr74HuiwZco51p/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -573,13 +573,12 @@
             }
         }
 
-            function handleLivePrice(id, el) {
+                        function handleLivePrice(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val)) {
-                // Biarkan UI kosong, set harga manual menjadi 0 agar Total Belanja akurat
-                cartState[id].manualPrice = 0;
+                delete cartState[id].manualPrice;
                 saveCartMem();
-                updateGrandTotal(); // PENTING: Jangan panggil updateRowVisuals di sini!
+                updateGrandTotal();
                 return;
             }
             cartState[id].manualPrice = val;
@@ -836,20 +835,17 @@
             } 
         }
         
-        function saveCartMem() { 
-            if (cartSaveTimer) clearTimeout(cartSaveTimer);
-            cartSaveTimer = setTimeout(() => {
-                try {
-                    localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
-                } catch (e) {
-                    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                        localStorage.removeItem('DB_WA_TRENDING');
-                        localStorage.removeItem('DB_WA_RECENT');
-                        try { localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); } catch(err){}
-                        tampilkanToast("Memori HP Penuh! Sistem membersihkan cache...", "var(--warning)");
-                    }
+                function saveCartMem() { 
+            try {
+                localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    localStorage.removeItem('DB_WA_TRENDING');
+                    localStorage.removeItem('DB_WA_RECENT');
+                    try { localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); } catch(err){}
+                    tampilkanToast("Memori HP Penuh! Sistem membersihkan cache...", "var(--warning)");
                 }
-            }, 300);
+            }
         }
         
         document.addEventListener('focus', function(e) {
@@ -1729,10 +1725,10 @@
             if (btnSave) btnSave.disabled = true; 
             if (btnCancel) btnCancel.disabled = true;
 
-            try {
-                const nRaw = $('i-n').value;
-                const b = String($('i-b').value).trim().toUpperCase();
-                const b2 = String($('i-b2').value).trim().toUpperCase(); 
+                try {
+                const nRaw = String($('i-n').value).substring(0, 80);
+                const b = String($('i-b').value).trim().toUpperCase().substring(0, 40);
+                const b2 = String($('i-b2').value).trim().toUpperCase().substring(0, 40); 
                 const exp = $('i-exp').dataset.rawDate || '';
                 const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, ''), 10) || 0;
                 const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, ''), 10) || 0;
@@ -2380,20 +2376,92 @@
 
             let msgHTML = `<div style="text-align:center; padding:0; margin:0;"><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:6px;">Total Belanja</div><div style="font-size:28px;font-weight:900;color:var(--mono-main);font-family:'Montserrat', sans-serif;margin-bottom:14px;letter-spacing:-0.5px;">Rp ${fmt(grandTotal)}</div><input type="tel" id="input-bayar-struk" style="box-sizing:border-box;width:100%;border-color:var(--border-color);background:#000;color:var(--text-light);font-size:16px;text-align:center;padding:12px;margin:0 0 10px 0;border-radius:8px;border:1px solid #333;outline:none;font-family:'Montserrat', sans-serif;font-weight:600;" placeholder="Bayar" autocomplete="off"><div style="display:flex;justify-content:space-between;align-items:center;background:#111;padding:12px 16px;border-radius:8px;border:1px solid #333;box-sizing:border-box;margin:0;"><span id="live-label" style="font-size:10px;font-weight:800;color:#888;letter-spacing:0.5px;">KEMBALIAN:</span><span id="live-val" style="font-size:15px;font-weight:800;color:#888;">Rp 0</span></div></div>`;
             
-            const resetPrintModalStyle = () => {
+                        const resetPrintModalStyle = () => {
                 $('custom-alert').style.alignItems = '';
                 $('custom-alert').style.paddingTop = '';
                 $('alert-box').style.marginTop = '';
                 $('alert-box').style.alignSelf = '';
                 $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;';
                 $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;';
+                if($('confirm-cancel-btn')) { $('confirm-cancel-btn').style.flex = ''; $('confirm-cancel-btn').style.padding = ''; $('confirm-cancel-btn').style.fontSize = ''; }
+                if($('confirm-ok-btn')) { $('confirm-ok-btn').style.flex = ''; $('confirm-ok-btn').style.padding = ''; $('confirm-ok-btn').style.fontSize = ''; }
             };
 
-            showConfirm(msgHTML, "PRINT", "var(--mono-main)", () => {}, "PRINT STRUK", () => { resetPrintModalStyle(); });
+            showConfirm(msgHTML, "PRINT", "var(--mono-main)", () => {}, "PRINT", () => { resetPrintModalStyle(); });
 
-            let btnOk = $('confirm-ok-btn');
-            if (btnOk) {
+                        let btnOk = $('confirm-ok-btn');
+            let alertBtns = $('alert-btns');
+            let btnCancel = $('confirm-cancel-btn');
+            
+            if (alertBtns && btnOk && btnCancel) {
+                // [PERISAI MULTI-TOUCH]: Mengunci event loop dari phantom click
+                let isProcessingPayment = false; 
+
+                // [SURGICAL INJECTION] Tombol "SIMPAN" di Tengah
+                let btnNoPrint = document.createElement('button');
+                btnNoPrint.className = "btn-main";
+                btnNoPrint.style.cssText = "border: 1px solid #FFA500!important; color: #FFA500!important; background:transparent!important; padding: 0 5px; font-size: 10px; flex: 1;";
+                btnNoPrint.innerHTML = "SIMPAN";
+                
+                // Proteksi CSS Flex layout agar 3 tombol muat (Mencegah UI Hancur di Layar Kecil)
+                btnCancel.style.flex = "1";
+                btnCancel.style.padding = "0 5px";
+                btnCancel.style.fontSize = "10px";
+                btnOk.style.flex = "1";
+                btnOk.style.padding = "0 5px";
+                btnOk.style.fontSize = "10px";
+                
+                btnNoPrint.onclick = () => {
+                    if (isProcessingPayment) return; // Kunci Absolut Event
+                    
+                    let inputBayarStr = $('input-bayar-struk').value.replace(/\D/g, '');
+                    let parsedBayar = parseInt(inputBayarStr, 10);
+                    if (isNaN(parsedBayar)) { tampilkanToast("Nominal bayar belum diisi!", "var(--warning)"); $('input-bayar-struk').focus(); return; }
+                    if (parsedBayar < grandTotal) { tampilkanToast("Uang bayar kurang!", "var(--danger)"); $('input-bayar-struk').focus(); return; }
+                    
+                    // Kunci Brute-Force (Spam Click Lock)
+                    isProcessingPayment = true;
+                    btnNoPrint.disabled = true;
+                    btnOk.disabled = true;
+                    
+                    closeCustomAlert();
+                    
+                    // Simpan Riwayat Siluman (Tanpa Memicu Iframe Print)
+                    let d = new Date();
+                    let totalModal = itemsPrint.reduce((sum, i) => sum + (i.modal || 0), 0);
+                    let newTrx = { id: 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4), ts: d.getTime(), total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
+                    
+                    try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').add(newTrx); } catch (e) {}
+                    
+                    // [PROTEKSI FATAL]: Mencegah JSON.parse crash yang memicu silent cart leak
+                    let hist = [];
+                    try { 
+                        hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); 
+                    } catch (e) { 
+                        hist = []; 
+                    }
+                    
+                    hist.unshift(newTrx);
+                    
+                    // [PROTEKSI MEMORI]: Menambahkan fallback penghancuran memori jika storage bricked
+                    try { 
+                        localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); 
+                    } catch (e) { 
+                        try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 10))); } 
+                        catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); } 
+                    }
+                    
+                    cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
+                    tampilkanToast("Transaksi Disimpan!", "#FFA500");
+                    resetPrintModalStyle();
+                };
+                
+                // Menyisipkan tepat di antara BATAL dan PRINT STRUK
+                alertBtns.insertBefore(btnNoPrint, btnOk);
+                
                 btnOk.onclick = () => {
+                    if (isProcessingPayment) return; // Kunci Absolut Event
+
                     let inputBayarStr = $('input-bayar-struk').value.replace(/\D/g, '');
                     let parsedBayar = parseInt(inputBayarStr, 10);
 
@@ -2408,6 +2476,11 @@
                         $('input-bayar-struk').focus();
                         return; 
                     }
+
+                    // Kunci Brute-Force (Spam Click Lock)
+                    isProcessingPayment = true;
+                    btnNoPrint.disabled = true;
+                    btnOk.disabled = true;
 
                     closeCustomAlert();
                     executePrint(grandTotal, parsedBayar, itemsPrint);
@@ -2664,26 +2737,21 @@
                             <span>Rp ${fmt(it.sub)}</span>
                         </div>`;
                                                                                                 let key = it.id || it.n;
-                        if (!itemAgg[key]) {
+                                                if (!itemAgg[key]) {
                             let liveData = it.id ? dbLookup[it.id] : null;
                             itemAgg[key] = { 
                                 n: liveData ? liveData.n : it.n, 
                                 q: 0, 
-                                normQ: 0, 
                                 iq: liveData ? liveData.iq : it.iq, 
                                 u1: liveData ? liveData.u1 : it.u1, 
                                 u2: liveData ? liveData.u2 : it.u2 
                             };
                         }
                         let qVal = parseFloat(it.q) || 0;
-                        let iqVal = Math.max(1, parseInt(it.iq) || 1);
-                        
-                        // Menghapus pemaksaan perkalian desimal
                         let baseQ = qVal; 
                         
                         itemAgg[key].q += baseQ;
-                        itemAgg[key].normQ += (iqVal > 1) ? (baseQ / iqVal) : baseQ;
-                   });
+                  });
                 } else {
                     itemsHtml += `<div style="font-size:11px; color:#ccc;">${h.items} Item (Format Lama)</div>`;
                 }
@@ -2847,7 +2915,8 @@
             doWaHistory(h);
         }
 
-        function cariCloudHistory() {
+            function cariCloudHistory() {
+            if (isApiLoading) return;
             let dateVal = $('hist-date').value; 
             let dStr = "HARI INI";
             if(dateVal) {
@@ -2859,13 +2928,15 @@
 
             let origTitle = $('loading-title').innerText;
             let origStyle = $('loading-title').style.fontStyle;
+            isApiLoading = true;
             $('loading-title').innerText = "MENCARI DATA";
             $('loading-title').style.fontStyle = "italic";
             showLoading(`<span style="font-size:10px; font-weight:700; color:#ccc; letter-spacing:0.5px; text-transform:uppercase;">MENCARI ${dStr} DI CLOUD...</span>`, "#87CEFA");
             
             fetchWithTimeout(CLOUD_URL + "?action=getHistory&date=" + dateVal + "&t=" + Date.now(), {}, 15000)
             .then(r => r.json())
-            .then(response => {
+                        .then(response => {
+                isApiLoading = false;
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
                 $('loading-title').style.fontStyle = origStyle;
@@ -2915,7 +2986,8 @@
                     }, 50);
                 }
             })
-            .catch(err => {
+                        .catch(err => {
+                isApiLoading = false;
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
                 $('loading-title').style.fontStyle = origStyle;
