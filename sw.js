@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '16.3'; 
+const APP_VERSION = '16.4'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -132,7 +132,8 @@ self.addEventListener('fetch', event => {
         }
 
         const pFetch = fetch(req).then(async (res) => {
-          if (res && res.ok) {
+          // [PERISAI LIE-FI] Validasi respons jaringan yang rusak secara mutlak
+          if (res && res.ok && res.status === 200 && res.type !== 'error') {
             try {
               const cache = await caches.open(CACHE_CORE);
               await cache.put(cleanReqUrl, res.clone()); 
@@ -141,7 +142,7 @@ self.addEventListener('fetch', event => {
           return res;
         });
         pFetch.catch(() => {});
-        event.waitUntil(pFetch); // Mitigasi Lie-Fi: Menjaga background download tetap hidup
+        event.waitUntil(pFetch); 
         
         const fetchPromise = Promise.race([
           pFetch,
@@ -202,26 +203,34 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-  const fetchPromiseDyn = fetch(req).then(res => {
-    const contentType = res.headers.get('content-type') || '';
-    if (res.ok && !contentType.includes('text/html')) {
-      const resClone = res.clone();
-      // Melepas await (Non-Blocking Task) agar stream response langsung dilempar ke UI tanpa hambatan I/O disk
-      caches.open(CACHE_DYNAMIC).then(cache => {
-        const cleanUrl = req.url.split('?')[0];
-        cache.put(cleanUrl, resClone); 
-        trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-      }).catch(() => {});
-    }
-    return res;
-  }).catch(() => null);
-
-  event.waitUntil(fetchPromiseDyn);
-
   event.respondWith(
     caches.match(req, { ignoreSearch: true }).then(cachedRes => {
-      if (cachedRes) return cachedRes; 
-      return fetchPromiseDyn.then(res => res || new Response('', { status: 503 }));
+      const fetchPromiseDyn = fetch(req).then(async (networkRes) => {
+        // [PERISAI GHOST STREAM] Validasi ketat sebelum menyentuh media disk I/O
+        if (networkRes && networkRes.ok && networkRes.status === 200 && networkRes.type !== 'error') {
+          const contentType = networkRes.headers.get('content-type') || '';
+          if (!contentType.includes('text/html')) {
+            const resClone = networkRes.clone();
+            try {
+              const cache = await caches.open(CACHE_DYNAMIC);
+              const cleanUrl = req.url.split('?')[0];
+              await cache.put(cleanUrl, resClone);
+              trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS);
+            } catch (err) {}
+          }
+        }
+        return networkRes;
+      }).catch(() => null);
+
+      if (cachedRes) {
+        event.waitUntil(fetchPromiseDyn); 
+        return cachedRes;
+      }
+
+      return fetchPromiseDyn.then(res => {
+         if (res) return res;
+         return new Response('', { status: 503, statusText: 'Service Unavailable' });
+      });
     })
   );
 });
@@ -240,18 +249,27 @@ async function processOfflineBackup() {
     const req = indexedDB.open('HargaDB_Pro'); 
     req.onsuccess = (e) => {
       const idb = e.target.result;
-      if (!idb.objectStoreNames.contains('sync-outbox')) return resolve();
+      
+      // [PERISAI MEMORI] Tutup instan jika storage belum dipersiapkan
+      if (!idb.objectStoreNames.contains('sync-outbox')) {
+          idb.close();
+          return resolve();
+      }
       
       const tx = idb.transaction('sync-outbox', 'readonly');
       const store = tx.objectStore('sync-outbox');
       const getReq = store.get('pending-backup');
       
       getReq.onsuccess = async () => {
-        if (!getReq.result) return resolve();
+        if (!getReq.result) {
+            idb.close();
+            return resolve();
+        }
+        
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyZNKXnZYnEOGg2osbtkhcTVCJEjzUhYn618UWqFu_7mSj_DfOpnCaHX_0_Qy6GUQA8/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbwHWEBQOjChfzBOcCKDIo22LzuiI9whlYXc2kzQua3yBoqAte9bZzyr74HuiwZco51p/exec";
           
           // 1. Eksekusi Backup Data Barang
           const resData = await fetch(CLOUD_API, {
@@ -263,7 +281,7 @@ async function processOfflineBackup() {
           try { 
             jsonResData = await resData.json(); 
           } catch(e) { 
-            return reject(new Error("API mengembalikan non-JSON (Tercegat Captive Portal/Wi-Fi). Sync ditunda demi keamanan data."));
+            throw new Error("API mengembalikan non-JSON (Tercegat Captive Portal/Wi-Fi). Sync ditunda demi keamanan data.");
           }
           if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
 
@@ -277,17 +295,23 @@ async function processOfflineBackup() {
           try { 
             jsonResHist = await resHist.json(); 
           } catch(e) {
-            return reject(new Error("Gagal parsing JSON Riwayat. Sinkronisasi ditunda."));
+            throw new Error("Gagal parsing JSON Riwayat. Sinkronisasi ditunda.");
           }
           if (jsonResHist.status !== "success") throw new Error("Server Sibuk: Riwayat gagal disinkronkan");
 
           // 3. Hapus antrean jika 100% SUKSES mendarat di Cloud
           const txDel = idb.transaction('sync-outbox', 'readwrite');
           txDel.objectStore('sync-outbox').delete('pending-backup');
-          txDel.oncomplete = () => resolve();
-          txDel.onerror = (e) => reject(new Error("Gagal menghapus antrean IDB: " + e.target.error));
+          txDel.oncomplete = () => { 
+              idb.close(); 
+              resolve(); 
+          };
+          txDel.onerror = (e) => { 
+              idb.close(); 
+              reject(new Error("Gagal menghapus antrean IDB: " + e.target.error)); 
+          };
         } catch (err) {
-          // Rejeksi untuk memicu retry otomatis oleh Service Worker saat jaringan stabil
+          idb.close(); // Hancurkan sisa memori I/O jika terjadi error di tengah stream
           reject(err); 
         }
       };
