@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==========================================
 
-const APP_VERSION = '16.4'; 
+const APP_VERSION = '16.5'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -96,8 +96,8 @@ self.addEventListener('activate', event => {
           return caches.delete(key); 
         }
       }));
-    }).then(() => {
-      manageStorage(); 
+    }).then(async () => {
+      await manageStorage(); 
       return self.clients.claim();
     }) 
   );
@@ -132,8 +132,8 @@ self.addEventListener('fetch', event => {
         }
 
         const pFetch = fetch(req).then(async (res) => {
-          // [PERISAI LIE-FI] Validasi respons jaringan yang rusak secara mutlak
-          if (res && res.ok && res.status === 200 && res.type !== 'error') {
+          // [PERISAI LIE-FI] Validasi respons jaringan (termasuk Opaque Response) secara mutlak
+          if (res && (res.status === 200 || res.status === 0) && res.type !== 'error') {
             try {
               const cache = await caches.open(CACHE_CORE);
               await cache.put(cleanReqUrl, res.clone()); 
@@ -141,6 +141,7 @@ self.addEventListener('fetch', event => {
           }
           return res;
         });
+        
         pFetch.catch(() => {});
         event.waitUntil(pFetch); 
         
@@ -152,7 +153,7 @@ self.addEventListener('fetch', event => {
         }).catch(() => null);
 
         const networkRes = await fetchPromise;
-        if (networkRes && networkRes.ok) return networkRes;
+        if (networkRes && (networkRes.ok || networkRes.status === 0)) return networkRes;
 
         if (cachedRes) {
            return cachedRes;
@@ -183,7 +184,7 @@ self.addEventListener('fetch', event => {
         
         const fetchPromiseCDN = fetch(req).then(async res => {
           const contentType = res.headers.get('content-type') || '';
-          if (res.ok && !contentType.includes('text/html')) {
+          if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
             const resClone = res.clone();
             try {
               const cache = await caches.open(CACHE_CDN);
@@ -206,8 +207,8 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(req, { ignoreSearch: true }).then(cachedRes => {
       const fetchPromiseDyn = fetch(req).then(async (networkRes) => {
-        // [PERISAI GHOST STREAM] Validasi ketat sebelum menyentuh media disk I/O
-        if (networkRes && networkRes.ok && networkRes.status === 200 && networkRes.type !== 'error') {
+        // [PERISAI GHOST STREAM] Validasi ketat termasuk Opaque Response tanpa Header
+        if (networkRes && (networkRes.status === 200 || networkRes.status === 0) && networkRes.type !== 'error') {
           const contentType = networkRes.headers.get('content-type') || '';
           if (!contentType.includes('text/html')) {
             const resClone = networkRes.clone();
