@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwHWEBQOjChfzBOcCKDIo22LzuiI9whlYXc2kzQua3yBoqAte9bZzyr74HuiwZco51p/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyBo5q8NCdhqTeCYOwE_YyKrEUD9QYc0KSKpQQX1xPDtaZ-3w4YKt2phLhlvXNgi7Mi/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -484,7 +484,7 @@
         let pendingAutoAdds = new Set();
         
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
-        let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout, cartSaveTimer = null;
+        let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout;
         const Picker = { sel: new Date(), targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
         let recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || [];
         let trendingSearches = JSON.parse(localStorage.getItem('DB_WA_TRENDING')) || {};
@@ -547,10 +547,11 @@
             applyFiltersAndRender();
         }
 
-        function handleLiveQty(id, el) {
+                function handleLiveQty(id, el) {
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
-            if (isNaN(parsed) || parsed <= 0) return; 
+            if (isNaN(parsed) || !isFinite(parsed) || parsed <= 0) return; 
+            parsed = Math.min(parsed, 99999);
             
             cartState[id].q = parsed;
             delete cartState[id].manualPrice; 
@@ -573,12 +574,13 @@
             }
         }
 
-                        function handleLivePrice(id, el) {
+                                function handleLivePrice(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val)) {
                 delete cartState[id].manualPrice;
                 saveCartMem();
                 updateGrandTotal();
+                updateRowVisuals(id);
                 return;
             }
             cartState[id].manualPrice = val;
@@ -637,7 +639,10 @@
                 }
             });
 
-            if (needsSave) saveCartMem();
+                        if (needsSave) {
+                saveCartMem();
+                if (isCartMode) renderCartUI();
+            }
             
             const gtEl = document.getElementById('cp-grand-total');
             if(gtEl) gtEl.innerText = `Rp ${fmt(grandTotal)}`;
@@ -689,12 +694,12 @@
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
                             </div>
-                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
+                                                        <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
-                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; handleLivePrice('${item.id}', this);" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
-                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
-                                <input type="tel" value="${q}" autocomplete="off" oninput="handleLiveQty('${item.id}', this)" onblur="validateQtyBlur('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
+                                                     <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
+                               <input type="tel" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
                             </div>
                         </div>
                     </div>`;
@@ -1422,12 +1427,14 @@
                     if (match) pMap[match.id] = (pMap[match.id] || 0) + (trending[k] * 2); 
                 });
 
-                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                hist.forEach(h => {
-                    if (Array.isArray(h.items)) {
-                        h.items.forEach(it => {
-                            let key = it.id || (db.find(x => x.n === it.n) || {}).id;
-                            if(key) {
+                                    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                    let dbMapFast = new Map();
+                    for (let i = 0; i < db.length; i++) dbMapFast.set(db[i].n, db[i].id);
+                    hist.forEach(h => {
+                        if (Array.isArray(h.items)) {
+                            h.items.forEach(it => {
+                                let key = it.id || dbMapFast.get(it.n);
+                                if(key) {
                                 let iq = Math.max(1, parseInt(it.iq) || 1);
                                 let qVal = parseFloat(it.q) || 1;
                                 let normQ = (iq > 1) ? (qVal / iq) : qVal;
@@ -2165,18 +2172,20 @@
                             }
                         }
 
-                        if(processedItems.size > 0) {
+                                                if(processedItems.size > 0) {
                             const tx = idb.transaction('items', 'readwrite'); const s = tx.objectStore('items');
+                            let fastIndexMap = new Map();
+                            for(let i=0; i<db.length; i++) fastIndexMap.set(String(db[i].id), i);
                             processedItems.forEach(item => { 
-                                let eIdx = db.findIndex(x => String(x.id) === String(item.id)); 
-                                if(eIdx > -1) db[eIdx] = item; else db.push(item); 
+                                let eIdx = fastIndexMap.has(String(item.id)) ? fastIndexMap.get(String(item.id)) : -1; 
+                                if(eIdx > -1) db[eIdx] = item; else { db.push(item); fastIndexMap.set(String(item.id), db.length - 1); } 
                                 s.put(item); 
                             });
-                            tx.oncomplete = () => { 
+                                                        tx.oncomplete = () => { 
                                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
-                                updateMaps(); clearSearch(); renderCartUI(); applyFiltersAndRender();
+                                updateMaps(); renderCartUI(); clearSearch(); 
                                 isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
-                                
+
                                 if (skippedCount > 0 || failedCount > 0) { 
                                     let msg = ``;
                                     if (skippedCount > 0) msg += `⚠️ <b>${skippedCount}</b> data ditolak (Barcode Ganda).<br>`;
