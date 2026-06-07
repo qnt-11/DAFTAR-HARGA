@@ -5,11 +5,11 @@
   "description": "Aplikasi pencatatan daftar harga eceran dan grosir",
   "start_url": "./index.html?mode=pwa",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "display_override": [
+    "fullscreen",
     "standalone",
-    "window-controls-overlay",
-    "fullscreen"
+    "window-controls-overlay"
   ],
   "background_color": "#000000",
   "theme_color": "#000000",
