@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyBo5q8NCdhqTeCYOwE_YyKrEUD9QYc0KSKpQQX1xPDtaZ-3w4YKt2phLhlvXNgi7Mi/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxZMZ6Ta_WF5iowj0ibJkJwSIBFbqYGZuIlet_X4WIV3pjrJXj_4NyWos-ZVTdO5bup/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -486,17 +486,20 @@
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
         let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout;
         const Picker = { sel: new Date(), targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
-        let recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || [];
-        let trendingSearches = JSON.parse(localStorage.getItem('DB_WA_TRENDING')) || {};
+                let recentSearches = [];
+        try { recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || []; } catch(e) { localStorage.removeItem('DB_WA_RECENT'); }
+        let trendingSearches = {};
+        try { trendingSearches = JSON.parse(localStorage.getItem('DB_WA_TRENDING')) || {}; } catch(e) { localStorage.removeItem('DB_WA_TRENDING'); }
 
         const searchInput = $('q');
         const searchDropdown = $('search-dropdown');
         const sdContent = $('sd-content');
         
         let isMainSwiping = false, swipedCardElem = null, touchStartX = 0, touchCurrentX = 0;
-        let isCartMode = false;
+                let isCartMode = false;
         let isApiLoading = false; 
-        let cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; 
+        let cartState = {};
+        try { cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; } catch(e) { localStorage.removeItem('DB_WA_CART'); }
 
         function handleSearchLogic(val) {
             currentSearchReqId++;
@@ -512,9 +515,12 @@
             if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
         }
 
-                searchInput.addEventListener('keydown', (e) => {
+                        searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && isCartMode) {
-                if (currentCleanQuery !== '') {
+                e.preventDefault();
+                let val = searchInput.value.trim();
+                if (val !== '') {
+                    handleSearchLogic(val);
                     pendingAutoAdds.add(currentSearchReqId); 
                 }
             }
@@ -1158,12 +1164,13 @@
 
         function debounce(func, wait) { 
             let timeout; 
-            return function(...args) { 
+            const debounced = function(...args) { 
                 clearTimeout(timeout); 
                 timeout = setTimeout(() => func.apply(this, args), wait); 
             }; 
+            debounced.cancel = () => clearTimeout(timeout);
+            return debounced;
         }
-
         function checkModalOpen() {
             const modals = document.querySelectorAll('.modal');
             let isOpen = false;
@@ -1352,7 +1359,7 @@
             errorEvent.preventDefault(); 
         };
 
-        worker.onmessage = function(e) { 
+                worker.onmessage = function(e) { 
             if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
                 workerResult = e.data.data; 
                 
@@ -1360,8 +1367,12 @@
                     pendingAutoAdds.delete(e.data.reqId);
                     if (workerResult.length > 0) {
                         const topItem = workerResult[0];
-                        modifyCartItem(topItem.id, currentInjectedQty);
-                        tampilkanToast(`+${currentInjectedQty} ${topItem.n}`, "var(--mono-main)");
+                        let addQty = currentInjectedQty;
+                        if (String(topItem.b2).toLowerCase() === currentCleanQuery && topItem.iq > 1) {
+                            addQty = topItem.iq * currentInjectedQty;
+                        }
+                        modifyCartItem(topItem.id, addQty);
+                        tampilkanToast(`+${addQty} ${topItem.n}`, "var(--mono-main)");
                         clearSearch(); 
                         return; 
                     } else {
@@ -1508,9 +1519,10 @@
         });
         
         function clearSearch() { 
+            if(handleSearchInput.cancel) handleSearchInput.cancel();
             searchInput.value = ''; 
             $('q-x').style.display = 'none'; 
-            workerResult = null; 
+            workerResult = null;
             currentSearchReqId++; 
             pendingAutoAdds.clear(); 
             window.scrollTo({ top: 0, behavior: 'instant' }); 
@@ -2228,9 +2240,9 @@
         async function openScanner(mode) { 
             if(isStartingScan || isScanning || isClosingScan) return; 
             isStartingScan = true; scanMode = mode; $('scanner-wrap').style.display = 'block'; document.body.classList.add('modal-open'); trackModal('scanner');
+            try { if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (globalAudioCtx && globalAudioCtx.state === 'suspended') globalAudioCtx.resume(); } catch(e){}
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader"); 
-            torchState = false; $('torch-btn').style.color = "white"; 
-                        try { 
+            torchState = false; $('torch-btn').style.color = "white";                        try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
                 await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
                     playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
@@ -2265,9 +2277,10 @@
         function clearOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; const tx = dbOff.transaction('CatatanDarurat', 'readwrite'); tx.objectStore('CatatanDarurat').delete(1); tx.oncomplete = () => { closeOfflineLedger(); tampilkanToast("Catatan dihapus!", "var(--danger)"); }; }; } catch(err){} }
         function checkOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (dbOff.objectStoreNames.contains('CatatanDarurat')) { const tx = dbOff.transaction('CatatanDarurat', 'readonly'); const store = tx.objectStore('CatatanDarurat'); const getReq = store.get(1); getReq.onsuccess = () => { if (getReq.result && getReq.result.text && getReq.result.text.trim().length > 0) { showConfirm("Terdapat catatan transaksi saat offline yang belum direkap.", "Info Offline", "var(--warning)", () => { showOfflineLedger(getReq.result.text); }, "LIHAT CATATAN"); } }; } }; } catch(err) {} }
 
-        function updateHistDateDisplay(val) {
+                function updateHistDateDisplay(val) {
             if(!val) return;
-            let d = new Date(val);
+            let parts = val.split('-');
+            let d = new Date(parts[0], parts[1]-1, parts[2]);
             if(isNaN(d.getTime())) return;
             let display = `${String(d.getDate()).padStart(2,'0')} ${NamaBlnPendek[d.getMonth()]} ${d.getFullYear()}`;
             let el = $('hist-date-display');
