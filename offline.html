@@ -82,11 +82,30 @@
         function triggerReload(text) { 
             btn.innerText = text; 
             btn.disabled = true; 
-            window.location.reload(); 
-            setTimeout(() => { 
-                btn.innerText = "Coba Muat Ulang"; 
-                btn.disabled = false; 
-            }, 3000); 
+            
+            const currentText = document.getElementById('offline-ledger').value;
+            try { localStorage.setItem('DB_WA_OFFLINE_LEDGER', currentText); } catch(e) {}
+            
+            let isReloading = false;
+            const forceReload = () => {
+                if (!isReloading) {
+                    isReloading = true;
+                    window.location.reload();
+                }
+            };
+
+            if (db) {
+                try {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).put({ id: 1, text: currentText });
+                    tx.oncomplete = forceReload;
+                    tx.onerror = forceReload;
+                } catch (e) { forceReload(); }
+            } else {
+                forceReload();
+            }
+            
+            setTimeout(forceReload, 1500); 
         }
 
         window.addEventListener('online', () => { 
@@ -163,11 +182,20 @@
                     unlockLedger();
                 };
 
-                req.onsuccess = function() { 
-                    if (req.result && typeof req.result.text === 'string' && ledger.value === '') { 
-                        ledger.value = req.result.text; 
-                    } else if (!req.result || typeof req.result.text !== 'string') {
-                        fallbackLoader();
+                                                req.onsuccess = function() { 
+                    const localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER');
+                    if (req.result && typeof req.result.text === 'string') { 
+                        if (localText && localText.length > req.result.text.length) {
+                            if (ledger.value === '') ledger.value = localText;
+                            saveLedger(); 
+                        } else {
+                            if (ledger.value === '') ledger.value = req.result.text; 
+                        }
+                    } else if (localText) {
+                             if (ledger.value === '') ledger.value = localText;
+                        saveLedger();
+                    } else {
+                        if (ledger.value === '') ledger.value = '';
                     }
                     unlockLedger();
                 };
@@ -210,8 +238,7 @@
                 }
             }
         });
-
-        // --- SISTEM KALKULATOR ---
+        
         const display = document.getElementById('calc-display'); 
         let calcVal = '0';
         let isResultDisplayed = false; 
@@ -284,7 +311,6 @@
             }
         }
 
-        // --- DUKUNGAN KEYBOARD FISIK ---
         document.addEventListener('keydown', (e) => {
             if (document.activeElement.tagName === 'TEXTAREA') return;
 
