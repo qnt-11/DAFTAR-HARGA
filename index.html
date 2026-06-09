@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxtlORbaWCTaYcgJeWN0cMtZIqyzs9R4SjBwQ05PYYMPzlCYVagUUZ1fKTop5FL1mFo/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwNwsoR0t0oh8ao2b-qufKRJj47QmY3UPNLwwANGBfg-zNa3t0WiYXmyXU1X4DJx8xO/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxZMZ6Ta_WF5iowj0ibJkJwSIBFbqYGZuIlet_X4WIV3pjrJXj_4NyWos-ZVTdO5bup/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxbgp_Zo0ftfjJtEbPzmMCkEUondl7itycfrR23mt6hn1SIrGUJCdwvKDWYISGcqAUh/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -2026,9 +2026,9 @@
                 function processNextChunk() {
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
-                        if (chunk.length === 0) {
+                                                if (chunk.length === 0) {
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none'; pendingAutoAdds.clear();
-                            if (isCartMode) renderCartUI(); applyFiltersAndRender(); isApiLoading = false; hideLoading(); 
+                            if (isCartMode) renderCartUI(); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); isApiLoading = false; hideLoading(); 
                             if (rejectedCloudCount > 0) { showAlert(`Update Selesai!<br><br><span style="color:var(--warning);">⚠️ ${rejectedCloudCount} data ditolak dari Cloud (Format rusak).</span>`, "Peringatan Sinkronisasi", "var(--warning)"); } else { tampilkanToast(forceSync ? "Berhasil memuat ulang semua data!" : `Berhasil update ${dataCloud.length} data!`, "var(--mono-main)"); }
                             return;
                         }
