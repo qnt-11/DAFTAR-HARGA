@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==================================
 
-const APP_VERSION = '16.8'; 
+const APP_VERSION = '16.7'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -62,9 +62,9 @@ async function manageStorage() {
 self.addEventListener('install', event => {
   self.skipWaiting(); 
   
-  const criticalUrls = ['./', './index.html'];
+  // [ENHANCEMENT MUTLAK]: OFFLINE_URL dipindah ke core agar aplikasi tidak crash saat offline pertama kali
+  const criticalUrls = ['./', './index.html', OFFLINE_URL];
   const optionalUrls = [
-    OFFLINE_URL, 
     './manifest.json',
     'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
     'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
@@ -79,7 +79,8 @@ self.addEventListener('install', event => {
         optionalUrls.map(url => 
           fetch(new Request(url, { cache: 'reload' }))
             .then(res => { 
-              if (res.ok) return cache.put(url, res); 
+              // [FIX APPLIED]: Mengizinkan Opaque Response CDN masuk ke dalam Cache
+              if (res.ok || res.type === 'opaque' || res.status === 0) return cache.put(url, res); 
             })
             .catch(err => console.warn('[SW] Aset opsional tertunda:', url))
         )
@@ -133,13 +134,14 @@ self.addEventListener('fetch', event => {
 
         const pFetch = fetch(req);
         
-        // [PERISAI GHOST CACHING] Registrasi waitUntil secara sinkron
         event.waitUntil(
           pFetch.then(async (res) => {
             if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
               try { 
+                // [FIX APPLIED]: Melakukan CLONE Stream Memory SEBELUM micro-task await
+                const resToCache = res.clone();
                 const cache = await caches.open(CACHE_CORE); 
-                await cache.put(cleanReqUrl, res.clone()); 
+                await cache.put(cleanReqUrl, resToCache); 
               } catch(e) {}
             }
           }).catch(() => {})
@@ -180,14 +182,15 @@ self.addEventListener('fetch', event => {
         
         const fetchReqCDN = fetch(req);
         
-        // [PERISAI GHOST CACHING] Registrasi waitUntil secara sinkron
         event.waitUntil(
           fetchReqCDN.then(async res => {
             const contentType = res.headers.get('content-type') || '';
             if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
               try { 
+                // [FIX APPLIED]: CLONE Stream Memory
+                const resToCache = res.clone();
                 const cache = await caches.open(CACHE_CDN); 
-                await cache.put(req, res.clone()); 
+                await cache.put(req, resToCache); 
                 await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
               } catch(err) { console.warn('[SW] Gagal simpan CDN lokal', err); }
             }
@@ -208,21 +211,21 @@ self.addEventListener('fetch', event => {
       const fetchReqDyn = fetch(req);
       
       const cacheUpdatePromise = fetchReqDyn.then(async networkRes => {
-        // [PERISAI GHOST STREAM] Validasi ketat termasuk Opaque Response tanpa Header
         if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
           const contentType = networkRes.headers.get('content-type') || '';
           if (!contentType.includes('text/html')) {
             try { 
+              // [FIX APPLIED]: CLONE Stream Memory
+              const resToCache = networkRes.clone();
               const cache = await caches.open(CACHE_DYNAMIC); 
               const cleanUrl = req.url.split('?')[0]; 
-              await cache.put(cleanUrl, networkRes.clone()); 
+              await cache.put(cleanUrl, resToCache); 
               await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
             } catch(e) {}
           }
         }
       }).catch(() => {});
 
-      // [PERISAI GHOST CACHING] Registrasi waitUntil secara sinkron
       event.waitUntil(cacheUpdatePromise);
 
       if (cachedRes) return cachedRes;
@@ -250,7 +253,6 @@ async function processOfflineBackup() {
     req.onsuccess = (e) => {
       const idb = e.target.result;
       
-      // [PERISAI MEMORI] Tutup instan jika storage belum dipersiapkan
       if (!idb.objectStoreNames.contains('sync-outbox')) {
           idb.close();
           return resolve();
@@ -269,9 +271,8 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbw0VaMi4xJVp14b8Vp5CPa502WhTJSlumnNN_zf4Iw8_tXmkRFx_qwQiBX2Pp6-C2s-/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbwf4iOgrPx6yUrORjzbgNFXOS9g9WLbiZtjLTlvCjxEOeU0ljmTn-WiBGkL0xaLhiXC/exec";
           
-          // 1. Eksekusi Backup Data Barang
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
           });
@@ -285,7 +286,6 @@ async function processOfflineBackup() {
           }
           if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
 
-          // 2. Eksekusi Backup Riwayat
           const resHist = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
           });
@@ -299,14 +299,13 @@ async function processOfflineBackup() {
           }
           if (jsonResHist.status !== "success") throw new Error("Server Sibuk: Riwayat gagal disinkronkan");
 
-          // 3. Hapus antrean dengan Validasi Timestamp Mutlak (Pencegah Silent Data Loss)
           const txDel = idb.transaction('sync-outbox', 'readwrite');
           const storeDel = txDel.objectStore('sync-outbox');
           const verifyReq = storeDel.get('pending-backup');
 
           verifyReq.onsuccess = () => {
               if (verifyReq.result && verifyReq.result.timestamp === payload.timestamp) {
-                  storeDel.delete('pending-backup'); // Hapus karena data di cloud dan lokal sudah sama persis
+                  storeDel.delete('pending-backup'); 
               } else {
                   console.warn('[SW] Mutasi transaksi baru terdeteksi saat proses upload berjalan. Antrean dipertahankan.');
               }
@@ -321,12 +320,11 @@ async function processOfflineBackup() {
               reject(new Error("Gagal memvalidasi antrean IDB: " + e.target.error)); 
           };
         } catch (err) {
-          idb.close(); // Hancurkan sisa memori I/O jika terjadi error di tengah stream
+          idb.close(); 
           reject(err); 
         }
       };
 
-      // [PERISAI ZOMBIE THREAD] Cegah gantung jika memori/IndexedDB terkunci oleh OS
       getReq.onerror = (e) => {
         idb.close();
         reject(new Error("Gagal membaca antrean Sync IDB: " + e.target.error));
