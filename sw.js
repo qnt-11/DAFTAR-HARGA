@@ -1,6 +1,6 @@
-// ======================================
+// ==================================
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
-// ======================================
+// ==================================
 
 const APP_VERSION = '16.8'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
@@ -132,20 +132,18 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-        const pFetch = fetch(req);
-        
-        event.waitUntil(
-          pFetch.then(async (res) => {
-            if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
+                const pFetch = fetch(req).then(res => {
+          if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
+            const resToCache = res.clone(); // Kloning instan absolut sebelum browser membaca
+            event.waitUntil((async () => {
               try { 
-                // [FIX APPLIED]: Melakukan CLONE Stream Memory SEBELUM micro-task await
-                const resToCache = res.clone();
                 const cache = await caches.open(CACHE_CORE); 
                 await cache.put(cleanReqUrl, resToCache); 
               } catch(e) {}
-            }
-          }).catch(() => {})
-        );
+            })());
+          }
+          return res;
+        });
 
         const fetchPromise = Promise.race([
           pFetch,
@@ -180,22 +178,20 @@ self.addEventListener('fetch', event => {
       caches.match(req).then(cachedRes => {
         if (cachedRes) return cachedRes; 
         
-        const fetchReqCDN = fetch(req);
-        
-        event.waitUntil(
-          fetchReqCDN.then(async res => {
-            const contentType = res.headers.get('content-type') || '';
-            if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
+                const fetchReqCDN = fetch(req).then(res => {
+          const contentType = res.headers.get('content-type') || '';
+          if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
+            const resToCache = res.clone();
+            event.waitUntil((async () => {
               try { 
-                // [FIX APPLIED]: CLONE Stream Memory
-                const resToCache = res.clone();
                 const cache = await caches.open(CACHE_CDN); 
                 await cache.put(req, resToCache); 
                 await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
               } catch(err) { console.warn('[SW] Gagal simpan CDN lokal', err); }
-            }
-          }).catch(() => {})
-        );
+            })());
+          }
+          return res;
+        });
 
         return fetchReqCDN.catch(() => new Response('', { status: 503 }));
       })
@@ -208,25 +204,26 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   event.respondWith(
     caches.match(req, { ignoreSearch: true }).then(cachedRes => {
-      const fetchReqDyn = fetch(req);
-      
-      const cacheUpdatePromise = fetchReqDyn.then(async networkRes => {
+      const fetchReqDyn = fetch(req).then(networkRes => {
         if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
           const contentType = networkRes.headers.get('content-type') || '';
           if (!contentType.includes('text/html')) {
-            try { 
-              // [FIX APPLIED]: CLONE Stream Memory
-              const resToCache = networkRes.clone();
-              const cache = await caches.open(CACHE_DYNAMIC); 
-              const cleanUrl = req.url.split('?')[0]; 
-              await cache.put(cleanUrl, resToCache); 
-              await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-            } catch(e) {}
+            const resToCache = networkRes.clone();
+            event.waitUntil((async () => {
+              try { 
+                const cache = await caches.open(CACHE_DYNAMIC); 
+                const cleanUrl = req.url.split('?')[0]; 
+                await cache.put(cleanUrl, resToCache); 
+                await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+              } catch(e) {}
+            })());
           }
         }
-      }).catch(() => {});
+        return networkRes;
+      });
 
-      event.waitUntil(cacheUpdatePromise);
+      // PERISAI MUTLAK: Tahan nyawa Service Worker hingga fetch latar belakang selesai
+      event.waitUntil(fetchReqDyn.catch(() => {}));
 
       if (cachedRes) return cachedRes;
 
@@ -271,7 +268,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbwf4iOgrPx6yUrORjzbgNFXOS9g9WLbiZtjLTlvCjxEOeU0ljmTn-WiBGkL0xaLhiXC/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxV4o_moi0l1HzOG46effb1_R2FyRJQTWp7JTbyzIQc2r8V4QSzBNsRBes43wSu5JTY/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
