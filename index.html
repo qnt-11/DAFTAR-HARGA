@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwf4iOgrPx6yUrORjzbgNFXOS9g9WLbiZtjLTlvCjxEOeU0ljmTn-WiBGkL0xaLhiXC/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxV4o_moi0l1HzOG46effb1_R2FyRJQTWp7JTbyzIQc2r8V4QSzBNsRBes43wSu5JTY/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -481,7 +481,7 @@
         
         let currentInjectedQty = 1;
         let currentCleanQuery = '';
-        let pendingAutoAdds = new Set();
+        let pendingAutoAdds = new Map();
         
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
         let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout;
@@ -521,12 +521,12 @@
         }
 
                         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && isCartMode) {
+                        if (e.key === 'Enter' && isCartMode) {
                 e.preventDefault();
                 let val = searchInput.value.trim();
                 if (val !== '') {
                     handleSearchLogic(val);
-                    pendingAutoAdds.add(currentSearchReqId); 
+                    pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
                 }
             }
         });
@@ -585,8 +585,8 @@
             }
         }
 
-                                function handleLivePrice(id, el) {
-            let val = parseInt(el.value.replace(/\D/g, ''), 10);
+                                        function handleLivePrice(id, el) {
+            let val = parseInt(el.value.replace(/\D/g, '').substring(0, 15), 10);
             if (isNaN(val)) {
                 delete cartState[id].manualPrice;
                 saveCartMem();
@@ -934,10 +934,9 @@
             try {
                 if ('wakeLock' in navigator) {
                     isRequestingWakeLock = true;
-                    wakeLock = await navigator.wakeLock.request('screen');
+                                        wakeLock = await navigator.wakeLock.request('screen');
                     wakeLock.addEventListener('release', () => {
                         wakeLock = null;
-                        if (document.visibilityState === 'visible') requestWakeLock();
                     });
                 }
             } catch (err) {} finally {
@@ -1215,7 +1214,7 @@
         function formatRp(input) { 
             let cursorPosition = input.selectionStart;
             let originalLength = input.value.length;
-            let val = input.value.replace(/\D/g, ""); 
+                        let val = input.value.replace(/\D/g, "").substring(0, 15); 
             input.value = val ? fmt(parseInt(val, 10) || 0) : ""; 
             let newLength = input.value.length;
             cursorPosition = cursorPosition + (newLength - originalLength);
@@ -1423,11 +1422,12 @@
             if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
                 workerResult = e.data.data; 
                 
-                if (pendingAutoAdds.has(e.data.reqId)) {
+                                if (pendingAutoAdds.has(e.data.reqId)) {
+                    let injectedQ = pendingAutoAdds.get(e.data.reqId);
                     pendingAutoAdds.delete(e.data.reqId);
                     if (workerResult.length > 0) {
                         const topItem = workerResult[0];
-                        let addQty = currentInjectedQty;
+                        let addQty = injectedQ;
                         if (String(topItem.b2).toLowerCase() === currentCleanQuery && topItem.iq > 1) {
                             addQty = topItem.iq * currentInjectedQty;
                         }
@@ -1547,11 +1547,12 @@
             handleSearchLogic(term); 
         }
         
-        const handleSearchInput = debounce(() => { 
+                const handleSearchInput = debounce(() => { 
             const val = searchInput.value.trim(); 
             if (val) {
                 handleSearchLogic(val); 
             } else { 
+                currentSearchReqId++; // [SURGICAL FIX] Batalkan/Blokir respon Worker sebelumnya
                 workerResult = null; 
                 window.scrollTo({ top: 0, behavior: 'instant' }); 
                 applyFiltersAndRender(); 
@@ -1809,9 +1810,9 @@
                 const b = String($('i-b').value).trim().toUpperCase().substring(0, 40);
                 const b2 = String($('i-b2').value).trim().toUpperCase().substring(0, 40); 
                 const exp = $('i-exp').dataset.rawDate || '';
-                const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, ''), 10) || 0;
-                const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, ''), 10) || 0;
-                const p2 = parseInt(String($('i-p2').value).replace(/[^\d]/g, ''), 10) || null;
+                                const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
+                const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
+                const p2 = parseInt(String($('i-p2').value).replace(/[^\d]/g, '').substring(0, 15), 10) || null;
                 const u1 = $('i-u1').value; 
                 const u2 = $('i-u2').value; 
                 let iq = parseInt($('i-iq').value) || 0;
@@ -2037,9 +2038,9 @@
                     const store = idb.transaction('history', 'readonly').objectStore('history');
                     const req = store.index('ts_idx').openCursor(null, 'prev');
                     const results = [];
-                    req.onsuccess = (e) => {
+                                        req.onsuccess = (e) => {
                         const cursor = e.target.result;
-                        if (cursor && results.length < 200) {
+                        if (cursor && results.length < 2500) {
                             results.push(cursor.value);
                             cursor.continue();
                         } else { resolve(results); }
@@ -2210,7 +2211,7 @@
                             } 
                         });
 
-                        let maxRows = Math.min(rawRows.length, 10000); 
+                                                let maxRows = Math.min(rawRows.length, 50000); 
                         for (let i = headerRowIndex + 1; i < maxRows; i++) {
                             let rowArr = rawRows[i];
                             if (!rowArr || rowArr.length === 0) continue;
@@ -2386,7 +2387,8 @@
             checkModalOpen();
         }
 
-        function changeFDPMonth(dir) {
+                function changeFDPMonth(dir) {
+            fdpDate.setDate(1); // Mencegah rollover JS jika bulan saat ini tgl 31
             fdpDate.setMonth(fdpDate.getMonth() + dir);
             renderFDP();
         }
