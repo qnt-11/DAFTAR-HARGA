@@ -607,12 +607,13 @@
             const iq = Math.max(1, item.iq || 1);
             let subTotal = 0;
             
-            // [SURGICAL FIX] Harga Grosir Proporsional (q >= iq/2) dengan Perisai Minimum Beli (q > 1)
+                       // [SURGICAL FIX] Harga Grosir Proporsional (q >= iq/2) dengan Perisai Minimum Beli (q > 1)
             if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                subTotal = Math.round(q * (item.p2 / iq));
+                subTotal = Math.round((q * item.p2) / iq);
             } else {
                 subTotal = Math.round(q * item.p1);
             }
+
             
             let priceInput = document.getElementById('price-input-' + id);
             if(priceInput) priceInput.value = fmt(subTotal);
@@ -638,9 +639,9 @@
                 if (cartState[k].manualPrice !== undefined) {
                     grandTotal += cartState[k].manualPrice;
                 } else {
-                    // [SURGICAL FIX] Harga Grosir Proporsional di Kalkulasi Grand Total
+                                        // [SURGICAL FIX] Harga Grosir Proporsional di Kalkulasi Grand Total
                     if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                        grandTotal += Math.round(q * (item.p2 / iq));
+                        grandTotal += Math.round((q * item.p2) / iq);
                     } else {
                         grandTotal += Math.round(q * item.p1);
                     }
@@ -679,9 +680,9 @@
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
-                        // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
+                                                // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
                         if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                            subTotal = Math.round(q * (item.p2 / iq));
+                            subTotal = Math.round((q * item.p2) / iq);
                         } else {
                             subTotal = Math.round(q * item.p1);
                         }
@@ -1762,8 +1763,9 @@
                     html += `<div style="position:relative; margin-bottom:12px;">${trashBgHtml}<div class="card" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${swipeAttributes}><div class="info"><div class="name"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div>${it.p1?`<div class="card-price-ecer">${unit1}: Rp ${fmt(it.p1)}</div>`:''}${(it.p1 > 0 && it.p2 > 0)?`<div class="card-price-grosir" style="display:flex; justify-content:space-between; max-width:200px;"><span>${unit2}: Rp ${fmt(it.p2)}</span><span style="color:#777777;">Isi: ${it.iq || 0}</span></div>`:''}${barcodeDisplay}${exH}</div>${rightSideUI}</div></div>`;
                 }
             }
-            rend.innerHTML = html;
+                        rend.innerHTML = html;
             requestAnimationFrame(() => {
+                if (start !== lastStartIndex) return;
                 let hc = false; const dom = rend.children;
                 for (let i = 0; i < dom.length; i++) {
                     const h = dom[i].offsetHeight + 12, idx = start + i; 
@@ -2453,12 +2455,12 @@
                     // 1. Kalkulasi Modal (Absolute Fallback)
                     finalModal = Math.round(q * (item.hpp || 0));
                     
-                    // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
+                                        // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
                         if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                            subTotal = Math.round(q * (item.p2 / iq)); 
+                            subTotal = Math.round((q * item.p2) / iq); 
                         } else { 
                             subTotal = Math.round(q * item.p1); 
                         }
@@ -2529,7 +2531,7 @@
                     let totalModal = itemsPrint.reduce((sum, i) => sum + (i.modal || 0), 0);
                     
                     // SURGICAL FIX 4: Overwrite Struk (Cegah Omzet Ganda)
-                    let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4);
+                    let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + generateUniqueId().substring(0, 8).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
                     let newTrx = { id: finalId, ts: finalTs, total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
                     
@@ -2632,7 +2634,7 @@
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
             // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
-            let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + Math.floor(Math.random() * 10000) + d.getTime().toString().slice(-4);
+            let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + generateUniqueId().substring(0, 10).toUpperCase();
             let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
             let receiptNo = finalId; 
             let totalItemCount = 0;
@@ -2841,10 +2843,11 @@
                             qtyText = `${it.q} ${eU}`;
                         }
 
-                        itemsHtml += `
-                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-bottom:4px;">
-                            <span>${escapeHTML(qtyText)} ${escapeHTML(it.n)}</span>
-                            <span>Rp ${fmt(it.sub)}</span>
+                                                itemsHtml += `
+                        <div style="display:flex; align-items:flex-start; gap:8px; font-size:11.5px; margin-bottom:8px;">
+                            <span style="color:#87CEFA; font-weight:800; flex-shrink:0; width:65px;">${escapeHTML(qtyText)}</span>
+                            <span style="color:#e0e0e0; flex:1; line-height:1.3; word-break:break-word;">${escapeHTML(it.n)}</span>
+                            <span style="color:#fff; font-weight:700; flex-shrink:0; text-align:right;">Rp ${fmt(it.sub)}</span>
                         </div>`;
                                                                                                 let key = it.id || it.n;
                                                 if (!itemAgg[key]) {
@@ -2866,25 +2869,70 @@
                     itemsHtml += `<div style="font-size:11px; color:#ccc;">${h.items} Item (Format Lama)</div>`;
                 }
 
+                                                // LOGIKA KOMPUTASI: Menghitung "Jenis" dan Total "Kuantitas Fisik"
+                let totalMacam = Array.isArray(h.items) ? h.items.length : 1;
+                let totalFisik = 0;
+                
+                if (Array.isArray(h.items)) {
+                    h.items.forEach(it => {
+                        let iqNum = Math.max(1, parseInt(it.iq) || 1);
+                        let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
+                        if (it.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                            totalFisik += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
+                        } else {
+                            totalFisik += nQ || 1;
+                        }
+                    });
+                } else {
+                    totalFisik = 1;
+                }
+                totalFisik = Math.round(totalFisik * 1000) / 1000;
+
+                let splitJam = timeStr.split(' '); 
+                let shortId = h.id ? h.id.split('-').pop() : 'LAMA'; 
+
+                                // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
                 html += `
-                <div style="border: 1px solid #333; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: transparent;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222; padding-bottom:8px; margin-bottom:8px;">
-                        <span style="font-size:10px; color:#888;">${timeStr}</span>
-                        <span style="font-size:13px; font-weight:800; color:#fff;">Rp ${fmt(h.total)}</span>
+                <div style="background: #111; border: 1px solid #333; border-radius: 8px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8);">
+                    <div onclick="const d = document.getElementById('det-${h.id}'); const i = document.getElementById('icn-${h.id}'); if(d.style.display==='none'){d.style.display='block'; i.style.transform='rotate(180deg)';}else{d.style.display='none'; i.style.transform='rotate(0deg)';}" 
+                         style="padding: 12px 14px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid #87CEFA;">
+                        
+                        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px dashed #333; padding-bottom: 6px;">
+                            <span style="font-family: monospace; font-size:11px; font-weight:800; color:#87CEFA; letter-spacing:1px;">TRX-${shortId}</span>
+                            <span style="font-size:10px; font-weight:600; color:#888;">${splitJam[1]} WIB</span>
+                        </div>
+                        
+                        <div style="display:flex; justify-content: space-between; align-items: center;">
+                            <div style="display:flex; flex-direction:column; gap:2px;">
+                                <span style="font-size:10px; color:#aaa; font-weight:500;">TOTAL BELANJA</span>
+                                <span style="font-size:11px; font-weight:700; color:#fff;">${totalMacam} Jenis <span style="color:#555;">|</span> ${totalFisik} Item</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:15px; font-weight:900; color:#3CB371;">Rp ${fmt(h.total)}</span>
+                                <svg id="icn-${h.id}" style="transition: transform 0.2s ease; color:#666;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                        </div>
                     </div>
-                    ${itemsHtml}
-                                        <div style="display:flex; gap:6px; margin-top:12px;">
-                        <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #FFA500!important; color:#FFA500!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="editHistory('${h.id}')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> EDIT
-                        </button>
-                        <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #3CB371!important; color:#3CB371!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="waHistory('${h.id}')">
-                            WA
-                        </button> 
-                        <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #666!important; color:#aaa!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px;" onclick="printHistory('${h.id}')">
-                            CETAK
-                        </button>
+                    
+                    <div id="det-${h.id}" style="display: none; border-top: 1px dashed #333; padding: 12px 14px; background: #050505;">
+                        <div style="margin-bottom: 15px; padding-right: 5px;">
+                            ${itemsHtml}
+                        </div>
+                        
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #FFA500!important; color:#FFA500!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="editHistory('${h.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> EDIT
+                            </button>
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #3CB371!important; color:#3CB371!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="waHistory('${h.id}')">
+                                WA
+                            </button> 
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
+                                CETAK
+                            </button>
+                        </div>
                     </div>
                 </div>`;
+
             });
 
             $('hist-omzet').innerText = `Rp ${fmt(totalOmzet)}`;
@@ -2912,24 +2960,34 @@
 
         function closeTop10() { untrackModal('top10'); $('top10-modal').style.display = 'none'; checkModalOpen(); } 
 
-        function printHistory(id) {
+                function printHistory(id) {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
+            // [SURGICAL FIX] Force Injeksi ID Lama ke Mesin Printer
+            const triggerPrint = (hData) => {
+                let itemsToPrint = Array.isArray(hData.items) ? hData.items : [{ n: "Item Historis", q: hData.items, u: "Item", sub: hData.total }];
+                
+                // KUNCI ABSOLUT: Paksa printer menggunakan ID lama
+                let tempId = activeEditTrxId; 
+                activeEditTrxId = hData.id; 
+                
+                executePrint(hData.total, hData.bayar, itemsToPrint, hData.ts, true);
+                
+                // Kembalikan state memori seperti semula (Mencegah error sistem)
+                setTimeout(() => { activeEditTrxId = tempId; }, 100); 
+            };
+
             if (!h) {
                 const tx = idb.transaction('history', 'readonly');
                 const req = tx.objectStore('history').get(id);
                 req.onsuccess = () => {
-                    if (req.result) {
-                        h = req.result;
-                        let itemsToPrint = Array.isArray(h.items) ? h.items : [{ n: "Item Historis", q: h.items, u: "Item", sub: h.total }];
-                        executePrint(h.total, h.bayar, itemsToPrint, h.ts, true);
-                    } else { tampilkanToast("Data tidak ditemukan!", "var(--danger)"); }
+                    if (req.result) { triggerPrint(req.result); }
+                    else { tampilkanToast("Data tidak ditemukan!", "var(--danger)"); }
                 };
                 return;
             }
-            let itemsToPrint = Array.isArray(h.items) ? h.items : [{ n: "Item Historis", q: h.items, u: "Item", sub: h.total }];
-            executePrint(h.total, h.bayar, itemsToPrint, h.ts, true);
+            triggerPrint(h);
         }
 
         function waHistory(id) {
