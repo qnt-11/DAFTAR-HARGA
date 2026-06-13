@@ -1,8 +1,8 @@
-// ==================================
+// =====================================
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
-// ==================================
+// =====================================
 
-const APP_VERSION = '16.8'; 
+const APP_VERSION = '16.9'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -23,25 +23,28 @@ const cdnDomains = [
 // MANAJEMEN MEMORI (ANTI-LAG)
 // ==========================================
 
-let isTrimming = {}; 
+let trimQueues = {}; 
 
-async function trimCache(cacheName, maxItems) {
-  if (isTrimming[cacheName]) return; 
-  isTrimming[cacheName] = true;
-  try {
-    const cache = await caches.open(cacheName);
-    const keys = await cache.keys();
-    if (keys.length > maxItems) {
-      const keysToDelete = keys.slice(0, keys.length - maxItems);
-      for (let key of keysToDelete) {
-        await cache.delete(key);
-      }
-    }
-  } catch (err) {
-    console.warn('[SW] Gagal membersihkan memori:', err);
-  } finally {
-    isTrimming[cacheName] = false;
+// [SURGICAL FIX] Enterprise Promise Queueing System (Anti-Bypass)
+function trimCache(cacheName, maxItems) {
+  if (!trimQueues[cacheName]) {
+    trimQueues[cacheName] = Promise.resolve();
   }
+  
+  trimQueues[cacheName] = trimQueues[cacheName].then(async () => {
+    try {
+      const cache = await caches.open(cacheName);
+      const keys = await cache.keys();
+      if (keys.length > maxItems) {
+        const keysToDelete = keys.slice(0, keys.length - maxItems);
+        await Promise.all(keysToDelete.map(key => cache.delete(key)));
+      }
+    } catch (err) {
+      console.warn('[SW] Gagal membersihkan memori:', err);
+    }
+  }).catch(() => {}); // Catch inline agar antrean tidak macet jika terjadi error
+  
+  return trimQueues[cacheName];
 }
 
 async function manageStorage() {
@@ -132,18 +135,19 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-                const pFetch = fetch(req).then(res => {
+                        const pFetch = fetch(req).then(async res => {
           if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
             const resToCache = res.clone(); // Kloning instan absolut sebelum browser membaca
-            event.waitUntil((async () => {
-              try { 
-                const cache = await caches.open(CACHE_CORE); 
-                await cache.put(cleanReqUrl, resToCache); 
-              } catch(e) {}
-            })());
+            try { 
+              const cache = await caches.open(CACHE_CORE); 
+              await cache.put(cleanReqUrl, resToCache); 
+            } catch(e) {}
           }
           return res;
         });
+
+        // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
+        event.waitUntil(pFetch.catch(() => {}));
 
         const fetchPromise = Promise.race([
           pFetch,
