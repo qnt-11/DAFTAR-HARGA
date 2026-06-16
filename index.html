@@ -1090,6 +1090,7 @@
                 gain.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + 0.1); 
                 osc.start(); 
                 osc.stop(globalAudioCtx.currentTime + 0.1); 
+osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             } catch(e) {} 
         }
 
@@ -2531,7 +2532,15 @@
                     let totalModal = itemsPrint.reduce((sum, i) => sum + (i.modal || 0), 0);
                     
                     // SURGICAL FIX 4: Overwrite Struk (Cegah Omzet Ganda)
-                    let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + generateUniqueId().substring(0, 8).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+                    let finalId = activeEditTrxId;
+                    if (!finalId) {
+                        let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+                        let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
+                        let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                        if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
+                        localStorage.setItem('TRX_SEQ', seq);
+                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+                    }
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
                     let newTrx = { id: finalId, ts: finalTs, total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
                     
@@ -2634,7 +2643,15 @@
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
             // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
-            let finalId = activeEditTrxId ? activeEditTrxId : 'TRX-' + generateUniqueId().substring(0, 10).toUpperCase();
+            let finalId = activeEditTrxId;
+            if (!finalId) {
+                let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+                let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
+                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
+                localStorage.setItem('TRX_SEQ', seq);
+                finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+            }
             let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
             let receiptNo = finalId; 
             let totalItemCount = 0;
@@ -2889,7 +2906,7 @@
                 totalFisik = Math.round(totalFisik * 1000) / 1000;
 
                 let splitJam = timeStr.split(' '); 
-                let shortId = h.id ? h.id.split('-').pop() : 'LAMA'; 
+let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA'; 
 
                                 // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
                 html += `
@@ -3183,7 +3200,8 @@
         
         async function initApp() { 
             try { 
-                const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`; 
+                if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(()=>{}); }
+const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
                 await initDB(); db = await loadAllFromIDB(); 
                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
