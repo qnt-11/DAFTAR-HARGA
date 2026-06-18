@@ -460,7 +460,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxV4o_moi0l1HzOG46effb1_R2FyRJQTWp7JTbyzIQc2r8V4QSzBNsRBes43wSu5JTY/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyeGARq6FkNhHHWtw8qVS9F5CMV1AaJCLX-B3jN_Ry-BFwnpYLc1IE28LG_DdtkFxEa/exec";
         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
@@ -585,19 +585,48 @@
             }
         }
 
-                                        function handleLivePrice(id, el) {
-            let val = parseInt(el.value.replace(/\D/g, '').substring(0, 15), 10);
-            if (isNaN(val)) {
-                delete cartState[id].manualPrice;
-                saveCartMem();
-                updateGrandTotal();
-                updateRowVisuals(id);
-                return;
+            function handleLivePrice(id, el) {
+            let valStr = el.value.replace(/\D/g, '').substring(0, 15);
+            if (valStr === '') {
+                // Jangan reset UI! Biarkan kasir mengetik. Tahan Grand Total agar tidak bocor.
+                cartState[id].manualPrice = 0;
+            } else {
+                cartState[id].manualPrice = parseInt(valStr, 10);
             }
-            cartState[id].manualPrice = val;
             saveCartMem();
             updateGrandTotal();
         }
+
+        function validatePriceBlur(id, el) {
+            let val = parseInt(el.value.replace(/\D/g, ''), 10);
+            if (isNaN(val) || el.value === '') {
+                delete cartState[id].manualPrice;
+                saveCartMem();
+                updateRowVisuals(id);
+                updateGrandTotal();
+            } else {
+                // Perisai State: Jangan lock Manual Price jika harganya SAMA dengan kalkulasi Auto!
+                let item = db.find(x => String(x.id) === id);
+                let q = cartState[id].q || 1;
+                let iq = Math.max(1, item.iq || 1);
+                let defaultSub = 0;
+                if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
+                    defaultSub = Math.round((q * item.p2) / iq);
+                } else {
+                    defaultSub = Math.round(q * item.p1);
+                }
+                
+                if (val === defaultSub) {
+                    delete cartState[id].manualPrice; // Buka kunci (kembalikan ke Auto)
+                } else {
+                    cartState[id].manualPrice = val;  // Kunci sebagai Manual Valid
+                }
+                saveCartMem();
+                el.value = fmt(val);
+                updateGrandTotal();
+            }
+        }
+
         
         function updateRowVisuals(id) {
             const item = db.find(x => String(x.id) === id);
@@ -702,7 +731,7 @@
                             </div>
                                                         <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
-                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; handleLivePrice('${item.id}', this);" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
                                                      <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
                                <input type="tel" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
@@ -754,12 +783,24 @@
                         const loadToCart = (hData) => {
                 if (!Array.isArray(hData.items)) return tampilkanToast("Format lama tidak bisa diedit!", "var(--danger)");
                 
-                cartState = {};
+                                cartState = {};
                 hData.items.forEach(it => {
                     cartState[it.id] = { q: it.q };
                     
-                    // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
+                    // [SURGICAL INJECTION] Rekonstruksi HPP Historis (Kunci Modal Masa Lalu)
+                    if (it.modal !== undefined) {
+                        cartState[it.id].hModal = it.q > 0 ? (it.modal / it.q) : 0;
+                    }
+                    
+                                        // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
                     let dbItem = db.find(x => String(x.id) === String(it.id));
+                    
+                    // [GHOST ITEM INJECTION]: Lindungi barang yang sudah dihapus dari DB utama agar tidak lenyap dari Struk lama
+                    if (!dbItem) {
+                        dbItem = { id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true };
+                        db.push(dbItem);
+                    }
+
                     if (dbItem) {
                         let iq = Math.max(1, dbItem.iq || 1);
                         let defaultSub = 0;
@@ -1157,10 +1198,11 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 return undefined;
             };
 
-            norm.n = prop(rawObj.n !== undefined ? rawObj.n : findVal(['NAMABARANG'], ['NAMA', 'ITEM', 'PRODUK']));
+                 norm.n = prop(rawObj.n !== undefined ? rawObj.n : findVal(['NAMABARANG'], ['NAMA', 'ITEM', 'PRODUK']));
             if (!norm.n) return null; 
             
-            norm.hpp = parseExcelPrice(rawObj.hpp !== undefined ? rawObj.hpp : findVal(['MODAL', 'HARGAMODAL', 'HPP', 'BELI']));
+            // SURGICAL FIX: Menambahkan 'HARGAMODAL(HPP)' agar persis dengan format Export
+            norm.hpp = parseExcelPrice(rawObj.hpp !== undefined ? rawObj.hpp : findVal(['MODAL', 'HARGAMODAL', 'HPP', 'BELI', 'HARGAMODAL(HPP)']));
             norm.p1 = parseExcelPrice(rawObj.p1 !== undefined ? rawObj.p1 : findVal(['HARGASATUAN'], ['HARGAECER', 'HARGA', 'ECERAN']));
             norm.p2 = parseExcelPrice(rawObj.p2 !== undefined ? rawObj.p2 : findVal(['HARGAGROSIR'], ['GROSIR']));
             
@@ -2262,34 +2304,49 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             }
                         }
 
-                                                if(processedItems.size > 0) {
-                            const tx = idb.transaction('items', 'readwrite'); const s = tx.objectStore('items');
+                            if(processedItems.size > 0) {
                             let fastIndexMap = new Map();
                             for(let i=0; i<db.length; i++) fastIndexMap.set(String(db[i].id), i);
-                            processedItems.forEach(item => { 
-                                let eIdx = fastIndexMap.has(String(item.id)) ? fastIndexMap.get(String(item.id)) : -1; 
-                                if(eIdx > -1) db[eIdx] = item; else { db.push(item); fastIndexMap.set(String(item.id), db.length - 1); } 
-                                s.put(item); 
-                            });
-                                                        tx.oncomplete = () => { 
-                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
-                                updateMaps(); renderCartUI(); clearSearch(); 
-                                isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
+                            
+                            let itemsArray = Array.from(processedItems.values());
+                            const chunkSize = 500;
+                            let currentIndex = 0;
 
-                                if (skippedCount > 0 || failedCount > 0) { 
-                                    let msg = ``;
-                                    if (skippedCount > 0) msg += `⚠️ <b>${skippedCount}</b> data ditolak (Barcode Ganda).<br>`;
-                                    if (failedCount > 0) msg += `ℹ️ <b>${failedCount}</b> baris kosong diabaikan.<br>`;
-                                    msg += `<br><span style="color:var(--mono-main);">✅ Sukses memuat <b>${processedItems.size}</b> Data Valid.</span>`;
-                                    showAlert(msg, "Laporan Import", "var(--warning)"); 
-                                } else { 
-                                    tampilkanToast("Import Selesai Total!", "var(--mono-main)"); 
+                            function processImportChunk() {
+                                const chunk = itemsArray.slice(currentIndex, currentIndex + chunkSize);
+                                if (chunk.length === 0) {
+                                    if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
+                                    updateMaps(); renderCartUI(); clearSearch(); 
+                                    isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
+
+                                    if (skippedCount > 0 || failedCount > 0) { 
+                                        let msg = `⚠️ <b>${skippedCount}</b> ditolak (Barcode Ganda).<br>ℹ️ <b>${failedCount}</b> baris kosong diabaikan.<br><br><span style="color:var(--mono-main);">✅ Sukses memuat <b>${processedItems.size}</b> Data Valid.</span>`;
+                                        showAlert(msg, "Laporan Import", "var(--warning)"); 
+                                    } else { 
+                                        tampilkanToast("Import Selesai Total!", "var(--mono-main)"); 
+                                    }
+                                    return;
                                 }
-                            }; 
-                            tx.onerror = () => { 
-                                isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
-                                showAlert("Gagal menyimpan ke Database HP. Coba lagi.", "Error"); 
+
+                                const tx = idb.transaction('items', 'readwrite'); 
+                                const s = tx.objectStore('items');
+                                
+                                chunk.forEach(item => { 
+                                    let eIdx = fastIndexMap.has(String(item.id)) ? fastIndexMap.get(String(item.id)) : -1; 
+                                    if(eIdx > -1) db[eIdx] = item; else { db.push(item); fastIndexMap.set(String(item.id), db.length - 1); } 
+                                    s.put(item); 
+                                });
+
+                                tx.oncomplete = () => { 
+                                    currentIndex += chunkSize; 
+                                    requestAnimationFrame(processImportChunk); 
+                                }; 
+                                tx.onerror = () => { 
+                                    isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
+                                    showAlert("Gagal menyimpan memori (Quota Exceeded).", "Error"); 
+                                };
                             }
+                            processImportChunk();
                         } else {
                             isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                             showAlert(`Tidak ada data valid yang bisa dibaca.<br>ℹ️ Baris kosong dilewati.`, "Info Import", "var(--warning)"); 
@@ -2450,13 +2507,17 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
-                    const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
+                                        const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0; let finalModal = 0; let printUnit = '';
 
-                    // 1. Kalkulasi Modal (Absolute Fallback)
-                    finalModal = Math.round(q * (item.hpp || 0));
+                    // 1. Kalkulasi Modal (Prioritaskan Modal Historis saat mode Edit Struk)
+                    if (cartState[id].hModal !== undefined) {
+                        finalModal = Math.round(q * cartState[id].hModal);
+                    } else {
+                        finalModal = Math.round(q * (item.hpp || 0));
+                    }
                     
-                                        // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
+                    // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
@@ -2653,8 +2714,14 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
             }
             let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
-            let receiptNo = finalId; 
+                        let receiptNo = finalId; 
             let totalItemCount = 0;
+
+            // Kalkulasi padding dinamis agar Jam selalu rata kanan dengan kode TRX
+            let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
+            let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            let padLen = Math.max(1, receiptNo.length - dDate.length - dTime.length);
+            let dateStrAligned = dDate + "&nbsp;".repeat(padLen) + dTime;
 
             // 2. Render Header & Meta Standar Supermarket
             let rawHTML = `
@@ -2667,7 +2734,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
                 <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
                     <tr><td style="text-align:left; width: 40px;">No</td><td style="text-align:left;">: ${receiptNo}</td></tr>
-                    <tr><td style="text-align:left;">Tgl</td><td style="text-align:left;">: ${dateStr}</td></tr>
+                    <tr><td style="text-align:left;">Tgl</td><td style="text-align:left; white-space: nowrap;">: ${dateStrAligned}</td></tr>
                     <tr><td style="text-align:left;">Kasir</td><td style="text-align:left;">: Dona${isReprint ? ' [R]' : ''}</td></tr>
                 </table>
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
@@ -3011,19 +3078,24 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
-                                    const doWaHistory = (hData) => {
-                let d = new Date(hData.ts);
-                let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const doWaHistory = (hData) => {
+                                let d = new Date(hData.ts);
+                let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
+                let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
                 // 1. Ekstraksi ID & Total Item
                 let receiptNo = hData.id; // SURGICAL FIX: Gunakan ID Riwayat Asli secara absolut
                 let totalItemCount = 0;
+                
+                // Kalkulasi spasi dinamis
+                let padLen = Math.max(1, receiptNo.length - dDate.length - dTime.length);
+                let dateStrAligned = dDate + " ".repeat(padLen) + dTime;
 
                 // 2. Render Header Standar Ritel
                 let text = "```\n";
                 text += `TOKO KELONTONG\nPs. Sunggingan Lt. 2\n========================\n`;
                 text += `No   : ${receiptNo}\n`;
-                text += `Tgl  : ${dateStr}\n`;
+                text += `Tgl  : ${dateStrAligned}\n`;
                 text += `========================\n`;
                 
                 // Normalisasi Data Historis Lawas menjadi Array (Bypass Ghost Item Bug)
