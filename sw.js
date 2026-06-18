@@ -1,8 +1,8 @@
-// =====================================
+// ==================================
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
-// =====================================
+// ==================================
 
-const APP_VERSION = '17.0'; 
+const APP_VERSION = '17.1'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -15,8 +15,7 @@ const OFFLINE_URL = 'offline.html';
 const cdnDomains = [
   'unpkg.com', 
   'fonts.googleapis.com', 
-  'fonts.gstatic.com', 
-  'cdn.jsdelivr.net'
+  'fonts.gstatic.com'
 ];
 
 // ==========================================
