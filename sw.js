@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==================================
 
-const APP_VERSION = '17.3'; 
+const APP_VERSION = '17.4'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -65,28 +65,11 @@ self.addEventListener('install', event => {
   self.skipWaiting(); 
   
   // [ENHANCEMENT MUTLAK]: OFFLINE_URL dipindah ke core agar aplikasi tidak crash saat offline pertama kali
-  const criticalUrls = ['./', './index.html', OFFLINE_URL];
-  const optionalUrls = [
-    './manifest.json',
-    'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
-    'https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700;800&display=swap'
-  ];
+  const criticalUrls = ['./', './index.html', OFFLINE_URL, './manifest.json'];
 
   event.waitUntil(
     caches.open(CACHE_CORE).then(async cache => {
       await cache.addAll(criticalUrls);
-      
-      await Promise.allSettled(
-        optionalUrls.map(url => 
-          fetch(new Request(url, { cache: 'reload' }))
-            .then(res => { 
-              // [FIX APPLIED]: Mengizinkan Opaque Response CDN masuk ke dalam Cache
-              if (res.ok || res.type === 'opaque' || res.status === 0) return cache.put(url, res); 
-            })
-            .catch(err => console.warn('[SW] Aset opsional tertunda:', url))
-        )
-      );
     }).catch(err => console.error('[SW] Instalasi PWA Gagal Total:', err))
   );
 });
@@ -117,9 +100,9 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
 
   // ---------------------------------------------------------
-  // STRATEGI 1: Network-First untuk File Utama HTML
+    // STRATEGI 1: Network-First untuk File Utama HTML
   // ---------------------------------------------------------
-  if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.includes('index.html')) {
+  if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('index.html')) {
     event.respondWith(
       (async () => {
         const cleanReqUrl = req.url.split('?')[0];
@@ -178,8 +161,8 @@ self.addEventListener('fetch', event => {
   // STRATEGI 2: Cache-First Murni untuk CDN Eksternal
   // ---------------------------------------------------------
   if (cdnDomains.some(domain => url.hostname.includes(domain))) {
-    event.respondWith(
-      caches.match(req).then(cachedRes => {
+        event.respondWith(
+      caches.match(req).catch(() => null).then(cachedRes => {
         if (cachedRes) return cachedRes; 
         
                 const fetchReqCDN = fetch(req).then(res => {
@@ -206,8 +189,8 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-  event.respondWith(
-    caches.match(req, { ignoreSearch: true }).then(cachedRes => {
+    event.respondWith(
+    caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
       const fetchReqDyn = fetch(req).then(networkRes => {
         if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
           const contentType = networkRes.headers.get('content-type') || '';
@@ -215,10 +198,11 @@ self.addEventListener('fetch', event => {
             const resToCache = networkRes.clone();
             event.waitUntil((async () => {
               try { 
-                const cache = await caches.open(CACHE_DYNAMIC); 
-                const cleanUrl = req.url.split('?')[0]; 
-                await cache.put(cleanUrl, resToCache); 
-                await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+                            const cache = await caches.open(CACHE_DYNAMIC); 
+                            const cleanUrl = req.url.split('?')[0]; 
+                            await cache.delete(cleanUrl); // [SURGICAL FIX] Paksa perbarui indeks LRU ke antrean paling belakang
+                            await cache.put(cleanUrl, resToCache); 
+                            await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
               } catch(e) {}
             })());
           }
@@ -248,7 +232,10 @@ self.addEventListener('sync', event => {
   }
 });
 
+let isSyncing = false;
 async function processOfflineBackup() {
+  if (isSyncing) return Promise.resolve();
+  isSyncing = true;
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('HargaDB_Pro'); 
     req.onsuccess = (e) => {
@@ -312,9 +299,13 @@ async function processOfflineBackup() {
               }
           };
 
-          txDel.oncomplete = () => { 
+                    txDel.oncomplete = () => { 
               idb.close(); 
               resolve(); 
+          };
+          txDel.onabort = () => { 
+              idb.close(); 
+              reject(new Error("Transaksi dibatalkan paksa oleh sistem.")); 
           };
           txDel.onerror = (e) => { 
               idb.close(); 
@@ -331,7 +322,7 @@ async function processOfflineBackup() {
         reject(new Error("Gagal membaca antrean Sync IDB: " + e.target.error));
       };
 
-    };
+     };
     req.onerror = () => reject();
-  });
+  }).finally(() => { isSyncing = false; });
 }
