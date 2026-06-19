@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.3</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.4</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -582,12 +582,13 @@
             if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
         }
 
-                                searchInput.addEventListener('keydown', (e) => {
+               searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && isCartMode) {
                 e.preventDefault();
                 if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
                 let val = searchInput.value.trim();
                 if (val !== '') {
+                    if (handleSearchInput.cancel) handleSearchInput.cancel();
                     handleSearchLogic(val);
                     pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
                 }
@@ -1011,13 +1012,7 @@
             }
             setTimeout(() => { isMainSwiping = false; }, 100);
         }
-        
-        for (let k in cartState) { 
-            if (typeof cartState[k] === 'object' && cartState[k].t !== undefined) { 
-                cartState[k] = { q: cartState[k].q }; 
-            } 
-        }
-        
+            
                 function saveCartMem() { 
             try {
                 localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
@@ -1116,7 +1111,7 @@
             }); 
         }
         
-        async function saveItemToIDB(item) { 
+                async function saveItemToIDB(item) { 
             if (!idb) {
                 await initDB();
             }
@@ -1125,6 +1120,7 @@
                     const tx = idb.transaction('items', 'readwrite'); 
                     tx.objectStore('items').put(item); 
                     tx.oncomplete = () => resolve(); 
+                    tx.onabort = () => reject(new Error("Transaksi dibatalkan sistem. (Memori penuh)"));
                     tx.onerror = () => reject(new Error("Gagal menyimpan ke memori perangkat.")); 
                 } catch (e) { 
                     initDB().then(() => {
@@ -2056,7 +2052,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }
         }
 
-        async function del(id) {
+                async function del(id) {
+            if ($('custom-alert').style.display === 'flex') return;
             const idx = db.findIndex(x => String(x.id) === String(id)), cardToReset = swipedCardElem; if(idx === -1) return;
             showConfirm(`Hapus "<b>${escapeHTML(db[idx].n)}</b>"?`, "Hapus", "var(--danger)", 
                 async () => {
@@ -2070,9 +2067,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
         async function executeDeleteAll() { 
             closePinModal(); tampilkanToast("Menghapus...", "var(--danger)"); $('list').style.pointerEvents = 'none'; 
-            try { 
+                        try { 
                 const tx = idb.transaction('items', 'readwrite'), s = tx.objectStore('items'), ts = Date.now(); 
-                db.forEach(i => { if (!i.deleted) { i.deleted = true; i.updatedAt = ts; s.put(i); } }); 
+                db.forEach(i => { if (!i.deleted && !i._isGhost) { i.deleted = true; i.updatedAt = ts; s.put(i); } }); 
                 tx.oncomplete = () => { if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)"); }; 
             } catch(e) { $('list').style.pointerEvents = 'auto'; showAlert("Gagal.", "Error"); } 
         }
@@ -2175,7 +2172,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     const tx = idb.transaction('items', 'readwrite'); 
                     const store = tx.objectStore('items'); 
                     store.clear(); 
-                    db.forEach(item => store.put(item));
+                    db.forEach(item => { if (!item._isGhost) store.put(item); });
                 })
                 .catch((err) => { 
                     isApiLoading = false; hideLoading(); 
@@ -2266,7 +2263,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 setTimeout(() => {
                     try {
                         const w = XLSX.read(new Uint8Array(ev.target.result), {type: 'array'});
-                        let rawRows = XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]], { header: 1, defval: "" });
+                        let rawRows = XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]], { header: 1, defval: "", raw: false });
                         
                         if (!rawRows || rawRows.length === 0) throw new Error("Data Kosong");
 
@@ -2573,7 +2570,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             $('fdp-grid').innerHTML = html;
         }
 
-        function promptPrint() {
+                function promptPrint() {
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--danger)");
             
             let grandTotal = 0; let itemsPrint = [];
@@ -3311,7 +3309,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
 
         let isDbReady = false, pendingLaunchFile = null; 
         
-        async function initApp() { 
+                async function initApp() { 
             try { 
                 if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(()=>{}); }
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
@@ -3319,6 +3317,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
+                checkOfflineLedger(); // [SURGICAL FIX] Jembatan Penarik Data Offline Darurat
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
         }
         initApp();
