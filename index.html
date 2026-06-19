@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwNwsoR0t0oh8ao2b-qufKRJj47QmY3UPNLwwANGBfg-zNa3t0WiYXmyXU1X4DJx8xO/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyeGARq6FkNhHHWtw8qVS9F5CMV1AaJCLX-B3jN_Ry-BFwnpYLc1IE28LG_DdtkFxEa/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -126,6 +126,7 @@
                     <div class="dropdown-item" onclick="exportData()" style="color: #3CB371;">Save Excel</div>
                     <label class="dropdown-item" style="color: #3CB371;">Load Excel<input type="file" accept=".xlsx, .xls, .csv" onchange="importData(event)"></label>
                     <div class="dropdown-item" onclick="optimizeData()" style="color: #FFA500;">Bersihkan Cache</div>
+                    <div class="dropdown-item" onclick="openAboutModal()" style="color: var(--text-light); border-top: 1px dashed #333;">About</div>
                     <div class="dropdown-item" onclick="deleteAllDataPrompt()" style="color: var(--danger);">Hapus Semua Data</div>
                 </div>
             </div>
@@ -453,6 +454,67 @@
                 <button class="btn-main" style="flex: 1; background: transparent!important; border: 1px solid #555!important; color: #fff!important; font-size: 11px; padding: 12px 0; border-radius: 8px;" onclick="closeFullDatePicker()">BATAL</button>
                 <button class="btn-main" style="flex: 1; background: transparent!important; border: 1px solid #555!important; color: #fff!important; font-size: 11px; padding: 12px 0; border-radius: 8px;" onclick="setFDPToday()">HARI INI</button>
                 <button class="btn-main" style="flex: 1; background: transparent!important; border: 1px solid #fff!important; color: #fff!important; font-size: 11px; padding: 12px 0; border-radius: 8px;" onclick="setFDPDate()">SETEL</button>
+            </div>
+        </div>
+    </div>
+
+            <div id="about-modal" class="modal" onclick="if(event.target===this) closeAboutModal()">
+        <div class="modal-box" style="border-color: var(--mono-main); max-width: 320px; padding: 25px 20px;">
+                <h3 style="margin-top:0; font-size:15px; color: var(--mono-main); display:flex; align-items:center; gap:8px; font-family:'Montserrat', sans-serif; text-transform:uppercase; border-bottom: 1px dashed #333; padding-bottom: 12px; margin-bottom: 15px;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                ABOUT
+            </h3>
+            <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
+                <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.2</div>
+                
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
+                    <ul style="margin: 4px 0 0; padding-left: 15px; font-size: 11.5px; color: #ccc;">
+                        <li><b>Arsitektur:</b> Offline-First PWA</li>
+                        <li><b>Database:</b> IndexedDB + Cloud Sync</li>
+                        <li><b>Performa:</b> Zero-Latency Render</li>
+                    </ul>
+                </div>
+
+                <div style="border-top: 1px dashed #333; margin: 12px 0; padding-top: 12px;">
+                    <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">DEVELOPED BY:</div>
+                    <div style="font-weight: 800; color: var(--mono-main); font-size: 14px; margin-top: 4px;">GINANJAR WAHYU RHOMADONA HP</div>
+                    
+                    <div style="font-size: 11px; color: #ccc; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                        
+                        <!-- Real WhatsApp Icon -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                            <span style="letter-spacing: 0.5px; margin-top: 1px;">082226334999</span>
+                        </div>
+                        
+                        <!-- Real Gmail Icon -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="#EA4335"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.338l8.073-4.845c1.618-1.214 3.927-.059 3.927 1.964Z"/></svg>
+                            <span style="letter-spacing: 0.5px; margin-top: 1px;">nd4zmoe@gmail.com</span>
+                        </div>
+                        
+                        <!-- Real Yahoo Logo -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="#7B0099"><path d="M16.042 0H24l-8.583 12.355V24h-6.191v-11.645L.012 0h7.79l5.056 8.52L16.042 0z"/></svg>
+                            <span style="letter-spacing: 0.5px; margin-top: 1px;">n_dazmoe@yahoo.com</span>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div style="font-size: 9px; color: #555; text-align: justify; margin-top: 18px; line-height: 1.4;">
+                    Hak Cipta © 2026 - All Rights Reserved
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px 6px; text-align: center; font-family: monospace; font-size: 9px; color: var(--mono-main); margin-bottom: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                [Sistem Status: Optimal | Local Storage: Aktif]
+            </div>
+
+            <div class="modal-btns">
+                <button class="btn-main" style="border: 1px solid var(--border-color)!important; color: var(--text-light)!important; background:transparent!important;" onclick="closeAboutModal()">TUTUP</button>
             </div>
         </div>
     </div>
@@ -1442,7 +1504,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 }
                 
                 hasil.sort((a, b) => b.score - a.score || (a.item.n || '').localeCompare(b.item.n || ''));
-                if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil.map(h => h.item), query: e.data.query, reqId: e.data.reqId }); }
+                if (latestReqId === e.data.reqId) { self.postMessage({ type: 'result', data: hasil.slice(0, 200).map(h => h.item), query: e.data.query, reqId: e.data.reqId }); }
             } 
         };`;
 
@@ -1740,7 +1802,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         function getDVSStartIndex(st) { let l = 0, h = listOffsets.length - 1; while (l <= h) { let m = Math.floor((l + h) / 2); if (listOffsets[m] === st) return m; if (listOffsets[m] < st) l = m + 1; else h = m - 1; } return h > 0 ? h : 0; }
         
         function applyFiltersAndRender(silentB = null) {
-            if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted); 
+            if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost);
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
             let base = silentB ? active.filter(i => i.b === silentB || i.b2 === silentB) : (exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active)); const today = Date.now();
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
@@ -1748,7 +1810,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             if (!q || tab === 'exp') { 
                 // [SURGICAL FIX] Menghindari NaN Crash Komparasi Tanggal pada perangkat iOS/WebKit
                 if (tab === 'exp') { filteredData.sort((a, b) => (a.exp || '9999-12-31').localeCompare(b.exp || '9999-12-31')); }
-                else if (sortAZ) { filteredData.sort((a,b) => String(a.n||"").localeCompare(String(b.n||"")) || (b.updatedAt||0) - (a.updatedAt||0)); } 
+                else if (sortAZ) { filteredData.sort((a,b) => { let an = String(a.n||"").toLowerCase(), bn = String(b.n||"").toLowerCase(); return an < bn ? -1 : (an > bn ? 1 : ((b.updatedAt||0) - (a.updatedAt||0))); }); } 
                 else { filteredData.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0)); }
             }
             const sumEl = $('search-summary'); if (q && !silentB && !exact) { sumEl.innerText = `Ditemukan ${filteredData.length} barang`; sumEl.classList.remove('hidden'); } else sumEl.classList.add('hidden');
@@ -2073,7 +2135,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                     }
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db }) }, 30000);
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 30000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
@@ -2126,6 +2188,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
         function openSyncModal() { $('dropdown-menu').classList.add('hidden'); $('sync-type').value = ''; $('sync-selected-text').innerText = '-- Pilih Mode --'; $('sync-selected-text').style.color = '#888'; $('sync-custom-options').classList.add('hidden'); handleSyncChange(); $('sync-modal').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('sync'); }
         function closeSyncModal() { untrackModal('sync'); $('sync-modal').style.display = 'none'; const btn = $('btn-sync-download'); if (btn) { btn.disabled = false; btn.innerText = "DOWNLOAD"; } checkModalOpen(); }
+        
+        function openAboutModal() { $('dropdown-menu').classList.add('hidden'); $('about-modal').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('about'); }
+        function closeAboutModal() { untrackModal('about'); $('about-modal').style.display = 'none'; checkModalOpen(); }
         function toggleSyncDropdown(e) { e.stopPropagation(); $('sync-custom-options').classList.toggle('hidden'); }
         function selectSyncOption(mode, e) { e.stopPropagation(); $('sync-type').value = mode; $('sync-selected-text').innerText = mode === 'delta' ? 'Load Pembaruan' : 'Load Semua Data'; $('sync-selected-text').style.color = mode === 'delta' ? 'white' : 'var(--danger)'; $('sync-custom-options').classList.add('hidden'); handleSyncChange(); }
         function handleSyncChange() { const val = $('sync-type').value, warningArea = $('sync-warning-area'), modalBox = $('sync-modal-box'), title = $('sync-modal-title'), btnDownload = $('btn-sync-download'); if (val === 'force') { warningArea.innerHTML = "<span style='color: var(--danger); font-weight: 800;'>⚠️ PERINGATAN</span><br><span style='color: #ccc;'>Data yang belum di-Upload akan HILANG!</span>"; modalBox.style.borderColor = title.style.color = btnDownload.style.borderColor = btnDownload.style.color = "var(--danger)"; } else if (val === 'delta') { warningArea.innerHTML = "<span style='color: #87CEFA;'>💯 Aman</span><br><span style='color: #ccc;'>Load data baru tanpa menghapus data.</span>"; modalBox.style.borderColor = title.style.color = btnDownload.style.borderColor = btnDownload.style.color = "#87CEFA"; } else { warningArea.innerHTML = ""; modalBox.style.borderColor = "var(--border-color)"; title.style.color = "#87CEFA"; btnDownload.style.borderColor = "var(--border-color)"; btnDownload.style.color = "var(--text-muted)"; } }
@@ -2177,8 +2242,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan internet menyala.", "Error"); }); 
         }
 
-        function exportData() { 
-            const data = db.filter(i => !i.deleted).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
+                function exportData() { 
+            const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Data"); XLSX.writeFile(wb, "Data_Harga.xlsx"); 
         }
 
@@ -2341,9 +2406,10 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                                     currentIndex += chunkSize; 
                                     requestAnimationFrame(processImportChunk); 
                                 }; 
-                                tx.onerror = () => { 
+                                    tx.onerror = () => { 
                                     isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
-                                    showAlert("Gagal menyimpan memori (Quota Exceeded).", "Error"); 
+                                    showAlert("Gagal menyimpan memori (Quota Exceeded). Memulihkan status aman...", "Error"); 
+                                    initApp(); // Bunuh Phantom Data dengan me-reload kebenaran absolut dari Disk
                                 };
                             }
                             processImportChunk();
@@ -2395,7 +2461,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             } 
         }
  
-        async function closeScanner() { if(isClosingScan) return; isClosingScan = true; untrackModal('scanner'); $('scanner-wrap').style.display = 'none'; checkModalOpen(); if (torchState) toggleFlashlight(); if (isScanning && html5QrCode) { try { await html5QrCode.stop(); html5QrCode.clear(); } catch(e) {} } isScanning = false; isClosingScan = false; requestWakeLock(); }
+        async function closeScanner() { if(isClosingScan) return; isClosingScan = true; untrackModal('scanner'); $('scanner-wrap').style.display = 'none'; checkModalOpen(); if (torchState) toggleFlashlight(); if (isScanning && html5QrCode) { try { await Promise.race([html5QrCode.stop(), new Promise(r => setTimeout(r, 1500))]); html5QrCode.clear(); } catch(e) {} } isScanning = false; isClosingScan = false; requestWakeLock(); }
 
         document.addEventListener('touchstart', function(e) { if (swipedCardElem && !swipedCardElem.contains(e.target) && !e.target.closest('.trash-trigger') && !e.target.closest('.cp-trash-bg')) { swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; swipedCardElem.style.transform = 'translateX(0px)'; swipedCardElem = null; } }, { passive: true });
         
@@ -2933,8 +2999,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             <span style="color:#e0e0e0; flex:1; line-height:1.3; word-break:break-word;">${escapeHTML(it.n)}</span>
                             <span style="color:#fff; font-weight:700; flex-shrink:0; text-align:right;">Rp ${fmt(it.sub)}</span>
                         </div>`;
-                                                                                                let key = it.id || it.n;
-                                                if (!itemAgg[key]) {
+                            let key = it.id || it.n;
+                        if (!itemAgg[key]) {
+
                             let liveData = it.id ? dbLookup[it.id] : null;
                             itemAgg[key] = { 
                                 n: liveData ? liveData.n : it.n, 
@@ -2947,7 +3014,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         let qVal = parseFloat(it.q) || 0;
                         let baseQ = qVal; 
                         
-                        itemAgg[key].q += baseQ;
+                        itemAgg[key].q = parseFloat((itemAgg[key].q + baseQ).toFixed(4));
                   });
                 } else {
                     itemsHtml += `<div style="font-size:11px; color:#ccc;">${h.items} Item (Format Lama)</div>`;
@@ -3359,6 +3426,7 @@ const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getD
             else if (id === 'history') { closeHistory(); }
             else if (id === 'full-date-picker') { closeFullDatePicker(); }
             else if (id === 'top10') { closeTop10(); } 
+            else if (id === 'about') { closeAboutModal(); }
         }
     </script>
 </body>
