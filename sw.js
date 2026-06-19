@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==================================
 
-const APP_VERSION = '17.1'; 
+const APP_VERSION = '17.2'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -145,12 +145,13 @@ self.addEventListener('fetch', event => {
           return res;
         });
 
-        // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
+                // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
         event.waitUntil(pFetch.catch(() => {}));
 
+        let timeoutId;
         const fetchPromise = Promise.race([
-          pFetch,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 4000))
+          pFetch.finally(() => clearTimeout(timeoutId)),
+          new Promise((_, reject) => timeoutId = setTimeout(() => reject(new Error('Timeout')), 4000))
         ]).catch(() => null);
 
         const networkRes = await fetchPromise;
@@ -271,7 +272,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxV4o_moi0l1HzOG46effb1_R2FyRJQTWp7JTbyzIQc2r8V4QSzBNsRBes43wSu5JTY/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyeGARq6FkNhHHWtw8qVS9F5CMV1AaJCLX-B3jN_Ry-BFwnpYLc1IE28LG_DdtkFxEa/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
