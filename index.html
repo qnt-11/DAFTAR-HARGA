@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.2</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.3</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -523,10 +523,10 @@
     <script>
         const $ = (id) => document.getElementById(id);
         const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyeGARq6FkNhHHWtw8qVS9F5CMV1AaJCLX-B3jN_Ry-BFwnpYLc1IE28LG_DdtkFxEa/exec";
-        const TemaNotifikasi = { 
+                const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
-            "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500", "Sistem Bersih": "#FFA500", 
-            "Backup": "#87CEFA", "Sinkronisasi": "#87CEFA", "Sukses": "var(--mono-main)", "Info": "var(--mono-main)", "Info Offline": "var(--warning)", "Laporan Import": "var(--warning)", "Offline Sync Aktif": "var(--warning)" 
+            "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
+            "Info": "var(--mono-main)", "Laporan Import": "var(--warning)", "Offline Sync Aktif": "var(--warning)" 
         };
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -582,9 +582,10 @@
             if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
         }
 
-                        searchInput.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' && isCartMode) {
+                                searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && isCartMode) {
                 e.preventDefault();
+                if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
                 let val = searchInput.value.trim();
                 if (val !== '') {
                     handleSearchLogic(val);
@@ -620,12 +621,13 @@
             applyFiltersAndRender();
         }
 
-                function handleLiveQty(id, el) {
+            function handleLiveQty(id, el) {
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
-            if (isNaN(parsed) || !isFinite(parsed) || parsed <= 0) return; 
+            // [SURGICAL FIX] Cegah Phantom State. Jika kosong, turunkan state ke 1 secara absolut.
+            if (isNaN(parsed) || !isFinite(parsed) || parsed <= 0) parsed = 1;
             parsed = Math.min(parsed, 99999);
-            
+
             cartState[id].q = parsed;
             delete cartState[id].manualPrice; 
             saveCartMem();
@@ -933,11 +935,17 @@
             return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
-        function formatQtyBreakdown(q, iq, u1, u2) {
+                function formatQtyBreakdown(q, iq, u1, u2) {
             let iqNum = Math.max(1, parseInt(iq) || 1);
             let eU = formatShortUnit(u1) || 'Satuan';
             let gU = formatShortUnit(u2) || 'Grosir';
             let nQ = parseFloat(String(q).replace(',', '.')) || 0;
+            
+            // [SURGICAL FIX] Cegah halusinasi visual jika Admin memasukkan nama satuan Ecer dan Grosir yang sama persis
+            if (eU.toLowerCase() === gU.toLowerCase() && iqNum > 1 && nQ >= iqNum) {
+                return `${nQ} ${eU} (Grosir)`;
+            }
+            
             if (iqNum > 1) {
                 if (nQ >= iqNum) {
                     let gQ = Math.floor(nQ / iqNum);
@@ -2813,28 +2821,17 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                 
-                // Menghitung jumlah item berdasarkan bentuk fisik kemasan transaksi (Package-Based Counting)
-                if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                                // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan Struk dengan Keranjang Utama
+                let eU_check = formatShortUnit(i.u1) || 'Satuan';
+                let gU_check = formatShortUnit(i.u2) || 'Grosir';
+                if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
                     totalItemCount += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
                 } else {
                     totalItemCount += nQ || 1;
                 }
 
-                // Membungkus nama satuan ke dalam unitString agar tidak tertimpa
-                let unitString = "";
-                if (i.iq !== undefined && iqNum > 1) {
-                    let eU = formatShortUnit(i.u1) || 'Satuan';
-                    let gU = formatShortUnit(i.u2) || 'Grosir';
-                    if (nQ >= iqNum) {
-                        let gQ = Math.floor(nQ / iqNum);
-                        let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                        unitString = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                    } else { unitString = `${i.q} ${eU}`; }
-                } else if (i.u1) { 
-                    unitString = `${i.q} ${formatShortUnit(i.u1)}`;
-                } else {
-                    unitString = `${i.q}`;
-                }
+                // Hapus label "(Grosir)" agar tampilan di kertas Thermal tetap rapi/tidak terpotong
+                let unitString = formatQtyBreakdown(i.q, i.iq, i.u1, i.u2).replace(" (Grosir)", "");
                 
                 // Menggabungkan Qty, Satuan, dan Harga Satuan
                 let qtyText = `${unitString} x ${fmt(hrgSatuan)}`;
@@ -2975,23 +2972,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 let itemsHtml = '';
                 if (Array.isArray(h.items)) {
                     h.items.forEach(it => {
-                        let qtyText = `${it.q}x`;
-                        let iqNum = Math.max(1, parseInt(it.iq) || 1);
-                        if (it.iq !== undefined && iqNum > 1) {
-                            let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
-                            let gU = String(it.u2 || '').trim(); gU = gU ? (gU.charAt(0).toUpperCase() + gU.slice(1)) : 'Grosir';
-                            let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
-                            
-                            // Logika Absolut: Menghormati desimal sebagai unit Eceran murni
-                            if (nQ >= iqNum) {
-                                let gQ = Math.floor(nQ / iqNum);
-                                let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                                qtyText = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                            } else { qtyText = `${nQ} ${eU}`; }
-                        } else if (it.u1) {
-                            let eU = String(it.u1 || '').trim(); eU = eU ? (eU.charAt(0).toUpperCase() + eU.slice(1)) : 'Satuan';
-                            qtyText = `${it.q} ${eU}`;
-                        }
+                                                // [SURGICAL FIX] Sinkronisasi rendering teks History dengan fungsi global Keranjang
+                        let qtyText = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2);
 
                                                 itemsHtml += `
                         <div style="display:flex; align-items:flex-start; gap:8px; font-size:11.5px; margin-bottom:8px;">
@@ -3028,7 +3010,10 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     h.items.forEach(it => {
                         let iqNum = Math.max(1, parseInt(it.iq) || 1);
                         let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
-                        if (it.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                                                // [SURGICAL FIX] Cegah divisi jumlah fisik History jika nama satuan U1 dan U2 sama
+                        let eU_check = formatShortUnit(it.u1) || 'Satuan';
+                        let gU_check = formatShortUnit(it.u2) || 'Grosir';
+                        if (it.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
                             totalFisik += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
                         } else {
                             totalFisik += nQ || 1;
@@ -3175,28 +3160,17 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                     let iqNum = Math.max(1, parseInt(i.iq) || 1);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                     
-                    // Menghitung jumlah item berdasarkan bentuk fisik kemasan transaksi (Package-Based Counting)
-                    if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum) {
+                                        // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan WA dengan Keranjang Utama
+                    let eU_check = formatShortUnit(i.u1) || 'Satuan';
+                    let gU_check = formatShortUnit(i.u2) || 'Grosir';
+                    if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
                         totalItemCount += Math.floor(nQ / iqNum) + parseFloat((nQ % iqNum).toFixed(3));
                     } else {
                         totalItemCount += nQ || 1;
                     }
 
-                    // Membungkus nama satuan ke dalam unitString dengan Proteksi Fallback Mutlak
-                    let unitString = "";
-                    if (i.iq !== undefined && iqNum > 1) {
-                        let eU = formatShortUnit(i.u1) || 'Satuan';
-                        let gU = formatShortUnit(i.u2) || 'Grosir';
-                        if (nQ >= iqNum) {
-                            let gQ = Math.floor(nQ / iqNum);
-                            let eQ = parseFloat((nQ % iqNum).toFixed(3));
-                            unitString = eQ === 0 ? `${gQ} ${gU}` : `${gQ} ${gU} ${eQ} ${eU}`;
-                        } else { unitString = `${i.q} ${eU}`; }
-                    } else if (i.u1) {
-                        unitString = `${i.q} ${formatShortUnit(i.u1)}`;
-                    } else {
-                        unitString = `${i.q}`;
-                    }
+                    // Hapus label "(Grosir)" agar teks WA tetap rapi
+                    let unitString = formatQtyBreakdown(i.q, i.iq, i.u1, i.u2).replace(" (Grosir)", "");
                     
                     // Menggabungkan Qty, Satuan, dan Harga Satuan
                     let qtyText = `${unitString} x ${fmt(hrgSatuan)}`;
@@ -3340,11 +3314,11 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
         async function initApp() { 
             try { 
                 if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(()=>{}); }
-const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
+                const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
                 await initDB(); db = await loadAllFromIDB(); 
                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
-                if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; } checkOfflineLedger();
+                if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
         }
         initApp();
