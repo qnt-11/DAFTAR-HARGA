@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.4</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.5</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -522,7 +522,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyeGARq6FkNhHHWtw8qVS9F5CMV1AaJCLX-B3jN_Ry-BFwnpYLc1IE28LG_DdtkFxEa/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxkHruU-TBG5DVvokqArb1J91EXyawyP8AET9BabiPU3DXjcCYNrf7HPo0zLdilVCzO/exec";
                 const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
@@ -1689,7 +1689,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             setTimeout(() => document.body.classList.remove('search-focus'), 150);
         });
         
-        function clearSearch() { 
+                function clearSearch() { 
             if(handleSearchInput.cancel) handleSearchInput.cancel();
             searchInput.value = ''; 
             $('q-x').style.display = 'none'; 
@@ -1699,7 +1699,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             window.scrollTo({ top: 0, behavior: 'instant' }); 
             showSearchSuggestions(); 
             applyFiltersAndRender(); 
-            searchInput.blur(); 
+            // SURGICAL FIX: Pertahankan fokus kursor jika berada di Mode Kasir untuk Scanner Fisik
+            if (!isCartMode) searchInput.blur(); 
         }
         document.addEventListener('click', (e) => { 
             if (!$('dropdown-menu').classList.contains('hidden') && !e.target.closest('#kebab-btn')) $('dropdown-menu').classList.add('hidden'); 
@@ -1859,8 +1860,12 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 const safeB1 = it.b ? escapeHTML(it.b) : ''; const safeB2 = it.b2 ? escapeHTML(it.b2) : '';
                 if (safeB1 && safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Satuan:${safeB1}</div><div class="card-barcode">Bc Grosir:${safeB2}</div>`; } else if (safeB1) { barcodeDisplay = `<div class="card-barcode">Bc Satuan: ${safeB1}</div>`; } else if (safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Grosir: ${safeB2}</div>`; }
 
-                if (tab === 'exp') {
-                    const c = diff <= 30 ? 'var(--danger)' : (diff <= 90 ? '#FFA500' : (diff <= 180 ? '#FFD700' : 'var(--mono-main)')); html += `<div class="card card-exp-mode" id="c-${it.id}"><div class="info" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;"><div class="name" style="margin:0; flex:1; min-width:0;"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div><div style="font-size:13px; font-weight:800; color:${c}; flex-shrink: 0;">${expT}</div></div></div>`;
+                                if (tab === 'exp') {
+                    const c = diff <= 30 ? 'var(--danger)' : (diff <= 90 ? '#FFA500' : (diff <= 180 ? '#FFD700' : 'var(--mono-main)')); 
+                    let exRightUI = `<div class="action-btns-absolute"><button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
+                    let exTrash = `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>`;
+                    let exSwipe = `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${it.id}')"`;
+                    html += `<div style="position:relative; margin-bottom:12px;">${exTrash}<div class="card card-exp-mode" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${exSwipe}><div class="info" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;"><div class="name" style="margin:0; flex:1; min-width:0;"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div><div style="font-size:13px; font-weight:800; color:${c}; flex-shrink: 0; margin-right:45px;">${expT}</div></div>${exRightUI}</div></div>`;
                 } else {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
@@ -2139,8 +2144,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         db = Array.from(tempMap.values()); updateMaps(); 
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
-                    }
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 30000);
+                                        }
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
@@ -2159,8 +2164,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     };
                             req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                         } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
-                    }).then(historyData => {
-                        return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 30000);
+                                        }).then(historyData => {
+                        return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 90000);
                     });
                 })
                 .then(r => r.json())
@@ -2450,7 +2455,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader"); 
             torchState = false; $('torch-btn').style.color = "white";                        try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
+                                let isScanLocked = false;
                 await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
+                    if (isScanLocked) return; isScanLocked = true;
                     playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
                     if (scanMode === 'cart') handlePhysicalScanner(scannedText);
                     else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
@@ -2764,11 +2771,12 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
         let isPrinting = false; 
 
-        function executePrint(total, bayar, items, timestamp = null, isReprint = false) {
+                function executePrint(total, bayar, items, timestamp = null, isReprint = false) {
             if (isPrinting) return tampilkanToast("Mohon tunggu, printer sedang memproses...", "var(--warning)");
             isPrinting = true;
             
-            let kembali = bayar - total;
+            let safeBayar = bayar !== undefined && !isNaN(bayar) ? bayar : total;
+            let kembali = safeBayar - total;
             let labelKembali = kembali < 0 ? "KURANG" : "KEMBALIAN";
             let valKembali = fmt(Math.abs(kembali));
 
@@ -3180,8 +3188,9 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                     }
                 });
 
-                // 3. Render Footer & PPN
-                let kembali = hData.bayar - hData.total;
+                                // 3. Render Footer & PPN
+                let safeBayar = hData.bayar !== undefined ? hData.bayar : hData.total;
+                let kembali = safeBayar - hData.total;
                 let labelKembali = kembali < 0 ? "KURANG   " : "KEMBALIAN";
                 
                 text += `------------------------\n`;
