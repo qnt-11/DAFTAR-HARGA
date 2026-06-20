@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.6</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 17.7</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -845,10 +845,13 @@
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
 
-                        const loadToCart = (hData) => {
+                                    const loadToCart = (hData) => {
                 if (!Array.isArray(hData.items)) return tampilkanToast("Format lama tidak bisa diedit!", "var(--danger)");
                 
-                                cartState = {};
+                // [SURGICAL FIX] Blokir injeksi SYS-TRUNC agar tidak merusak database keranjang
+                if (hData.items.some(x => x.id === "SYS-TRUNC")) return showAlert("Struk ini terlalu besar dan telah diarsipkan oleh sistem. Tidak dapat diedit ulang.", "Ditolak", "var(--danger)");
+                
+                    cartState = {};
                 hData.items.forEach(it => {
                     cartState[it.id] = { q: it.q };
                     
@@ -857,7 +860,7 @@
                         cartState[it.id].hModal = it.q > 0 ? (it.modal / it.q) : 0;
                     }
                     
-                                        // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
+                     // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
                     let dbItem = db.find(x => String(x.id) === String(it.id));
                     
                     // [GHOST ITEM INJECTION]: Lindungi barang yang sudah dihapus dari DB utama agar tidak lenyap dari Struk lama
