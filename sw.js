@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ==================================
 
-const APP_VERSION = '18.4'; 
+const APP_VERSION = '18.5'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -30,7 +30,7 @@ function trimCache(cacheName, maxItems) {
     trimQueues[cacheName] = Promise.resolve();
   }
   
-  trimQueues[cacheName] = trimQueues[cacheName].then(async () => {
+  const currentTask = trimQueues[cacheName].then(async () => {
     try {
       const cache = await caches.open(cacheName);
       const keys = await cache.keys();
@@ -41,9 +41,16 @@ function trimCache(cacheName, maxItems) {
     } catch (err) {
       console.warn('[SW] Gagal membersihkan memori:', err);
     }
-  }).catch(() => {}); // Catch inline agar antrean tidak macet jika terjadi error
+  }).catch(() => {}); 
   
-  return trimQueues[cacheName];
+  trimQueues[cacheName] = currentTask;
+  
+  // Lepaskan referensi memori (Garbage Collection) jika tidak ada antrean lain
+  currentTask.finally(() => { 
+    if (trimQueues[cacheName] === currentTask) trimQueues[cacheName] = null; 
+  });
+  
+  return currentTask;
 }
 
 async function manageStorage() {
@@ -258,8 +265,8 @@ async function processOfflineBackup() {
         
         const payload = getReq.result;
         
-        try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbycBsw8PWl1Q5lI9dq1zS9yod5Hp8cDDxSo8pq14MVcuImHnzPXLcdV8fy9cL6v8ogY/exec";
+                try {
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
