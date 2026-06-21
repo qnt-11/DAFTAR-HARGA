@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.1</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.2</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -522,7 +522,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbw2IVZhIwcO2UwxZ24Xz7Fw_U_NPDkHLJGD0ENKSs_pXRkQhMyxc_oulMz3DKR2i1yq/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec";
                 const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
@@ -2115,8 +2115,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 .then(r => r.json())
                 .then(dataResponse => { 
                     const dataCloud = dataResponse.data || []; 
-                    const serverTime = dataResponse.serverTime || Date.now(); 
-                    localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
+                                        const serverTime = dataResponse.serverTime || Date.now(); 
                     
                     if (dataCloud.length > 0) {
                         let tempMap = new Map(); db.forEach(item => tempMap.set(String(item.id), item));
@@ -2147,7 +2146,16 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         db = Array.from(tempMap.values()); updateMaps(); 
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
-                                        }
+                        
+                        // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
+                        try {
+                            const tx = idb.transaction('items', 'readwrite'); 
+                            const store = tx.objectStore('items'); 
+                            store.clear(); 
+                            db.forEach(item => { if (!item._isGhost) store.put(item); });
+                        } catch(e) {}
+                    }
+                    localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
                     return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
                 })
                 .then(r => r.json())
@@ -2172,15 +2180,11 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     });
                 })
                 .then(r => r.json())
-                .then(historyRes => {
+                                .then(historyRes => {
                     if (historyRes.status !== 'success') throw new Error(historyRes.message);
                     isApiLoading = false; 
                     hideLoading(); 
                     tampilkanToast("Upload Data Berhasil!", "var(--mono-main)"); 
-                    const tx = idb.transaction('items', 'readwrite'); 
-                    const store = tx.objectStore('items'); 
-                    store.clear(); 
-                    db.forEach(item => { if (!item._isGhost) store.put(item); });
                 })
                 .catch((err) => { 
                     isApiLoading = false; hideLoading(); 
@@ -2255,9 +2259,12 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan internet menyala.", "Error"); }); 
         }
 
-                function exportData() { 
-            const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Data"); XLSX.writeFile(wb, "Data_Harga.xlsx"); 
+                        function exportData() { 
+            try {
+                if (typeof XLSX === 'undefined') throw new Error("Sistem Excel belum termuat. Pastikan internet menyala untuk fitur ini.");
+                const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
+                const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Data"); XLSX.writeFile(wb, "Data_Harga.xlsx"); 
+            } catch (err) { showAlert(err.message, "Gagal Export", "var(--danger)"); }
         }
 
         function importData(e) { 
