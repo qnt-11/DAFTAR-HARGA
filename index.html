@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwD7AYa6m_BBcf2AGqdVAt3X3h_SrEmJZVS3OFBb-Jaei7ErBdWnOiRyicvaxDK6pfG/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -466,7 +466,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.2</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.3</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -742,7 +742,8 @@
                 }
             });
 
-                        if (needsSave) {
+                                    if (needsSave) {
+                if (Object.keys(cartState).length === 0) clearEditMode(); // [SURGICAL FIX] Lepas kunci transaksi
                 saveCartMem();
                 if (isCartMode) renderCartUI();
             }
@@ -1153,10 +1154,13 @@
             return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 8); 
         }
         
-        const fetchWithTimeout = (url, options, timeout = 30000) => Promise.race([ 
-            fetch(url, options), 
-            new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), timeout)) 
-        ]);
+                const fetchWithTimeout = (url, options, timeout = 30000) => {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            return fetch(url, { ...options, signal: controller.signal })
+                .then(res => { clearTimeout(id); return res; })
+                .catch(err => { clearTimeout(id); throw err.name === 'AbortError' ? new Error('TIMEOUT') : err; });
+        };
 
         function isAcronymUsed(acr, excludeId, tempSet = null) { 
             if (tempSet && tempSet.has(acr)) return true; 
@@ -1187,8 +1191,9 @@
                 if (!globalAudioCtx) {
                     globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
                 }
-                if (globalAudioCtx.state === 'suspended') {
-                    globalAudioCtx.resume();
+                                if (globalAudioCtx.state === 'suspended') {
+                    let p = globalAudioCtx.resume();
+                    if(p && p.catch) p.catch(()=>{});
                 }
                 const osc = globalAudioCtx.createOscillator(); 
                 const gain = globalAudioCtx.createGain(); 
@@ -1914,7 +1919,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     clearTimeout(scrollLetterTimeout); scrollLetterTimeout = setTimeout(() => sL.classList.remove('show'), 300);
                 }
             }
-            if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { renderVirtualList(true); window._rafScroll = null; });
+                        if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { try { renderVirtualList(true); } finally { window._rafScroll = null; } });
         }, { passive: true });
             async function save(bypassAnomaly = false) {
             if (isSaving) return;
@@ -2461,7 +2466,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         async function openScanner(mode) { 
             if(isStartingScan || isScanning || isClosingScan) return; 
             isStartingScan = true; scanMode = mode; $('scanner-wrap').style.display = 'block'; document.body.classList.add('modal-open'); trackModal('scanner');
-            try { if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (globalAudioCtx && globalAudioCtx.state === 'suspended') globalAudioCtx.resume(); } catch(e){}
+                        try { if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (globalAudioCtx && globalAudioCtx.state === 'suspended') { let p = globalAudioCtx.resume(); if(p && p.catch) p.catch(()=>{}); } } catch(e){}
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader"); 
             torchState = false; $('torch-btn').style.color = "white";                        try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
