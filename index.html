@@ -204,11 +204,23 @@
 
     <div id="mod" class="modal" onclick="if(event.target===this && !isSaving) hideMod()">
         <div class="modal-box" id="mod-box">
-            <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
+                        <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
+            
             <label>Nama Barang</label>
             <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;">
+
+            <div class="form-grid" style="margin-top: 14px; margin-bottom: 14px;">
+                <div style="flex: 7;">
+                    <label style="margin-top: 0;">Expired</label>
+                    <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent;">
+                </div>
+                <div style="flex: 3;">
+                    <label style="margin-top: 0;">Akronim</label>
+                    <input type="text" id="i-t" placeholder="" autocomplete="off" style="text-transform: lowercase;">
+                </div>
+            </div>
             
-            <label>BC Satuan</label>
+            <label>Barcode Satuan</label>
             <div class="barcode-row">
                 <input type="text" id="i-b" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()">
                 <button type="button" onclick="openScanner('input')">
@@ -216,7 +228,7 @@
                 </button>
             </div>
 
-            <label>BC Grosir</label>
+            <label>Barcode Grosir</label>
             <div class="barcode-row">
                 <input type="text" id="i-b2" placeholder="Opsional" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()">
                 <button type="button" onclick="openScanner('input-grosir')">
@@ -225,29 +237,22 @@
             </div>
 
             <label style="color:#87CEFA;">HPP</label>
-            <div style="display:flex; gap:10px;">
-                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
-                <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this);" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+                        <div style="display:flex; gap:10px;">
+                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP(); calcMargin('p2');" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+                <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this); calcMargin('p1'); syncModalGrosir();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
             </div>
-            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis.</div>
-             
-            <div class="form-grid">
-                <div class="col-price">
-                    <label>Expired</label>
-                    <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent;">
-                </div>
-                <div class="col-unit">
-                    <label>Akronim</label>
-                    <input type="text" id="i-t" placeholder="" autocomplete="off" style="text-transform: lowercase;">
-                </div>
-            </div>
+                        <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis.</div>
             
-            <div class="form-grid">
-                <div class="col-price">
+                <div class="form-grid">
+                <div style="flex: 39;">
                     <label>Harga Satuan</label>
-                    <input type="tel" id="i-p1" pattern="[0-9]*" placeholder="0" oninput="formatRp(this)">
+                    <input type="tel" id="i-p1" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p1');">
                 </div>
-                <div class="col-unit">
+                <div style="flex: 23;">
+                    <label style="white-space: nowrap;">Margin %</label>
+                    <input type="number" id="i-m1" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p1');" style="font-weight: 800; transition: color 0.3s, border-color 0.3s; padding: 12px 8px; text-align: center;">
+                </div>
+                <div style="flex: 38;">
                     <label>Satuan</label>
                     <input type="text" id="i-u1" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1)">
                 </div>
@@ -259,12 +264,16 @@
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>
             </div>
             
-            <div class="form-grid">
-                <div class="col-price">
+                 <div class="form-grid">
+                <div style="flex: 39;">
                     <label>Harga Grosir</label>
-                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this)">
+                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
                 </div>
-                <div class="col-unit">
+                <div style="flex: 23;">
+                    <label style="white-space: nowrap;">Margin %</label>
+                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; transition: color 0.3s, border-color 0.3s; padding: 12px 8px; text-align: center;">
+                </div>
+                <div style="flex: 38;">
                     <label>Grosir</label>
                     <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
                 </div>
@@ -278,7 +287,7 @@
 
             <div id="wrap-iq">
                 <label id="label-iq">Isi per ...</label>
-                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="autoCalcHPP();">
+                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="syncModalGrosir();">
             </div> 
 
             <div class="modal-btns">
@@ -466,7 +475,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.4</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.5</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -823,9 +832,10 @@
             renderCartUI();
         }
 
-                function clearEditMode() {
+                        function clearEditMode() {
             activeEditTrxId = null;
             activeEditTrxTs = null;
+            db = db.filter(x => !x._isGhost);
             let titleBox = document.querySelector('.cp-title-box span:first-child');
             if (titleBox) { titleBox.innerText = "TOTAL BELANJA"; titleBox.style.color = "#888"; }
         }
@@ -1150,8 +1160,9 @@
             }); 
         }
 
+                let _idAutoCounter = 0;
         function generateUniqueId() { 
-            return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 8); 
+            return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 8) + (_idAutoCounter++).toString(36); 
         }
         
                 const fetchWithTimeout = (url, options, timeout = 30000) => {
@@ -1742,19 +1753,78 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             trackModal('alert'); 
         }
         
-        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
+                        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
-        function autoCalcHPP() {
+        // [SURGICAL FIX] Logika Two-Way Margin (Eceran & Grosir)
+        function updateWarnaMargin(el, margin) {
+            if (margin < 10) { el.style.color = "var(--danger)"; el.style.borderColor = "var(--danger)"; } 
+            else if (margin >= 10 && margin <= 20) { el.style.color = "var(--warning)"; el.style.borderColor = "var(--warning)"; } 
+            else { el.style.color = "#4dff4d"; el.style.borderColor = "#4dff4d"; }
+        }
+
+        function calcMargin(type) {
+            let hppVal = type === 'p1' ? $('i-hpp').value : $('i-hpp-grosir').value;
+            let jualVal = type === 'p1' ? $('i-p1').value : $('i-p2').value;
+            let elMargin = type === 'p1' ? $('i-m1') : $('i-m2');
+            
+            let hpp = parseInt(String(hppVal).replace(/\D/g, ''), 10) || 0;
+            let jual = parseInt(String(jualVal).replace(/\D/g, ''), 10) || 0;
+            
+            if (hpp > 0 && jual > 0) {
+                let margin = ((jual - hpp) / jual) * 100;
+                elMargin.value = parseFloat(margin.toFixed(2));
+                updateWarnaMargin(elMargin, margin);
+            } else {
+                elMargin.value = "";
+                elMargin.style.color = "var(--text-light)";
+                elMargin.style.borderColor = "var(--border-color)";
+            }
+        }
+
+        function calcPriceFromMargin(type) {
+            let hppVal = type === 'p1' ? $('i-hpp').value : $('i-hpp-grosir').value;
+            let elMargin = type === 'p1' ? $('i-m1') : $('i-m2');
+            let elJual = type === 'p1' ? $('i-p1') : $('i-p2');
+            
+            let hpp = parseInt(String(hppVal).replace(/\D/g, ''), 10) || 0;
+            let margin = parseFloat(elMargin.value) || 0;
+            
+            if (hpp > 0 && margin > 0 && margin < 100) {
+                let hargaJual = hpp / (1 - (margin / 100));
+                elJual.value = fmt(Math.ceil(hargaJual / 100) * 100);
+                updateWarnaMargin(elMargin, margin);
+            } else {
+                elMargin.style.color = "var(--text-light)"; 
+                elMargin.style.borderColor = "var(--border-color)";
+            }
+        }
+
+               function autoCalcHPP() {
             let mg = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0;
             let isi = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
-            if (mg > 0 && isi > 0) $('i-hpp').value = fmt(Math.round(mg / isi));
+            if (mg > 0 && isi > 0) {
+                $('i-hpp').value = fmt(Math.round(mg / isi));
+                calcMargin('p1'); // Paksa hitung ulang margin eceran
+            }
+        }
+
+        function syncModalGrosir() {
+            let hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, ''), 10) || 0;
+            let iq = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
+            if (hpp > 0 && iq > 1) {
+                $('i-hpp-grosir').value = fmt(hpp * iq);
+                calcMargin('p2');
+            } else if (hpp > 0 && iq <= 1) {
+                $('i-hpp-grosir').value = "";
+                calcMargin('p2');
+            }
         }
 
         function showMod(id = null) { 
             activeId = id; 
             const b = $('i-b'), b2 = $('i-b2'), n = $('i-n'), hpp = $('i-hpp'), hppG = $('i-hpp-grosir'), p1 = $('i-p1'), p2 = $('i-p2'), exp = $('i-exp'), t = $('i-t'), u1 = $('i-u1'), u2 = $('i-u2'), iq = $('i-iq'); 
             $('mod-box').style.borderColor = "var(--border-color)";
-            if (id) { 
+            if (id) {  
                 const it = db.find(x => String(x.id) === String(id)); if(!it) return; 
                 $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(it.hpp) : ''; hppG.value = (it.hpp && it.iq > 1) ? fmt(it.hpp * it.iq) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
             } else { 
@@ -1780,14 +1850,13 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             const chipRowU1 = $('chip-row-u1');
             if (chipRowU1) chipRowU1.innerHTML = topU1.map(u => renderChip(u, false)).join('') + `<div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>`;
             
-            const chipRowU2 = $('chip-row-u2');
+                        const chipRowU2 = $('chip-row-u2');
             if (chipRowU2) chipRowU2.innerHTML = topU2.map(u => renderChip(u, true)).join('') + `<div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>`;
 
-            toggleIsiGrosir(); $('mod').style.display = 'flex'; document.body.classList.add('modal-open'); setTimeout(() => $('i-n').focus(), 100); trackModal('mod');
+            toggleIsiGrosir(); calcMargin('p1'); calcMargin('p2'); $('mod').style.display = 'flex'; document.body.classList.add('modal-open'); setTimeout(() => $('i-n').focus(), 100); trackModal('mod');
         }
 
         function hideMod() { untrackModal('mod'); activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
-
         function deleteAllDataPrompt() { 
             if (db.filter(i => !i.deleted).length === 0) return showAlert("Data sudah kosong!", "Info"); 
             $('dropdown-menu').classList.add('hidden'); $('pin-input').value = ''; $('pin-modal').style.display = 'flex'; document.body.classList.add('modal-open'); setTimeout(() => $('pin-input').focus(), 100); trackModal('pin');
