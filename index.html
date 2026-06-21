@@ -475,7 +475,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.5</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.6</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -1937,12 +1937,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 const safeB1 = it.b ? escapeHTML(it.b) : ''; const safeB2 = it.b2 ? escapeHTML(it.b2) : '';
                 if (safeB1 && safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Satuan:${safeB1}</div><div class="card-barcode">Bc Grosir:${safeB2}</div>`; } else if (safeB1) { barcodeDisplay = `<div class="card-barcode">Bc Satuan: ${safeB1}</div>`; } else if (safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Grosir: ${safeB2}</div>`; }
 
-                                if (tab === 'exp') {
+                            if (tab === 'exp') {
                     const c = diff <= 30 ? 'var(--danger)' : (diff <= 90 ? '#FFA500' : (diff <= 180 ? '#FFD700' : 'var(--mono-main)')); 
-                    let exRightUI = `<div class="action-btns-absolute"><button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
-                    let exTrash = `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>`;
-                    let exSwipe = `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${it.id}')"`;
-                    html += `<div style="position:relative; margin-bottom:12px;">${exTrash}<div class="card card-exp-mode" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${exSwipe}><div class="info" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;"><div class="name" style="margin:0; flex:1; min-width:0;"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div><div style="font-size:13px; font-weight:800; color:${c}; flex-shrink: 0; margin-right:45px;">${expT}</div></div>${exRightUI}</div></div>`;
+                    html += `<div style="position:relative; margin-bottom:12px;"><div class="card card-exp-mode" id="c-${it.id}" style="margin-bottom:0; z-index:2;"><div class="info" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;"><div class="name" style="margin:0; flex:1; min-width:0;"><span>${dn}</span></div><div style="font-size:13px; font-weight:800; color:${c}; flex-shrink: 0; margin-right:0;">${expT}</div></div></div></div>`;
                 } else {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
