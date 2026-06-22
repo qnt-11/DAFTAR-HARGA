@@ -202,9 +202,9 @@
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
 
-        <div id="mod" class="modal">
+    <div id="mod" class="modal">
         <div class="modal-box" id="mod-box">
-                        <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
+            <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
             
             <label>Nama Barang</label>
             <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;">
@@ -212,7 +212,10 @@
             <div class="form-grid" style="margin-top: 14px; margin-bottom: 14px;">
                 <div style="flex: 7;">
                     <label style="margin-top: 0;">Expired</label>
-                    <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent;">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent; flex:1; margin-bottom:0;">
+                        <button type="button" onclick="startWASMOCR()" style="background:var(--wa-bg); border:1px solid var(--warning); border-radius:8px; width:44px; color:var(--warning); outline:none; display:flex; justify-content:center; align-items:center; cursor:pointer;">👁️</button>
+                    </div>
                 </div>
                 <div style="flex: 3;">
                     <label style="margin-top: 0;">Akronim</label>
@@ -237,13 +240,13 @@
             </div>
 
             <label style="color:#87CEFA;">HPP</label>
-                        <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px;">
                 <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP(); calcMargin('p2');" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
                 <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this); calcMargin('p1'); syncModalGrosir();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
             </div>
-                        <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis.</div>
+            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis.</div>
             
-                <div class="form-grid">
+            <div class="form-grid">
                 <div style="flex: 39;">
                     <label>Harga Satuan</label>
                     <input type="tel" id="i-p1" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p1');">
@@ -264,7 +267,7 @@
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>
             </div>
             
-                 <div class="form-grid">
+            <div class="form-grid">
                 <div style="flex: 39;">
                     <label>Harga Grosir</label>
                     <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
@@ -296,7 +299,6 @@
             </div>
         </div>
     </div>
-
     <div id="offline-ledger-modal" class="modal">        <div class="modal-box" style="border-color: var(--warning);">
             <h3 style="margin-top:0; font-size:15px; color: var(--warning); text-transform:uppercase;">Catatan Darurat Offline</h3>
             <p style="font-size:11px; color:#888; margin-bottom:12px;">Salin data ini ke kasir utama, lalu hapus jika sudah selesai.</p>
@@ -308,7 +310,7 @@
         </div>
     </div>
 
-        <div id="sync-modal" class="modal">
+    <div id="sync-modal" class="modal">
         <div class="modal-box" id="sync-modal-box" style="text-align: center; max-width: 310px; padding: 25px 20px; border: 2px solid var(--border-color); transition: border-color 0.3s ease; overflow: visible;">
             <h3 id="sync-modal-title" style="margin-top:0; color: #87CEFA; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Montserrat', sans-serif; transition: color 0.3s ease;">
                 Load Data Cloud
@@ -347,7 +349,7 @@
         <button class="scan-stop" onclick="closeScanner()">BATAL SCAN</button>
     </div>
 
-        <div id="pin-modal" class="modal">
+    <div id="pin-modal" class="modal">
         <div class="modal-box" id="pin-box" style="text-align: center; border-color: var(--danger);">
             <h3 style="margin-top:0; font-size:15px; color: var(--danger);">Otorisasi Dibutuhkan</h3>
             <p style="font-size:11px; color:#888; margin-bottom:20px;">Masukkan PIN!</p>
@@ -359,7 +361,7 @@
         </div>
     </div>
     
-        <div id="custom-picker" class="modal">
+    <div id="custom-picker" class="modal">
         <div class="modal-box" style="text-align:center; border-color: var(--mono-main);">
             <div class="picker-header-new">
                 <button class="picker-nav-new" onclick="cpChangeYear(-1)">❮</button>
@@ -391,7 +393,7 @@
         </div>
     </div>
 
-     <div id="history-modal" class="modal">        <div class="modal-box" style="background: #000; border-color: #333; padding: 20px; max-width: 340px; display: flex; flex-direction: column;">
+    <div id="history-modal" class="modal">        <div class="modal-box" style="background: #000; border-color: #333; padding: 20px; max-width: 340px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
                 <h3 class="audiowide-regular" style="margin: 0; font-size: 16px; font-style: italic; color: #fff; display: flex; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -433,7 +435,7 @@
         </div>
     </div>
     
-     <div id="top10-modal" class="modal">        <div class="modal-box" style="background: #111; border-color: #FFD700; padding: 20px; max-width: 320px; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
+    <div id="top10-modal" class="modal">        <div class="modal-box" style="background: #111; border-color: #FFD700; padding: 20px; max-width: 320px; box-shadow: 0 15px 40px rgba(0,0,0,0.9);">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px;">
                 <div style="font-size:14px; color:#FFD700; font-weight:800; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:6px;">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> 
@@ -445,7 +447,7 @@
         </div>
     </div>
     
-        <div id="full-date-picker" class="modal">
+    <div id="full-date-picker" class="modal">
         <div class="modal-box" style="background: #111; border-color: #333; padding: 20px; max-width: 320px; border-radius: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                 <svg onclick="changeFDPMonth(-1)" style="cursor: pointer; padding: 5px;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -464,14 +466,14 @@
         </div>
     </div>
 
-             <div id="about-modal" class="modal">        <div class="modal-box" style="border-color: var(--mono-main); max-width: 320px; padding: 25px 20px;">
+    <div id="about-modal" class="modal">        <div class="modal-box" style="border-color: var(--mono-main); max-width: 320px; padding: 25px 20px;">
                 <h3 style="margin-top:0; font-size:15px; color: var(--mono-main); display:flex; align-items:center; gap:8px; font-family:'Montserrat', sans-serif; text-transform:uppercase; border-bottom: 1px dashed #333; padding-bottom: 12px; margin-bottom: 15px;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 ABOUT
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.7</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.8</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -488,19 +490,16 @@
                     
                     <div style="font-size: 11px; color: #ccc; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
                         
-                        <!-- Real WhatsApp Icon -->
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                             <span style="letter-spacing: 0.5px; margin-top: 1px;">082226334999</span>
                         </div>
                         
-                        <!-- Real Gmail Icon -->
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="#EA4335"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 8.338l8.073-4.845c1.618-1.214 3.927-.059 3.927 1.964Z"/></svg>
                             <span style="letter-spacing: 0.5px; margin-top: 1px;">nd4zmoe@gmail.com</span>
                         </div>
                         
-                        <!-- Real Yahoo Logo -->
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="#7B0099"><path d="M16.042 0H24l-8.583 12.355V24h-6.191v-11.645L.012 0h7.79l5.056 8.52L16.042 0z"/></svg>
                             <span style="letter-spacing: 0.5px; margin-top: 1px;">n_dazmoe@yahoo.com</span>
@@ -697,7 +696,6 @@
             }
         }
 
-        
         function updateRowVisuals(id) {
             const item = db.find(x => String(x.id) === id);
             if(!item) return;
@@ -712,7 +710,6 @@
             } else {
                 subTotal = Math.round(q * item.p1);
             }
-
             
             let priceInput = document.getElementById('price-input-' + id);
             if(priceInput) priceInput.value = fmt(subTotal);
@@ -756,21 +753,20 @@
             const gtEl = document.getElementById('cp-grand-total');
             if(gtEl) gtEl.innerText = `Rp ${fmt(grandTotal)}`;
         }
-
         function renderCartUI() {
             const list = $('cp-list');
             if (!list) return;
             let grandTotal = 0;
             let html = '';
             
-                        const keys = Object.keys(cartState);
+            const keys = Object.keys(cartState);
             if (keys.length === 0) {
                 list.innerHTML = '<div class="cpi-empty">Keranjang Kosong</div>';
                 $('cp-grand-total').innerText = 'Rp 0';
                 return;
             }
 
-                        keys.forEach(id => {
+            keys.forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q;
@@ -780,7 +776,7 @@
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
-                                                // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
+                        // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
                         if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
                             subTotal = Math.round((q * item.p2) / iq);
                         } else {
@@ -800,22 +796,45 @@
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
                             </div>
-                                                        <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
+                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
                                 <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
-                                                     <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
+                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
                                <input type="tel" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
                             </div>
                         </div>
                     </div>`;
                 }
             });
+            
+            // --- INJEKSI UI AI MARKET BASKET ---
+            if (keys.length > 0 && typeof marketBasketRules !== 'undefined' && marketBasketRules.length > 0) {
+                let recItem = null;
+                for(let rule of marketBasketRules) {
+                    if (keys.includes(rule.trigger) && !keys.includes(rule.rec)) {
+                        let i = db.find(x => String(x.id) === rule.rec && !x.deleted);
+                        if (i) { recItem = i; break; }
+                    }
+                }
+                if (recItem) {
+                    html += `
+                    <div style="padding: 10px 16px; background: rgba(135,206,250,0.05); border-top: 1px dashed rgba(135,206,250,0.2); border-bottom: 1px dashed rgba(135,206,250,0.2); animation: popInBouncy 0.3s ease;">
+                        <span style="font-size:9.5px; color:#87CEFA; font-weight:800; letter-spacing:0.5px;">🤖 AI PREDIKSI: SERING DIBELI BERSAMA</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                            <span style="font-size:13px; color:#fff; font-weight:600;">${escapeHTML(recItem.n)}</span>
+                            <button onclick="modifyCartItem('${recItem.id}', 1)" style="background:var(--mono-main); border:none; color:#000; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:800; cursor:pointer;">+ TAMBAH</button>
+                        </div>
+                    </div>`;
+                }
+            }
+            // ------------------------------------
+
             list.innerHTML = html;
             $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
 
-                function modifyCartItem(id, qty) {
+        function modifyCartItem(id, qty) {
             if (!cartState[id]) {
                 if (qty > 0) cartState[id] = { q: qty };
             } else {
@@ -828,7 +847,7 @@
             renderCartUI();
         }
 
-                        function clearEditMode() {
+        function clearEditMode() {
             activeEditTrxId = null;
             activeEditTrxTs = null;
             db = db.filter(x => !x._isGhost);
@@ -852,13 +871,13 @@
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
 
-                                    const loadToCart = (hData) => {
+            const loadToCart = (hData) => {
                 if (!Array.isArray(hData.items)) return tampilkanToast("Format lama tidak bisa diedit!", "var(--danger)");
                 
                 // [SURGICAL FIX] Blokir injeksi SYS-TRUNC agar tidak merusak database keranjang
                 if (hData.items.some(x => x.id === "SYS-TRUNC")) return showAlert("Struk ini terlalu besar dan telah diarsipkan oleh sistem. Tidak dapat diedit ulang.", "Ditolak", "var(--danger)");
                 
-                    cartState = {};
+                cartState = {};
                 hData.items.forEach(it => {
                     cartState[it.id] = { q: it.q };
                     
@@ -867,7 +886,7 @@
                         cartState[it.id].hModal = it.q > 0 ? (it.modal / it.q) : 0;
                     }
                     
-                     // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
+                    // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
                     let dbItem = db.find(x => String(x.id) === String(it.id));
                     
                     // [GHOST ITEM INJECTION]: Lindungi barang yang sudah dihapus dari DB utama agar tidak lenyap dari Struk lama
@@ -914,7 +933,7 @@
             loadToCart(h);
         }
 
-                function formatShortUnit(unit) {
+        function formatShortUnit(unit) {
             if (!unit) return '';
             let str = String(unit).trim().toLowerCase();
             if (str === '') return '';
@@ -946,7 +965,7 @@
             return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
-                function formatQtyBreakdown(q, iq, u1, u2) {
+        function formatQtyBreakdown(q, iq, u1, u2) {
             let iqNum = Math.max(1, parseInt(iq) || 1);
             let eU = formatShortUnit(u1) || 'Satuan';
             let gU = formatShortUnit(u2) || 'Grosir';
@@ -1023,7 +1042,7 @@
             setTimeout(() => { isMainSwiping = false; }, 100);
         }
             
-                function saveCartMem() { 
+        function saveCartMem() { 
             try {
                 localStorage.setItem('DB_WA_CART', JSON.stringify(cartState)); 
             } catch (e) {
@@ -1051,7 +1070,7 @@
             try {
                 if ('wakeLock' in navigator) {
                     isRequestingWakeLock = true;
-                                        wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock = await navigator.wakeLock.request('screen');
                     wakeLock.addEventListener('release', () => {
                         wakeLock = null;
                     });
@@ -1121,7 +1140,7 @@
             }); 
         }
         
-                async function saveItemToIDB(item) { 
+        async function saveItemToIDB(item) { 
             if (!idb) {
                 await initDB();
             }
@@ -1147,7 +1166,7 @@
             }); 
         }
 
-            function updateMaps() { 
+        function updateMaps() { 
             acronymMap.clear(); 
             db.forEach(item => { 
                 if (!item.deleted) { 
@@ -1156,12 +1175,12 @@
             }); 
         }
 
-                let _idAutoCounter = 0;
+        let _idAutoCounter = 0;
         function generateUniqueId() { 
             return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 8) + (_idAutoCounter++).toString(36); 
         }
         
-                const fetchWithTimeout = (url, options, timeout = 30000) => {
+        const fetchWithTimeout = (url, options, timeout = 30000) => {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
             return fetch(url, { ...options, signal: controller.signal })
@@ -1198,7 +1217,7 @@
                 if (!globalAudioCtx) {
                     globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
                 }
-                                if (globalAudioCtx.state === 'suspended') {
+                if (globalAudioCtx.state === 'suspended') {
                     let p = globalAudioCtx.resume();
                     if(p && p.catch) p.catch(()=>{});
                 }
@@ -1212,7 +1231,7 @@
                 gain.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + 0.1); 
                 osc.start(); 
                 osc.stop(globalAudioCtx.currentTime + 0.1); 
-osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+                osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             } catch(e) {} 
         }
 
@@ -1279,7 +1298,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 return undefined;
             };
 
-                 norm.n = prop(rawObj.n !== undefined ? rawObj.n : findVal(['NAMABARANG'], ['NAMA', 'ITEM', 'PRODUK']));
+            norm.n = prop(rawObj.n !== undefined ? rawObj.n : findVal(['NAMABARANG'], ['NAMA', 'ITEM', 'PRODUK']));
             if (!norm.n) return null; 
             
             // SURGICAL FIX: Menambahkan 'HARGAMODAL(HPP)' agar persis dengan format Export
@@ -1339,7 +1358,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         function formatRp(input) { 
             let cursorPosition = input.selectionStart;
             let originalLength = input.value.length;
-                        let val = input.value.replace(/\D/g, "").substring(0, 15); 
+            let val = input.value.replace(/\D/g, "").substring(0, 15); 
             input.value = val ? fmt(parseInt(val, 10) || 0) : ""; 
             let newLength = input.value.length;
             cursorPosition = cursorPosition + (newLength - originalLength);
@@ -1377,7 +1396,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             if(!str) return "";
             return str.toLowerCase()
                 .replace(/[^a-z0-9]/g, '').replace(/gh/g, 'g').replace(/sh/g, 's')
-                .replace(/([a-z])\\1+/g, '$1').replace(/[fvw]/g, 'p')
+                .replace(/([a-z])\\\\1+/g, '$1').replace(/[fvw]/g, 'p')
                 .replace(/[z]/g, 'j').replace(/[cq]/g, 'k').replace(/[aeiouy]/g, '');
         }
 
@@ -1543,11 +1562,11 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             errorEvent.preventDefault(); 
         };
 
-                worker.onmessage = function(e) { 
+        worker.onmessage = function(e) { 
             if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
                 workerResult = e.data.data; 
                 
-                                if (pendingAutoAdds.has(e.data.reqId)) {
+                if (pendingAutoAdds.has(e.data.reqId)) {
                     let injectedQ = pendingAutoAdds.get(e.data.reqId);
                     pendingAutoAdds.delete(e.data.reqId);
                     if (workerResult.length > 0) {
@@ -1623,14 +1642,14 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     if (match) pMap[match.id] = (pMap[match.id] || 0) + (trending[k] * 2); 
                 });
 
-                                    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                    let dbMapFast = new Map();
-                    for (let i = 0; i < db.length; i++) dbMapFast.set(db[i].n, db[i].id);
-                    hist.forEach(h => {
-                        if (Array.isArray(h.items)) {
-                            h.items.forEach(it => {
-                                let key = it.id || dbMapFast.get(it.n);
-                                if(key) {
+                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                let dbMapFast = new Map();
+                for (let i = 0; i < db.length; i++) dbMapFast.set(db[i].n, db[i].id);
+                hist.forEach(h => {
+                    if (Array.isArray(h.items)) {
+                        h.items.forEach(it => {
+                            let key = it.id || dbMapFast.get(it.n);
+                            if(key) {
                                 let iq = Math.max(1, parseInt(it.iq) || 1);
                                 let qVal = parseFloat(it.q) || 1;
                                 let normQ = (iq > 1) ? (qVal / iq) : qVal;
@@ -1672,7 +1691,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             handleSearchLogic(term); 
         }
         
-                const handleSearchInput = debounce(() => { 
+        const handleSearchInput = debounce(() => { 
             const val = searchInput.value.trim(); 
             if (val) {
                 handleSearchLogic(val); 
@@ -1695,7 +1714,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             handleSearchInput(); 
         });
 
-             searchInput.addEventListener('focus', () => {
+        searchInput.addEventListener('focus', () => {
             document.body.classList.add('search-focus');
             showSearchSuggestions();
         });
@@ -1704,7 +1723,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             setTimeout(() => document.body.classList.remove('search-focus'), 150);
         });
         
-                function clearSearch() { 
+        function clearSearch() { 
             if(handleSearchInput.cancel) handleSearchInput.cancel();
             searchInput.value = ''; 
             $('q-x').style.display = 'none'; 
@@ -1749,7 +1768,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             trackModal('alert'); 
         }
         
-                        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
+        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
         // [SURGICAL FIX] Logika Two-Way Margin (Eceran & Grosir)
         function updateWarnaMargin(el, margin) {
@@ -1795,7 +1814,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }
         }
 
-               function autoCalcHPP() {
+        function autoCalcHPP() {
             let mg = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0;
             let isi = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
             if (mg > 0 && isi > 0) {
@@ -1815,7 +1834,6 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 calcMargin('p2');
             }
         }
-
         function showMod(id = null) { 
             activeId = id; 
             const b = $('i-b'), b2 = $('i-b2'), n = $('i-n'), hpp = $('i-hpp'), hppG = $('i-hpp-grosir'), p1 = $('i-p1'), p2 = $('i-p2'), exp = $('i-exp'), t = $('i-t'), u1 = $('i-u1'), u2 = $('i-u2'), iq = $('i-iq'); 
@@ -1846,7 +1864,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             const chipRowU1 = $('chip-row-u1');
             if (chipRowU1) chipRowU1.innerHTML = topU1.map(u => renderChip(u, false)).join('') + `<div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>`;
             
-                        const chipRowU2 = $('chip-row-u2');
+            const chipRowU2 = $('chip-row-u2');
             if (chipRowU2) chipRowU2.innerHTML = topU2.map(u => renderChip(u, true)).join('') + `<div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>`;
 
             toggleIsiGrosir(); calcMargin('p1'); calcMargin('p2'); $('mod').style.display = 'flex'; document.body.classList.add('modal-open'); setTimeout(() => $('i-n').focus(), 100); trackModal('mod');
@@ -1864,7 +1882,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         function openPicker(id, m) { 
             Picker.targetId = id; const el = $(id); if (!el) return; 
             let val = el.dataset.rawDate || el.value; 
-                        if (!val) { const now = new Date(); Picker.tempYear = now.getFullYear(); Picker.tempMonth = now.getMonth(); } else { const p = val.split('-'); Picker.tempYear = parseInt(p[0], 10); Picker.tempMonth = parseInt(p[1], 10) - 1; if (isNaN(Picker.tempYear) || isNaN(Picker.tempMonth)) { const now = new Date(); Picker.tempYear = now.getFullYear(); Picker.tempMonth = now.getMonth(); } } 
+            if (!val) { const now = new Date(); Picker.tempYear = now.getFullYear(); Picker.tempMonth = now.getMonth(); } else { const p = val.split('-'); Picker.tempYear = parseInt(p[0], 10); Picker.tempMonth = parseInt(p[1], 10) - 1; if (isNaN(Picker.tempYear) || isNaN(Picker.tempMonth)) { const now = new Date(); Picker.tempYear = now.getFullYear(); Picker.tempMonth = now.getMonth(); } } 
             renderKalenderGrid(); $('custom-picker').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('picker');
         }
 
@@ -1933,7 +1951,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 const safeB1 = it.b ? escapeHTML(it.b) : ''; const safeB2 = it.b2 ? escapeHTML(it.b2) : '';
                 if (safeB1 && safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Satuan:${safeB1}</div><div class="card-barcode">Bc Grosir:${safeB2}</div>`; } else if (safeB1) { barcodeDisplay = `<div class="card-barcode">Bc Satuan: ${safeB1}</div>`; } else if (safeB2) { barcodeDisplay = `<div class="card-barcode">Bc Grosir: ${safeB2}</div>`; }
 
-                            if (tab === 'exp') {
+                if (tab === 'exp') {
                     const c = diff <= 30 ? 'var(--danger)' : (diff <= 90 ? '#FFA500' : (diff <= 180 ? '#FFD700' : 'var(--mono-main)')); 
                     html += `<div style="position:relative; margin-bottom:12px;"><div class="card card-exp-mode" id="c-${it.id}" style="margin-bottom:0; z-index:2;"><div class="info" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;"><div class="name" style="margin:0; flex:1; min-width:0;"><span>${dn}</span></div><div style="font-size:13px; font-weight:800; color:${c}; flex-shrink: 0; margin-right:0;">${expT}</div></div></div></div>`;
                 } else {
@@ -1947,7 +1965,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     html += `<div style="position:relative; margin-bottom:12px;">${trashBgHtml}<div class="card" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${swipeAttributes}><div class="info"><div class="name"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div>${it.p1?`<div class="card-price-ecer">${unit1}: Rp ${fmt(it.p1)}</div>`:''}${(it.p1 > 0 && it.p2 > 0)?`<div class="card-price-grosir" style="display:flex; justify-content:space-between; max-width:200px;"><span>${unit2}: Rp ${fmt(it.p2)}</span><span style="color:#777777;">Isi: ${it.iq || 0}</span></div>`:''}${barcodeDisplay}${exH}</div>${rightSideUI}</div></div>`;
                 }
             }
-                        rend.innerHTML = html;
+            rend.innerHTML = html;
             requestAnimationFrame(() => {
                 if (start !== lastStartIndex) return;
                 let hc = false; const dom = rend.children;
@@ -1981,9 +1999,10 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     clearTimeout(scrollLetterTimeout); scrollLetterTimeout = setTimeout(() => sL.classList.remove('show'), 300);
                 }
             }
-                        if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { try { renderVirtualList(true); } finally { window._rafScroll = null; } });
+            if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { try { renderVirtualList(true); } finally { window._rafScroll = null; } });
         }, { passive: true });
-            async function save(bypassAnomaly = false) {
+
+        async function save(bypassAnomaly = false) {
             if (isSaving) return;
             isSaving = true;
             const btnSave = $('btn-save-item');
@@ -1991,12 +2010,12 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             if (btnSave) btnSave.disabled = true; 
             if (btnCancel) btnCancel.disabled = true;
 
-                try {
+            try {
                 const nRaw = String($('i-n').value).substring(0, 80);
                 const b = String($('i-b').value).trim().toUpperCase().substring(0, 40);
                 const b2 = String($('i-b2').value).trim().toUpperCase().substring(0, 40); 
                 const exp = $('i-exp').dataset.rawDate || '';
-                                const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
+                const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 const p2 = parseInt(String($('i-p2').value).replace(/[^\d]/g, '').substring(0, 15), 10) || null;
                 const u1 = $('i-u1').value; 
@@ -2007,7 +2026,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     return showAlert("Nama barang dan Harga Satuan tidak boleh kosong/nol!", "Gagal"); 
                 }
                 
-                                if (!bypassAnomaly) {
+                if (!bypassAnomaly) {
                     if (hpp > 0 && p1 < hpp) {
                         isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
                         return showConfirm(`Harga Satuan (Rp ${fmt(p1)}) lebih rendah dari HPP Modal (Rp ${fmt(hpp)}).<br>Tetap simpan (Cuci Gudang)?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
@@ -2127,7 +2146,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }
         }
 
-                async function del(id) {
+        async function del(id) {
             if ($('custom-alert').style.display === 'flex') return;
             const idx = db.findIndex(x => String(x.id) === String(id)), cardToReset = swipedCardElem; if(idx === -1) return;
             showConfirm(`Hapus "<b>${escapeHTML(db[idx].n)}</b>"?`, "Hapus", "var(--danger)", 
@@ -2140,12 +2159,29 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             );
         }
 
+                // [QA LEAD FIX] Chunking IDB Put untuk 36.000+ data agar HP tidak freeze/crash saat Hapus Semua Data
         async function executeDeleteAll() { 
             closePinModal(); tampilkanToast("Menghapus...", "var(--danger)"); $('list').style.pointerEvents = 'none'; 
-                        try { 
-                const tx = idb.transaction('items', 'readwrite'), s = tx.objectStore('items'), ts = Date.now(); 
-                db.forEach(i => { if (!i.deleted && !i._isGhost) { i.deleted = true; i.updatedAt = ts; s.put(i); } }); 
-                tx.oncomplete = () => { if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)"); }; 
+            try { 
+                const ts = Date.now();
+                let toDelete = db.filter(i => !i.deleted && !i._isGhost);
+                toDelete.forEach(i => { i.deleted = true; i.updatedAt = ts; });
+                
+                let idx = 0;
+                function putDeleteChunk() {
+                    if (idx >= toDelete.length) {
+                        if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)");
+                        return;
+                    }
+                    let tx = idb.transaction('items', 'readwrite');
+                    let s = tx.objectStore('items');
+                    let end = Math.min(idx + 500, toDelete.length);
+                    for (let i = idx; i < end; i++) s.put(toDelete[i]);
+                    idx = end;
+                    tx.oncomplete = putDeleteChunk;
+                    tx.onerror = () => { $('list').style.pointerEvents = 'auto'; showAlert("Gagal menghapus sebagian data (Memori penuh).", "Error"); };
+                }
+                putDeleteChunk();
             } catch(e) { $('list').style.pointerEvents = 'auto'; showAlert("Gagal.", "Error"); } 
         }
         
@@ -2182,7 +2218,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 .then(r => r.json())
                 .then(dataResponse => { 
                     const dataCloud = dataResponse.data || []; 
-                                        const serverTime = dataResponse.serverTime || Date.now(); 
+                    const serverTime = dataResponse.serverTime || Date.now(); 
                     
                     if (dataCloud.length > 0) {
                         let tempMap = new Map(); db.forEach(item => tempMap.set(String(item.id), item));
@@ -2214,12 +2250,25 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                         
-                        // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
+                                                // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
+                        // [QA LEAD FIX] Mencegah Memory Crash/Transaction Abort pada 36.000+ data dengan Chunking IDB
                         try {
-                            const tx = idb.transaction('items', 'readwrite'); 
-                            const store = tx.objectStore('items'); 
-                            store.clear(); 
-                            db.forEach(item => { if (!item._isGhost) store.put(item); });
+                            let safeItems = db.filter(item => !item._isGhost);
+                            const txClear = idb.transaction('items', 'readwrite');
+                            txClear.objectStore('items').clear();
+                            txClear.oncomplete = () => {
+                                let idx = 0;
+                                function putChunk() {
+                                    if (idx >= safeItems.length) return;
+                                    let tx = idb.transaction('items', 'readwrite');
+                                    let store = tx.objectStore('items');
+                                    let end = Math.min(idx + 500, safeItems.length);
+                                    for (let i = idx; i < end; i++) store.put(safeItems[i]);
+                                    idx = end;
+                                    tx.oncomplete = putChunk;
+                                }
+                                putChunk();
+                            };
                         } catch(e) {}
                     }
                     localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
@@ -2230,24 +2279,24 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     if (backupRes.status !== 'success') throw new Error(backupRes.message);
                     return new Promise((resolve) => {
                         try {
-                    const store = idb.transaction('history', 'readonly').objectStore('history');
-                    const req = store.index('ts_idx').openCursor(null, 'prev');
-                    const results = [];
-                                        req.onsuccess = (e) => {
-                        const cursor = e.target.result;
-                        if (cursor && results.length < 2500) {
-                            results.push(cursor.value);
-                            cursor.continue();
-                        } else { resolve(results); }
-                    };
+                            const store = idb.transaction('history', 'readonly').objectStore('history');
+                            const req = store.index('ts_idx').openCursor(null, 'prev');
+                            const results = [];
+                            req.onsuccess = (e) => {
+                                const cursor = e.target.result;
+                                if (cursor && results.length < 2500) {
+                                    results.push(cursor.value);
+                                    cursor.continue();
+                                } else { resolve(results); }
+                            };
                             req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                         } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
-                                        }).then(historyData => {
+                    }).then(historyData => {
                         return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 90000);
                     });
                 })
                 .then(r => r.json())
-                                .then(historyRes => {
+                .then(historyRes => {
                     if (historyRes.status !== 'success') throw new Error(historyRes.message);
                     isApiLoading = false; 
                     hideLoading(); 
@@ -2289,12 +2338,17 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 const dataCloud = dataResponse.data || []; const serverTime = dataResponse.serverTime || Date.now(); 
                 if (dataCloud.length === 0 && !forceSync) { isApiLoading = false; hideLoading(); tampilkanToast("Data harga sudah yang paling baru!", "var(--mono-main)"); localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); return; } 
                 let tempMap = new Map(); if (!forceSync) { db.forEach(item => tempMap.set(String(item.id), item)); }
-                const chunkSize = 500; let currentIndex = 0; let rejectedCloudCount = 0; 
+                                const chunkSize = 500; let currentIndex = 0; let rejectedCloudCount = 0; 
                 
+                // [QA LEAD FIX] Eksekusi pembersihan IDB lebih awal untuk mencegah Zombie Data jika Cloud ternyata KOSONG (0 data)
+                if (forceSync && dataCloud.length === 0) {
+                    try { const tx = idb.transaction('items', 'readwrite'); tx.objectStore('items').clear(); } catch(e){}
+                }
+
                 function processNextChunk() {
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
-                                                                        if (chunk.length === 0) {
+                        if (chunk.length === 0) {
                             db = Array.from(tempMap.values()); updateMaps(); 
                             if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none'; pendingAutoAdds.clear();
@@ -2314,7 +2368,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                                 if (existing) { if ((norm.updatedAt || 0) >= (existing.updatedAt || 0)) { if (norm.deleted) { store.delete(norm.id); tempMap.delete(String(norm.id)); } else { tempMap.set(String(norm.id), norm); store.put(norm); } } } else if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); } 
                             }
                         }); 
-                                                tx.oncomplete = () => { 
+                        tx.oncomplete = () => { 
                             currentIndex += chunkSize; requestAnimationFrame(processNextChunk); 
                         }; 
                         tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
@@ -2326,7 +2380,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan internet menyala.", "Error"); }); 
         }
 
-                        function exportData() { 
+        function exportData() { 
             try {
                 if (typeof XLSX === 'undefined') throw new Error("Sistem Excel belum termuat. Pastikan internet menyala untuk fitur ini.");
                 const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
@@ -2408,7 +2462,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             } 
                         });
 
-                                                let maxRows = Math.min(rawRows.length, 50000); 
+                        let maxRows = Math.min(rawRows.length, 50000); 
                         for (let i = headerRowIndex + 1; i < maxRows; i++) {
                             let rowArr = rawRows[i];
                             if (!rowArr || rowArr.length === 0) continue;
@@ -2425,7 +2479,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             if (norm.b !== '' && norm.b2 === norm.b) norm.b2 = ''; 
                             if (norm.b2 !== '' && norm.iq < 2) norm.b2 = ''; 
                             
-                                if (!norm.id || norm.id === "undefined" || norm.id === "") {
+                            if (!norm.id || norm.id === "undefined" || norm.id === "") {
                                 norm.id = generateUniqueId();
                             }
 
@@ -2446,7 +2500,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             let currentTs = baseTs + i;
                             let existingItem = dbMapById.get(String(norm.id)) || dbMapByName.get(String(norm.n).toLowerCase());
                             
-                                                        if (existingItem) { 
+                            if (existingItem) { 
                                 processedItems.set(existingItem.id, { ...existingItem, ...norm, id: existingItem.id, updatedAt: currentTs, deleted: false }); 
                             } else { 
                                 norm.updatedAt = currentTs; 
@@ -2456,7 +2510,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                             }
                         }
 
-                            if(processedItems.size > 0) {
+                        if(processedItems.size > 0) {
                             let fastIndexMap = new Map();
                             for(let i=0; i<db.length; i++) fastIndexMap.set(String(db[i].id), i);
                             
@@ -2493,7 +2547,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                                     currentIndex += chunkSize; 
                                     requestAnimationFrame(processImportChunk); 
                                 }; 
-                                    tx.onerror = () => { 
+                                tx.onerror = () => { 
                                     isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                                     showAlert("Gagal menyimpan memori (Quota Exceeded). Memulihkan status aman...", "Error"); 
                                     initApp(); // Bunuh Phantom Data dengan me-reload kebenaran absolut dari Disk
@@ -2511,7 +2565,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 }, 100); 
             }; 
             
-                        r.onerror = () => { 
+            r.onerror = () => { 
                 isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
                 showAlert("Gagal membaca file dari HP Anda!", "Error"); 
             }
@@ -2521,6 +2575,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             }
             r.readAsArrayBuffer(f); 
         }
+        
         let torchState = false; 
         function toggleFlashlight() { const vid = document.querySelector('#reader video'); if (vid && vid.srcObject) { try { const track = vid.srcObject.getVideoTracks()[0], cap = track.getCapabilities(); if (cap.torch) { torchState = !torchState; track.applyConstraints({ advanced: [{ torch: torchState }] }).catch(e => console.log(e)); $('torch-btn').style.color = torchState ? "var(--warning)" : "white"; } else tampilkanToast("Kamera tidak dukung senter", "var(--warning)"); } catch(e) {} } }
         
@@ -2528,14 +2583,30 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         async function openScanner(mode) { 
             if(isStartingScan || isScanning || isClosingScan) return; 
             isStartingScan = true; scanMode = mode; $('scanner-wrap').style.display = 'block'; document.body.classList.add('modal-open'); trackModal('scanner');
-                        try { if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (globalAudioCtx && globalAudioCtx.state === 'suspended') { let p = globalAudioCtx.resume(); if(p && p.catch) p.catch(()=>{}); } } catch(e){}
+            try { if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (globalAudioCtx && globalAudioCtx.state === 'suspended') { let p = globalAudioCtx.resume(); if(p && p.catch) p.catch(()=>{}); } } catch(e){}
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader"); 
-            torchState = false; $('torch-btn').style.color = "white";                        try { 
+            torchState = false; $('torch-btn').style.color = "white";            
+            try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
-                                let isScanLocked = false;
+                let isScanLocked = false;
                 await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
                     if (isScanLocked) return; isScanLocked = true;
                     playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
+                    
+                    // --- INJEKSI MESIN GS1 PARSER ---
+                    if (scannedText.startsWith('01') && scannedText.length >= 16) {
+                        let gtin = scannedText.substring(2, 16).replace(/^0+/, ''); // Buang nol di depan
+                        let expMatch = scannedText.match(/17(\d{6})/);
+                        if (expMatch && (scanMode === 'input' || scanMode === 'input-grosir')) {
+                            let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = d.substring(2,4);
+                            $('i-exp').dataset.rawDate = `${y}-${m}-01`;
+                            $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
+                            tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
+                        }
+                        scannedText = gtin; // Kembalikan ke format GTIN murni untuk pencarian database
+                    }
+                    // --------------------------------
+
                     if (scanMode === 'cart') handlePhysicalScanner(scannedText);
                     else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
                     else if (scanMode === 'input-grosir') $('i-b2').value = scannedText; else $('i-b').value = scannedText; 
@@ -2567,7 +2638,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
         function clearOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; const tx = dbOff.transaction('CatatanDarurat', 'readwrite'); tx.objectStore('CatatanDarurat').delete(1); tx.oncomplete = () => { closeOfflineLedger(); tampilkanToast("Catatan dihapus!", "var(--danger)"); }; }; } catch(err){} }
         function checkOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (dbOff.objectStoreNames.contains('CatatanDarurat')) { const tx = dbOff.transaction('CatatanDarurat', 'readonly'); const store = tx.objectStore('CatatanDarurat'); const getReq = store.get(1); getReq.onsuccess = () => { if (getReq.result && getReq.result.text && getReq.result.text.trim().length > 0) { showConfirm("Terdapat catatan transaksi saat offline yang belum direkap.", "Info Offline", "var(--warning)", () => { showOfflineLedger(getReq.result.text); }, "LIHAT CATATAN"); } }; } }; } catch(err) {} }
 
-                function updateHistDateDisplay(val) {
+        function updateHistDateDisplay(val) {
             if(!val) return;
             let parts = val.split('-');
             let d = new Date(parts[0], parts[1]-1, parts[2]);
@@ -2602,7 +2673,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             checkModalOpen();
         }
 
-                function changeFDPMonth(dir) {
+        function changeFDPMonth(dir) {
             fdpDate.setDate(1); // Mencegah rollover JS jika bulan saat ini tgl 31
             fdpDate.setMonth(fdpDate.getMonth() + dir);
             renderFDP();
@@ -2654,7 +2725,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             $('fdp-grid').innerHTML = html;
         }
 
-                function promptPrint() {
+        function promptPrint() {
             if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--danger)");
             
@@ -2663,7 +2734,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
                 if (item && !item.deleted) {
-                                        const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
+                    const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0; let finalModal = 0; let printUnit = '';
 
                     // 1. Kalkulasi Modal (Prioritaskan Modal Historis saat mode Edit Struk)
@@ -2694,7 +2765,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
             let msgHTML = `<div style="text-align:center; padding:0; margin:0;"><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:6px;">Total Belanja</div><div style="font-size:28px;font-weight:900;color:var(--mono-main);font-family:'Montserrat', sans-serif;margin-bottom:14px;letter-spacing:-0.5px;">Rp ${fmt(grandTotal)}</div><input type="tel" id="input-bayar-struk" style="box-sizing:border-box;width:100%;border-color:var(--border-color);background:#000;color:var(--text-light);font-size:16px;text-align:center;padding:12px;margin:0 0 10px 0;border-radius:8px;border:1px solid #333;outline:none;font-family:'Montserrat', sans-serif;font-weight:600;" placeholder="Bayar" autocomplete="off"><div style="display:flex;justify-content:space-between;align-items:center;background:#111;padding:12px 16px;border-radius:8px;border:1px solid #333;box-sizing:border-box;margin:0;"><span id="live-label" style="font-size:10px;font-weight:800;color:#888;letter-spacing:0.5px;">KEMBALIAN:</span><span id="live-val" style="font-size:15px;font-weight:800;color:#888;">Rp 0</span></div></div>`;
             
-                        const resetPrintModalStyle = () => {
+            const resetPrintModalStyle = () => {
                 $('custom-alert').style.alignItems = '';
                 $('custom-alert').style.paddingTop = '';
                 $('alert-box').style.marginTop = '';
@@ -2707,7 +2778,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
 
             showConfirm(msgHTML, "PRINT", "var(--mono-main)", () => {}, "PRINT", () => { resetPrintModalStyle(); });
 
-                        let btnOk = $('confirm-ok-btn');
+            let btnOk = $('confirm-ok-btn');
             let alertBtns = $('alert-btns');
             let btnCancel = $('confirm-cancel-btn');
             
@@ -2745,7 +2816,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     closeCustomAlert();
                     
                     // Simpan Riwayat Siluman (Tanpa Memicu Iframe Print)
-                                        let d = new Date();
+                    let d = new Date();
                     let totalModal = itemsPrint.reduce((sum, i) => sum + (i.modal || 0), 0);
                     
                     // SURGICAL FIX 4: Overwrite Struk (Cegah Omzet Ganda)
@@ -2761,7 +2832,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
                     let newTrx = { id: finalId, ts: finalTs, total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
                     
-                                        try { 
+                    try { 
                         const tx = idb.transaction('history', 'readwrite'); 
                         tx.objectStore('history').put(newTrx); 
                         tx.onerror = () => { tampilkanToast("GAGAL SIMPAN DATABASE! Memori Penuh.", "var(--danger)"); };
@@ -2775,7 +2846,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                         if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
                     } else { hist.unshift(newTrx); }
                     
-                                        // [PROTEKSI MEMORI]: Menambahkan fallback penghancuran memori jika storage bricked
+                    // [PROTEKSI MEMORI]: Menambahkan fallback penghancuran memori jika storage bricked
                     try { 
                         localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); 
                     } catch (e) { 
@@ -2790,7 +2861,34 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 };
                 
                 // Menyisipkan tepat di antara BATAL dan PRINT STRUK
+                let btnBluetooth = document.createElement('button');
+                btnBluetooth.className = "btn-main";
+                btnBluetooth.style.cssText = "border: 1px solid #87CEFA!important; color: #87CEFA!important; background:transparent!important; padding: 0 5px; font-size: 10px; flex: 1;";
+                btnBluetooth.innerHTML = "BLUETOOTH";
+                btnBluetooth.onclick = () => {
+                    if (isProcessingPayment) return;
+                    let inputBayarStr = $('input-bayar-struk').value.replace(/\D/g, '');
+                    let parsedBayar = parseInt(inputBayarStr, 10);
+                    if (isNaN(parsedBayar) || parsedBayar < grandTotal) return tampilkanToast("Uang bayar kurang/tidak valid!", "var(--danger)");
+                    isProcessingPayment = true; btnNoPrint.disabled = true; btnOk.disabled = true; btnBluetooth.disabled = true;
+                    closeCustomAlert();
+                    
+                    let d = new Date();
+                    let finalId = activeEditTrxId;
+                    if (!finalId) {
+                        let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+                        let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
+                        let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                        if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
+                        localStorage.setItem('TRX_SEQ', seq);
+                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+                    }
+                    printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId); // Tembak ke Hardware
+                    resetPrintModalStyle();
+                };
+
                 alertBtns.insertBefore(btnNoPrint, btnOk);
+                alertBtns.insertBefore(btnBluetooth, btnOk); // Injeksi tombol BT di tengah
                 
                 btnOk.onclick = () => {
                     if (isProcessingPayment) return; // Kunci Absolut Event
@@ -2814,6 +2912,8 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     isProcessingPayment = true;
                     btnNoPrint.disabled = true;
                     btnOk.disabled = true;
+
+                    if (btnBluetooth) btnBluetooth.disabled = true;
 
                     closeCustomAlert();
                     executePrint(grandTotal, parsedBayar, itemsPrint);
@@ -2849,10 +2949,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 });
             }
         }
-
         let isPrinting = false; 
 
-                function executePrint(total, bayar, items, timestamp = null, isReprint = false) {
+        function executePrint(total, bayar, items, timestamp = null, isReprint = false) {
             if (isPrinting) return tampilkanToast("Mohon tunggu, printer sedang memproses...", "var(--warning)");
             isPrinting = true;
             
@@ -2861,7 +2960,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
             let labelKembali = kembali < 0 ? "KURANG" : "KEMBALIAN";
             let valKembali = fmt(Math.abs(kembali));
 
-                        let d = timestamp ? new Date(timestamp) : new Date();
+            let d = timestamp ? new Date(timestamp) : new Date();
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
             // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
@@ -2875,7 +2974,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
             }
             let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
-                        let receiptNo = finalId; 
+            let receiptNo = finalId; 
             let totalItemCount = 0;
 
             // Kalkulasi padding dinamis agar Jam selalu rata kanan dengan kode TRX
@@ -2901,14 +3000,14 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
             `;
 
-                        // 3. Render Daftar Barang dengan Indentasi Ritel
+            // 3. Render Daftar Barang dengan Indentasi Ritel
             items.forEach(i => {
                 let safeN = escapeHTML(i.n).toUpperCase(); // Nama selalu kapital di struk ritel
-                                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
+                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                 
-                                // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan Struk dengan Keranjang Utama
+                // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan Struk dengan Keranjang Utama
                 let eU_check = formatShortUnit(i.u1) || 'Satuan';
                 let gU_check = formatShortUnit(i.u2) || 'Grosir';
                 if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
@@ -2954,13 +3053,13 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 </div>
             </div>`;
  
-                                                if (!isReprint) {
+            if (!isReprint) {
                 let totalModal = items.reduce((sum, i) => sum + (i.modal || 0), 0);
                 
                 // SURGICAL FIX: Hapus deklarasi ganda, gunakan variabel Sinkronisasi Absolut dari atas
                 let newTrx = { id: finalId, ts: finalTs, total: total, bayar: bayar, items: items, modal: totalModal };
                 
-                                try { 
+                try { 
                     const tx = idb.transaction('history', 'readwrite'); 
                     tx.objectStore('history').put(newTrx); 
                     tx.onerror = () => { tampilkanToast("GAGAL SIMPAN DATABASE! Memori Penuh.", "var(--danger)"); };
@@ -3049,12 +3148,12 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 });
             }
 
-                        let totalOmzet = 0; let totalModal = 0; let html = '';
+            let totalOmzet = 0; let totalModal = 0; let html = '';
             let itemAgg = {}; 
             let dbLookup = {};
             for (let i = 0; i < db.length; i++) dbLookup[db[i].id] = db[i]; // Hash Map O(1)
 
-                        hist.forEach((h, index) => {
+            hist.forEach((h, index) => {
                 let d = new Date(h.ts);
                 totalOmzet += h.total;
                 totalModal += (h.modal || 0); 
@@ -3067,16 +3166,16 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 let itemsHtml = '';                
                 if (Array.isArray(h.items)) {
                     h.items.forEach(it => {
-                                                // [SURGICAL FIX] Sinkronisasi rendering teks History dengan fungsi global Keranjang
+                        // [SURGICAL FIX] Sinkronisasi rendering teks History dengan fungsi global Keranjang
                         let qtyText = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2);
 
-                                                itemsHtml += `
+                        itemsHtml += `
                         <div style="display:flex; align-items:flex-start; gap:8px; font-size:11.5px; margin-bottom:8px;">
                             <span style="color:#87CEFA; font-weight:800; flex-shrink:0; width:65px;">${escapeHTML(qtyText)}</span>
                             <span style="color:#e0e0e0; flex:1; line-height:1.3; word-break:break-word;">${escapeHTML(it.n)}</span>
                             <span style="color:#fff; font-weight:700; flex-shrink:0; text-align:right;">Rp ${fmt(it.sub)}</span>
                         </div>`;
-                            let key = it.id || it.n;
+                        let key = it.id || it.n;
                         if (!itemAgg[key]) {
 
                             let liveData = it.id ? dbLookup[it.id] : null;
@@ -3097,7 +3196,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     itemsHtml += `<div style="font-size:11px; color:#ccc;">${h.items} Item (Format Lama)</div>`;
                 }
 
-                                                // LOGIKA KOMPUTASI: Menghitung "Jenis" dan Total "Kuantitas Fisik"
+                // LOGIKA KOMPUTASI: Menghitung "Jenis" dan Total "Kuantitas Fisik"
                 let totalMacam = Array.isArray(h.items) ? h.items.length : 1;
                 let totalFisik = 0;
                 
@@ -3105,7 +3204,7 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                     h.items.forEach(it => {
                         let iqNum = Math.max(1, parseInt(it.iq) || 1);
                         let nQ = parseFloat(String(it.q).replace(',', '.')) || 0;
-                                                // [SURGICAL FIX] Cegah divisi jumlah fisik History jika nama satuan U1 dan U2 sama
+                        // [SURGICAL FIX] Cegah divisi jumlah fisik History jika nama satuan U1 dan U2 sama
                         let eU_check = formatShortUnit(it.u1) || 'Satuan';
                         let gU_check = formatShortUnit(it.u2) || 'Grosir';
                         if (it.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
@@ -3120,9 +3219,9 @@ osc.onended = () => { osc.disconnect(); gain.disconnect(); };
                 totalFisik = Math.round(totalFisik * 1000) / 1000;
 
                 let splitJam = timeStr.split(' '); 
-let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA'; 
+                let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA'; 
 
-                                // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
+                // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
                 html += `
                 <div style="background: #111; border: 1px solid #333; border-radius: 8px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8);">
                     <div onclick="const d = document.getElementById('det-${h.id}'); const i = document.getElementById('icn-${h.id}'); if(d.style.display==='none'){d.style.display='block'; i.style.transform='rotate(180deg)';}else{d.style.display='none'; i.style.transform='rotate(0deg)';}" 
@@ -3172,7 +3271,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             $('hist-list').innerHTML = html || '<div style="text-align:center; color:#555; padding: 40px 0; font-size: 12px; font-weight: 600; letter-spacing:1px;">KOSONG</div>';
         }
 
-                function openTop10() {
+        function openTop10() {
             let top10Arr = Object.values(globalItemAgg).sort((a,b) => b.q - a.q).slice(0, 10);
             let top10Html = top10Arr.length > 0 ? top10Arr.map((it, idx) => {
             let displayQty = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2); 
@@ -3191,7 +3290,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
 
         function closeTop10() { untrackModal('top10'); $('top10-modal').style.display = 'none'; checkModalOpen(); } 
 
-                function printHistory(id) {
+        function printHistory(id) {
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
@@ -3225,8 +3324,8 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
-                const doWaHistory = (hData) => {
-                                let d = new Date(hData.ts);
+            const doWaHistory = (hData) => {
+                let d = new Date(hData.ts);
                 let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
                 let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
@@ -3248,14 +3347,14 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                 // Normalisasi Data Historis Lawas menjadi Array (Bypass Ghost Item Bug)
                 let itemsArray = Array.isArray(hData.items) ? hData.items : [{ n: "Item Historis", q: parseFloat(hData.items) || 1, u1: "Item", sub: hData.total }];
                 
-                                itemsArray.forEach(i => {
+                itemsArray.forEach(i => {
                     let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                     let itemName = i.n || "Item Tidak Diketahui";
                     let safeN = itemName.length > 20 ? itemName.substring(0, 19).toUpperCase() + '…' : itemName.toUpperCase();
                     let iqNum = Math.max(1, parseInt(i.iq) || 1);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                     
-                                        // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan WA dengan Keranjang Utama
+                    // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan WA dengan Keranjang Utama
                     let eU_check = formatShortUnit(i.u1) || 'Satuan';
                     let gU_check = formatShortUnit(i.u2) || 'Grosir';
                     if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
@@ -3277,7 +3376,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                     }
                 });
 
-                                // 3. Render Footer & PPN
+                // 3. Render Footer & PPN
                 let safeBayar = hData.bayar !== undefined ? hData.bayar : hData.total;
                 let kembali = safeBayar - hData.total;
                 let labelKembali = kembali < 0 ? "KURANG   " : "KEMBALIAN";
@@ -3292,7 +3391,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                 text += `Simpan struk sebagai bukti\n\n`;
                 text += `Terima Kasih\nSelamat Belanja Kembali\n\`\`\``;
 
-                let intentUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                let intentUrl = `[https://api.whatsapp.com/send?text=$](https://api.whatsapp.com/send?text=$){encodeURIComponent(text)}`;
                 let a = document.createElement('a');
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
@@ -3312,7 +3411,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             doWaHistory(h);
         }
 
-            function cariCloudHistory() {
+        function cariCloudHistory() {
             if (isApiLoading) return;
             let dateVal = $('hist-date').value; 
             let dStr = "HARI INI";
@@ -3332,7 +3431,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             
             fetchWithTimeout(CLOUD_URL + "?action=getHistory&date=" + dateVal + "&t=" + Date.now(), {}, 15000)
             .then(r => r.json())
-                        .then(response => {
+            .then(response => {
                 isApiLoading = false;
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
@@ -3383,7 +3482,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
                     }, 50);
                 }
             })
-                        .catch(err => {
+            .catch(err => {
                 isApiLoading = false;
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
@@ -3407,11 +3506,12 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
 
         let isDbReady = false, pendingLaunchFile = null; 
         
-                async function initApp() { 
+        async function initApp() { 
             try { 
                 if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(()=>{}); }
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
                 await initDB(); db = await loadAllFromIDB(); 
+                runMarketBasketAI(); // <--- INJEKSI PELATUK AI LOKAL
                 if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
                 updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
@@ -3451,7 +3551,7 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
         let activeModals = [];
         let isPoppingState = false; // Bendera pelindung infinite loop
 
-            function trackModal(id) { 
+        function trackModal(id) { 
             if (activeModals[activeModals.length - 1] === id) return;
             activeModals.push(id); 
             history.pushState({ modalOpen: true }, ''); 
@@ -3498,6 +3598,156 @@ let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA';
             else if (id === 'full-date-picker') { closeFullDatePicker(); }
             else if (id === 'top10') { closeTop10(); } 
             else if (id === 'about') { closeAboutModal(); }
+        }
+
+        // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
+        let btDevice = null, btServer = null, btChar = null;
+        async function printBluetoothESCPOS(total, bayar, items, trxId) {
+            try {
+                if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
+                if (!btDevice || !btDevice.gatt.connected) {
+                    showLoading("Mencari Printer Bluetooth...", "#87CEFA");
+                    btDevice = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
+                    });
+                    btServer = await btDevice.gatt.connect();
+                    const services = await btServer.getPrimaryServices();
+                    let service = services.find(s => s.uuid.includes('18f0') || s.uuid.includes('e781') || s.uuid.includes('4953'));
+                    if(!service) service = services[0];
+                    const chars = await service.getCharacteristics();
+                    btChar = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                    hideLoading();
+                }
+                
+                let encoder = new TextEncoder();
+                let initPrint = [0x1B, 0x40, 0x1B, 0x61, 0x01]; // Init & Center Align
+                let textHead = encoder.encode("TOKO KELONTONG\nPs. Sunggingan Lt. 2\nTelp: 082226334999\n--------------------------------\n");
+                let alignLeft = [0x1B, 0x61, 0x00];
+                let bodyStr = `No  : ${trxId}\nTgl : ${new Date().toLocaleString('id-ID')}\n--------------------------------\n`;
+                
+                items.forEach(i => {
+                    let n = i.n.substring(0, 32); let sub = fmt(i.sub);
+                    let qU = `${i.q}x${fmt(i.q > 0 ? Math.round(i.sub / i.q) : i.sub)}`;
+                    let pad = 32 - qU.length - sub.length;
+                    bodyStr += `${n}\n${qU}${" ".repeat(Math.max(1, pad))}${sub}\n`;
+                });
+                
+                bodyStr += `--------------------------------\nTOTAL   : Rp ${fmt(total)}\nBAYAR   : Rp ${fmt(bayar)}\nKEMBALI : Rp ${fmt(bayar-total)}\n--------------------------------\nTERIMA KASIH\n\n\n\n`;
+                let bodyData = encoder.encode(bodyStr);
+                let cut = [0x1D, 0x56, 0x41, 0x10]; // Auto Cutter
+                
+                let payload = new Uint8Array(initPrint.length + textHead.length + alignLeft.length + bodyData.length + cut.length);
+                let offset = 0;
+                payload.set(initPrint, offset); offset += initPrint.length;
+                payload.set(textHead, offset); offset += textHead.length;
+                payload.set(alignLeft, offset); offset += alignLeft.length;
+                payload.set(bodyData, offset); offset += bodyData.length;
+                payload.set(cut, offset);
+                
+                // MTU Chunking (Max 256 bytes dengan Jeda Hardware 20ms)
+                for (let i = 0; i < payload.length; i += 256) {
+                    await btChar.writeValue(payload.slice(i, i + 256));
+                    await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
+                }
+                
+                // Simpan transaksi offline ke Database setelah cetak sukses
+                let newTrx = { id: trxId, ts: Date.now(), total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
+                try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
+                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                hist.unshift(newTrx); localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50)));
+                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+                tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
+                
+            } catch (err) {
+                hideLoading(); showAlert("Printer Gagal Terhubung: " + err.message, "Bluetooth Error", "var(--danger)");
+            }
+        }
+
+        // --- INJEKSI MESIN AI APRIORI ---
+        let marketBasketRules = [];
+        async function runMarketBasketAI() {
+            try {
+                let tx = idb.transaction('history', 'readonly');
+                let hist = await new Promise(res => {
+                    let results = [];
+                    let req = tx.objectStore('history').index('ts_idx').openCursor(null, 'prev');
+                    req.onsuccess = (e) => {
+                        let cursor = e.target.result;
+                        if (cursor && results.length < 500) { // Limit absolut: 500 Transaksi Terbaru
+                            results.push(cursor.value);
+                            cursor.continue();
+                        } else { res(results); }
+                    };
+                });
+                if(hist.length < 20) return; // Butuh data cukup
+                let pairCounts = {}; let itemCounts = {};
+                hist.forEach(h => {
+                    if(!Array.isArray(h.items)) return;
+                    let ids = [...new Set(h.items.map(i => String(i.id)))];
+                    ids.forEach(id => {
+                        itemCounts[id] = (itemCounts[id] || 0) + 1;
+                        ids.forEach(id2 => {
+                            if(id !== id2) {
+                                let pair = [id, id2].sort().join('|');
+                                pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+                            }
+                        });
+                    });
+                });
+                let rules = [];
+                for (let pair in pairCounts) {
+                    if (pairCounts[pair] >= 2) { 
+                        let [a, b] = pair.split('|');
+                        let confA = pairCounts[pair] / itemCounts[a];
+                        let confB = pairCounts[pair] / itemCounts[b];
+                        if (confA > 0.3) rules.push({ trigger: a, rec: b, conf: confA });
+                        if (confB > 0.3) rules.push({ trigger: b, rec: a, conf: confB });
+                    }
+                }
+                marketBasketRules = rules.sort((a,b) => b.conf - a.conf);
+            } catch(e){}
+        }
+
+        // --- INJEKSI MESIN WASM AI OCR (LAZY LOAD) ---
+        async function startWASMOCR() {
+            if (!window.Tesseract) {
+                showLoading("Download AI OCR Engine...<br>(Hanya perlu sekali seumur hidup)", "#FFD700");
+                let script = document.createElement('script');
+                script.src = '[https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js](https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js)';
+                document.body.appendChild(script);
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = () => {
+                        document.body.removeChild(script);
+                        reject(new Error("Gagal mengunduh AI. Periksa koneksi internet Anda."));
+                    };
+                }).catch(err => {
+                    hideLoading();
+                    showAlert(err.message, "Network Error", "var(--danger)");
+                    throw err; // Hentikan eksekusi
+                });
+                hideLoading();
+            }
+            let input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+            input.onchange = async (e) => {
+                if(!e.target.files[0]) return;
+                showLoading("AI sedang membaca Teks Gambar...", "#FFD700");
+                try {
+                    let { data: { text } } = await Tesseract.recognize(e.target.files[0], 'eng');
+                    let match = text.match(/(?:EXP|ED|KADALUARSA)[\s\:\.\-]*(\d{1,2})[\/\-\.](\d{2,4})/i);
+                    if (match) {
+                        let m = match[1].padStart(2, '0'); let y = match[2].length === 2 ? "20"+match[2] : match[2];
+                        $('i-exp').dataset.rawDate = `${y}-${m}-01`; $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
+                        tampilkanToast("Tanggal Terbaca Otomatis!", "#FFD700");
+                    } else {
+                        showAlert("Tidak ada teks kedaluwarsa yang terdeteksi AI. Silakan ketik manual atau foto ulang lebih jelas.", "Gagal OCR", "var(--warning)");
+                    }
+                } catch(err) { tampilkanToast("OCR Error. Periksa internet Anda.", "var(--danger)"); }
+                hideLoading();
+            };
+            input.click();
         }
     </script>
 </body>
