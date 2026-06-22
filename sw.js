@@ -1,6 +1,6 @@
-// ==================================
+// ====================================
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
-// ==================================
+// ====================================
 
 const APP_VERSION = '18.7'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
@@ -8,14 +8,16 @@ const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
 
 const MAX_DYNAMIC_ITEMS = 50; 
-const MAX_CDN_ITEMS = 20;
+const MAX_CDN_ITEMS = 100; // [SURGICAL FIX] Ditambah untuk mengamankan Core WASM & TrainedData AI
 
 const OFFLINE_URL = 'offline.html';
 
 const cdnDomains = [
   'unpkg.com', 
   'fonts.googleapis.com', 
-  'fonts.gstatic.com'
+  'fonts.gstatic.com',
+  'tessdata.projectnaptha.com', // [SURGICAL FIX] Whitelist Database Bahasa OCR AI
+  'raw.githubusercontent.com'   // [SURGICAL FIX] Whitelist Fallback Tesseract
 ];
 
 // ==========================================
@@ -107,7 +109,7 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
 
   // ---------------------------------------------------------
-    // STRATEGI 1: Network-First untuk File Utama HTML
+  // STRATEGI 1: Network-First untuk File Utama HTML
   // ---------------------------------------------------------
   if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('index.html')) {
     event.respondWith(
@@ -124,7 +126,7 @@ self.addEventListener('fetch', event => {
           console.error('[SW] Cache API Crash (Storage diblokir)!', err);
         }
 
-                        const pFetch = fetch(req).then(async res => {
+        const pFetch = fetch(req).then(async res => {
           if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
             const resToCache = res.clone(); // Kloning instan absolut sebelum browser membaca
             try { 
@@ -135,7 +137,7 @@ self.addEventListener('fetch', event => {
           return res;
         });
 
-                // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
+        // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
         event.waitUntil(pFetch.catch(() => {}));
 
         let timeoutId;
@@ -165,27 +167,32 @@ self.addEventListener('fetch', event => {
   }
 
   // ---------------------------------------------------------
-  // STRATEGI 2: Cache-First Murni untuk CDN Eksternal
+  // STRATEGI 2: Cache-First Murni untuk CDN Eksternal (Termasuk AI OCR)
   // ---------------------------------------------------------
-  if (cdnDomains.some(domain => url.hostname.includes(domain))) {
-        event.respondWith(
+    if (cdnDomains.some(domain => url.hostname.includes(domain))) {
+    event.respondWith(
       caches.match(req).catch(() => null).then(cachedRes => {
         if (cachedRes) return cachedRes; 
         
-                const fetchReqCDN = fetch(req).then(res => {
+        let cachePutPromise = Promise.resolve(); // [QA LEAD FIX] Perisai Anti-Terminasi SW
+
+        const fetchReqCDN = fetch(req).then(res => {
           const contentType = res.headers.get('content-type') || '';
           if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
             const resToCache = res.clone();
-            event.waitUntil((async () => {
+            cachePutPromise = (async () => {
               try { 
                 const cache = await caches.open(CACHE_CDN); 
                 await cache.put(req, resToCache); 
                 await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
               } catch(err) { console.warn('[SW] Gagal simpan CDN lokal', err); }
-            })());
+            })();
           }
           return res;
         });
+
+        // [QA LEAD FIX] Mendaftarkan Promise secara SINKRON untuk mencegah InvalidStateError
+        event.waitUntil(fetchReqCDN.then(() => cachePutPromise).catch(() => {}));
 
         return fetchReqCDN.catch(() => new Response('', { status: 503 }));
       })
@@ -198,27 +205,29 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
     event.respondWith(
     caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
+      let cachePutPromise = Promise.resolve(); // [QA LEAD FIX] Perisai Lifecycle SW
+
       const fetchReqDyn = fetch(req).then(networkRes => {
         if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
           const contentType = networkRes.headers.get('content-type') || '';
           if (!contentType.includes('text/html')) {
             const resToCache = networkRes.clone();
-            event.waitUntil((async () => {
+            cachePutPromise = (async () => {
               try { 
-                            const cache = await caches.open(CACHE_DYNAMIC); 
-                            const cleanUrl = req.url.split('?')[0]; 
-                            await cache.delete(cleanUrl); // [SURGICAL FIX] Paksa perbarui indeks LRU ke antrean paling belakang
-                            await cache.put(cleanUrl, resToCache); 
-                            await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+                const cache = await caches.open(CACHE_DYNAMIC); 
+                const cleanUrl = req.url.split('?')[0]; 
+                // [QA LEAD FIX] cache.delete() Dihapus! Sangat berbahaya. cache.put() akan menimpa file dengan aman.
+                await cache.put(cleanUrl, resToCache); 
+                await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
               } catch(e) {}
-            })());
+            })();
           }
         }
         return networkRes;
       });
 
-      // PERISAI MUTLAK: Tahan nyawa Service Worker hingga fetch latar belakang selesai
-      event.waitUntil(fetchReqDyn.catch(() => {}));
+      // PERISAI MUTLAK: Rantai Promise tugas caching secara terpusat agar SW tidak mati prematur
+      event.waitUntil(fetchReqDyn.then(() => cachePutPromise).catch(() => {}));
 
       if (cachedRes) return cachedRes;
 
@@ -231,7 +240,7 @@ self.addEventListener('fetch', event => {
 });
 
 // ==========================================
-// BACKGROUND SYNC (OFFLINE MUTATION)
+// BACKGROUND SYNC (OFFLINE MUTATION & SILENT UPLOAD)
 // ==========================================
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-transaksi-cloud') {
@@ -242,6 +251,10 @@ self.addEventListener('sync', event => {
 let isSyncing = false;
 async function processOfflineBackup() {
   if (isSyncing) return Promise.resolve();
+  
+  // [SURGICAL FIX] Kill-Switch untuk mencegah loop penguras baterai jika offline
+  if (!navigator.onLine) return Promise.reject(new Error("Perangkat masih offline. Sinkronisasi ditunda."));
+  
   isSyncing = true;
   return new Promise((resolve, reject) => {
     const req = indexedDB.open('HargaDB_Pro'); 
@@ -265,7 +278,7 @@ async function processOfflineBackup() {
         
         const payload = getReq.result;
         
-                try {
+        try {
           const CLOUD_API = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec";
           
           const resData = await fetch(CLOUD_API, {
@@ -306,7 +319,7 @@ async function processOfflineBackup() {
               }
           };
 
-                    txDel.oncomplete = () => { 
+          txDel.oncomplete = () => { 
               idb.close(); 
               resolve(); 
           };
