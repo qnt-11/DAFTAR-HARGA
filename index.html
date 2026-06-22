@@ -473,7 +473,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.8</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.9</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -3710,23 +3710,30 @@
         }
 
         // --- INJEKSI MESIN WASM AI OCR (LAZY LOAD) ---
+        // [QA LEAD FIX] Perbaikan Sintaks URL Cacat dan DOM Leak Protection
         async function startWASMOCR() {
             if (!window.Tesseract) {
                 showLoading("Download AI OCR Engine...<br>(Hanya perlu sekali seumur hidup)", "#FFD700");
                 let script = document.createElement('script');
-                script.src = '[https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js](https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js)';
+                script.id = "tesseract-engine-script"; // ID protection
+                script.src = 'https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js';
                 document.body.appendChild(script);
-                await new Promise((resolve, reject) => {
-                    script.onload = resolve;
-                    script.onerror = () => {
-                        document.body.removeChild(script);
-                        reject(new Error("Gagal mengunduh AI. Periksa koneksi internet Anda."));
-                    };
-                }).catch(err => {
+                
+                try {
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = () => {
+                            if (document.getElementById("tesseract-engine-script")) {
+                                document.body.removeChild(script);
+                            }
+                            reject(new Error("Gagal mengunduh AI. Periksa koneksi internet Anda."));
+                        };
+                    });
+                } catch (err) {
                     hideLoading();
                     showAlert(err.message, "Network Error", "var(--danger)");
-                    throw err; // Hentikan eksekusi
-                });
+                    return; // Hentikan eksekusi dengan aman, hindari Unhandled Promise
+                }
                 hideLoading();
             }
             let input = document.createElement('input');
