@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '19.2'; 
+const APP_VERSION = '19.3'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -118,12 +118,20 @@ self.addEventListener('fetch', event => {
     const cleanReqUrl = req.url.split('?')[0];
     
     // [QA LEAD FIX] Tarik eksekusi fetch ke hulu secara SINKRON absolut di Thread Utama SW
-    const pFetch = fetch(req).then(async res => {
+        const pFetch = fetch(req).then(async res => {
       if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
         const resToCache = res.clone();
         try { 
-          const cache = await caches.open(CACHE_CORE); 
+          // [SURGICAL FIX] Mencegah Memory Leak 10 Tahun: Pisahkan cache rute dinamis dari CACHE_CORE
+          const pwaRoot = new URL('./', self.location).href;
+          const isCore = cleanReqUrl === pwaRoot || cleanReqUrl === pwaRoot + 'index.html' || cleanReqUrl.endsWith(OFFLINE_URL);
+          const targetCacheName = isCore ? CACHE_CORE : CACHE_DYNAMIC;
+          
+          const cache = await caches.open(targetCacheName); 
           await cache.put(cleanReqUrl, resToCache); 
+          
+          // Rute navigasi dinamis dilimitasi agar tidak membuat memori HP penuh
+          if (!isCore) await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS);
         } catch(e) {}
       }
       return res;
@@ -134,12 +142,15 @@ self.addEventListener('fetch', event => {
 
     event.respondWith(
       (async () => {
-        let cachedRes = null;
+                let cachedRes = null;
         try {
-          const cache = await caches.open(CACHE_CORE);
-          cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
-                      await cache.match('./index.html', { ignoreSearch: true }) || 
-                      await cache.match('./', { ignoreSearch: true });
+          // [SURGICAL FIX] Cari di seluruh namespace (CORE & DYNAMIC) untuk mencegah Write-Only / I/O Waste pada navigasi dinamis
+          cachedRes = await caches.match(cleanReqUrl, { ignoreSearch: true });
+          if (!cachedRes) {
+            const cacheCore = await caches.open(CACHE_CORE);
+            cachedRes = await cacheCore.match('./index.html', { ignoreSearch: true }) || 
+                        await cacheCore.match('./', { ignoreSearch: true });
+          }
         } catch (err) { console.error('[SW] Cache API Crash!', err); }
 
         let timeoutId;
@@ -184,15 +195,16 @@ self.addEventListener('fetch', event => {
           return cachedRes;
         }
 
-        return fetch(req).then(async res => {
+                return fetch(req).then(async res => {
           const contentType = res.headers.get('content-type') || '';
-                                if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
-                        const resToCache = res.clone();
-                        caches.open(CACHE_CDN).then(async cache => {
-                          await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
-                          await trimCache(CACHE_CDN, MAX_CDN_ITEMS);
-                        }).catch(() => {}).finally(taskResolver);
-                      } else {
+          // [SURGICAL FIX] Tolak status Opaque (res.type === 'opaque' / status 0) untuk melumpuhkan ancaman 700MB Quota Bomb
+          if (res && res.ok && res.type !== 'error' && res.type !== 'opaque' && !contentType.includes('text/html')) {
+            const resToCache = res.clone();
+            caches.open(CACHE_CDN).then(async cache => {
+              await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
+              await trimCache(CACHE_CDN, MAX_CDN_ITEMS);
+            }).catch(() => {}).finally(taskResolver);
+          } else {
             taskResolver();
           }
           return res;
@@ -335,12 +347,12 @@ async function processOfflineBackup() {
         }
       };
 
-      getReq.onerror = (e) => {
+            getReq.onerror = (e) => {
         idb.close();
-        reject(new Error("Gagal membaca antrean Sync IDB: " + e.target.error));
+        reject(new Error("Gagal membaca antrean Sync IDB: " + (e.target.error?.message || "Unknown Error")));
       };
 
      };
-    req.onerror = () => reject();
+    req.onerror = (e) => reject(new Error("Gagal membuka database: " + (e.target.error?.message || "Access Denied/Unknown Error")));
   }).finally(() => { isSyncing = false; });
 }
