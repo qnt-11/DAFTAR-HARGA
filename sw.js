@@ -76,11 +76,14 @@ self.addEventListener('install', event => {
   // [ENHANCEMENT MUTLAK]: OFFLINE_URL dipindah ke core agar aplikasi tidak crash saat offline pertama kali
   const criticalUrls = ['./', './index.html', OFFLINE_URL, './manifest.json'];
 
-  event.waitUntil(
-    caches.open(CACHE_CORE).then(async cache => {
-      await cache.addAll(criticalUrls);
-    }).catch(err => console.error('[SW] Instalasi PWA Gagal Total:', err))
-  );
+                event.waitUntil(
+                caches.open(CACHE_CORE).then(async cache => {
+                  // SURGICAL FIX: Caching secara individual (Atomic Bypass). Jika offline.html 404, index.html tetap aman di-cache!
+                  await Promise.all(
+                    criticalUrls.map(url => cache.add(url).catch(e => console.warn(`[SW] Lewati file hilang: ${url}`)))
+                  );
+                }).catch(err => console.error('[SW] Instalasi PWA Gagal Total:', err))
+              );
 });
 
 self.addEventListener('activate', event => {
@@ -183,13 +186,13 @@ self.addEventListener('fetch', event => {
 
         return fetch(req).then(async res => {
           const contentType = res.headers.get('content-type') || '';
-          if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
-            const resToCache = res.clone();
-            caches.open(CACHE_CDN).then(async cache => {
-              await cache.put(req, resToCache);
-              await trimCache(CACHE_CDN, MAX_CDN_ITEMS);
-            }).catch(() => {}).finally(taskResolver); // Matikan kunci saat byte terakhir selesai disimpan
-          } else {
+                                if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
+                        const resToCache = res.clone();
+                        caches.open(CACHE_CDN).then(async cache => {
+                          await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
+                          await trimCache(CACHE_CDN, MAX_CDN_ITEMS);
+                        }).catch(() => {}).finally(taskResolver);
+                      } else {
             taskResolver();
           }
           return res;
@@ -205,9 +208,7 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-      const cleanUrl = req.url.split('?')[0];
-
-  // [QA LEAD FIX] Tarik fetch jaringan ke hulu secara SINKRON instan (SWR selalu butuh jaringan)
+        // [QA LEAD FIX] Tarik fetch jaringan ke hulu secara SINKRON instan (SWR selalu butuh jaringan)
   const pFetchDyn = fetch(req).then(async networkRes => {
     if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
       const contentType = networkRes.headers.get('content-type') || '';
@@ -215,7 +216,7 @@ self.addEventListener('fetch', event => {
         const resToCache = networkRes.clone();
         try { 
           const cache = await caches.open(CACHE_DYNAMIC); 
-          await cache.put(cleanUrl, resToCache); 
+          await cache.put(req.url, resToCache); // SURGICAL FIX: Amankan parameter URL agar aset multi-versi tidak bertabrakan
           await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
         } catch(e) {}
       }
@@ -226,10 +227,9 @@ self.addEventListener('fetch', event => {
   // [QA LEAD FIX] Daftarkan ke waitUntil secara SINKRON absolut di Thread Utama
   event.waitUntil(pFetchDyn);
 
-                event.respondWith(
-                caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
-                  if (cachedRes) return cachedRes; // Render 0ms, pFetchDyn tetap jalan aman di latar belakang
-
+                                event.respondWith(
+                caches.match(req.url).catch(() => null).then(cachedRes => { // SURGICAL FIX: Gunakan req.url untuk memblokir anomali TypeError "Consumed Request" di iOS/WebKit
+                  if (cachedRes) return cachedRes; 
                   return pFetchDyn.then(res => {
                     return res || new Response('', { status: 503, statusText: 'Service Unavailable' });
                   });
@@ -277,7 +277,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbymUtPHw-_O6w-reo0zLhz-FKxfWzR25lBNDfO_hF5-WIZaTU3M2R4C7Cxmaoqxltch/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
