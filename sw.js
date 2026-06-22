@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '18.8'; 
+const APP_VERSION = '18.9'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -111,34 +111,33 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 1: Network-First untuk File Utama HTML
   // ---------------------------------------------------------
-  if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    const cleanReqUrl = req.url.split('?')[0];
+    
+    // [QA LEAD FIX] Tarik eksekusi fetch ke hulu secara SINKRON absolut di Thread Utama SW
+    const pFetch = fetch(req).then(async res => {
+      if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
+        const resToCache = res.clone();
+        try { 
+          const cache = await caches.open(CACHE_CORE); 
+          await cache.put(cleanReqUrl, resToCache); 
+        } catch(e) {}
+      }
+      return res;
+    });
+
+    // [QA LEAD FIX] Daftarkan waitUntil secara SINKRON pada First-Tick (Mencegah InvalidStateError)
+    event.waitUntil(pFetch.catch(() => {}));
+
     event.respondWith(
       (async () => {
-        const cleanReqUrl = req.url.split('?')[0];
         let cachedRes = null;
-
         try {
           const cache = await caches.open(CACHE_CORE);
           cachedRes = await cache.match(cleanReqUrl, { ignoreSearch: true }) || 
                       await cache.match('./index.html', { ignoreSearch: true }) || 
                       await cache.match('./', { ignoreSearch: true });
-        } catch (err) {
-          console.error('[SW] Cache API Crash (Storage diblokir)!', err);
-        }
-
-        const pFetch = fetch(req).then(async res => {
-          if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
-            const resToCache = res.clone(); // Kloning instan absolut sebelum browser membaca
-            try { 
-              const cache = await caches.open(CACHE_CORE); 
-              await cache.put(cleanReqUrl, resToCache); 
-            } catch(e) {}
-          }
-          return res;
-        });
-
-        // [SURGICAL FIX] Daftarkan promise ke waitUntil secara SINKRON untuk mencegah SW dibunuh
-        event.waitUntil(pFetch.catch(() => {}));
+        } catch (err) { console.error('[SW] Cache API Crash!', err); }
 
         let timeoutId;
         const fetchPromise = Promise.race([
@@ -158,7 +157,7 @@ self.addEventListener('fetch', event => {
         } catch (e) {}
 
         return new Response(
-          `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan Anda tersambung ke internet untuk sinkronisasi awal aplikasi ke dalam perangkat.</p></body></html>`,
+          `<!DOCTYPE html><html><body style="background:#000;color:#f00;text-align:center;padding:50px;font-family:sans-serif;"><h2>⚠️ Sistem Offline</h2><p>Pastikan tersambung internet untuk sinkronisasi awal.</p></body></html>`,
           { headers: { 'Content-Type': 'text/html' }, status: 503 }
         );
       })()
@@ -169,32 +168,35 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 2: Cache-First Murni untuk CDN Eksternal (Termasuk AI OCR)
   // ---------------------------------------------------------
-    if (cdnDomains.some(domain => url.hostname.includes(domain))) {
+      if (cdnDomains.some(domain => url.hostname.includes(domain))) {
+    let taskResolver;
+    const lifeLock = new Promise(r => { taskResolver = r; });
+    // [QA LEAD FIX] Kunci siklus hidup SW secara SINKRON di hulu menggunakan Master Resolver
+    event.waitUntil(lifeLock); 
+
     event.respondWith(
       caches.match(req).catch(() => null).then(cachedRes => {
-        if (cachedRes) return cachedRes; 
-        
-        let cachePutPromise = Promise.resolve(); // [QA LEAD FIX] Perisai Anti-Terminasi SW
+        if (cachedRes) {
+          taskResolver(); // Matikan kunci hidup, SW boleh tidur
+          return cachedRes;
+        }
 
-        const fetchReqCDN = fetch(req).then(res => {
+        return fetch(req).then(async res => {
           const contentType = res.headers.get('content-type') || '';
           if ((res.ok || res.status === 0) && !contentType.includes('text/html')) {
             const resToCache = res.clone();
-            cachePutPromise = (async () => {
-              try { 
-                const cache = await caches.open(CACHE_CDN); 
-                await cache.put(req, resToCache); 
-                await trimCache(CACHE_CDN, MAX_CDN_ITEMS); 
-              } catch(err) { console.warn('[SW] Gagal simpan CDN lokal', err); }
-            })();
+            caches.open(CACHE_CDN).then(async cache => {
+              await cache.put(req, resToCache);
+              await trimCache(CACHE_CDN, MAX_CDN_ITEMS);
+            }).catch(() => {}).finally(taskResolver); // Matikan kunci saat byte terakhir selesai disimpan
+          } else {
+            taskResolver();
           }
           return res;
+        }).catch(err => {
+          taskResolver();
+          return new Response('', { status: 503 });
         });
-
-        // [QA LEAD FIX] Mendaftarkan Promise secara SINKRON untuk mencegah InvalidStateError
-        event.waitUntil(fetchReqCDN.then(() => cachePutPromise).catch(() => {}));
-
-        return fetchReqCDN.catch(() => new Response('', { status: 503 }));
       })
     );
     return;
@@ -203,41 +205,36 @@ self.addEventListener('fetch', event => {
   // ---------------------------------------------------------
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
-    event.respondWith(
+      const cleanUrl = req.url.split('?')[0];
+
+  // [QA LEAD FIX] Tarik fetch jaringan ke hulu secara SINKRON instan (SWR selalu butuh jaringan)
+  const pFetchDyn = fetch(req).then(async networkRes => {
+    if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
+      const contentType = networkRes.headers.get('content-type') || '';
+      if (!contentType.includes('text/html')) {
+        const resToCache = networkRes.clone();
+        try { 
+          const cache = await caches.open(CACHE_DYNAMIC); 
+          await cache.put(cleanUrl, resToCache); 
+          await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
+        } catch(e) {}
+      }
+    }
+    return networkRes;
+  }).catch(() => null);
+
+  // [QA LEAD FIX] Daftarkan ke waitUntil secara SINKRON absolut di Thread Utama
+  event.waitUntil(pFetchDyn);
+
+  event.respondWith(
     caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
-      let cachePutPromise = Promise.resolve(); // [QA LEAD FIX] Perisai Lifecycle SW
+      if (cachedRes) return cachedRes; // Render 0ms, pFetchDyn tetap jalan aman di latar belakang
 
-      const fetchReqDyn = fetch(req).then(networkRes => {
-        if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
-          const contentType = networkRes.headers.get('content-type') || '';
-          if (!contentType.includes('text/html')) {
-            const resToCache = networkRes.clone();
-            cachePutPromise = (async () => {
-              try { 
-                const cache = await caches.open(CACHE_DYNAMIC); 
-                const cleanUrl = req.url.split('?')[0]; 
-                // [QA LEAD FIX] cache.delete() Dihapus! Sangat berbahaya. cache.put() akan menimpa file dengan aman.
-                await cache.put(cleanUrl, resToCache); 
-                await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-              } catch(e) {}
-            })();
-          }
-        }
-        return networkRes;
-      });
-
-      // PERISAI MUTLAK: Rantai Promise tugas caching secara terpusat agar SW tidak mati prematur
-      event.waitUntil(fetchReqDyn.then(() => cachePutPromise).catch(() => {}));
-
-      if (cachedRes) return cachedRes;
-
-      return fetchReqDyn.catch(() => null).then(res => {
-         if (res) return res;
-         return new Response('', { status: 503, statusText: 'Service Unavailable' });
+      return pFetchDyn.then(res => {
+        return res || new Response('', { status: 503, statusText: 'Service Unavailable' });
       });
     })
   );
-});
 
 // ==========================================
 // BACKGROUND SYNC (OFFLINE MUTATION & SILENT UPLOAD)
