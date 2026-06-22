@@ -523,7 +523,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxU49-st1XhuFCDqXENuw7lHqyhxgsXxyi3UkzER1tW9UCUVlDDW8CAExpl8BmlwKkB/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbymUtPHw-_O6w-reo0zLhz-FKxfWzR25lBNDfO_hF5-WIZaTU3M2R4C7Cxmaoqxltch/exec";
                 const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
@@ -1411,11 +1411,11 @@
         const workerScript = `
         let workerList = []; let popMap = {}; let phoneticMap = {}; let latestReqId = 0; 
 
-        function indoPhonetic(str) {
+                        function indoPhonetic(str) {
             if(!str) return "";
             return str.toLowerCase()
                 .replace(/[^a-z0-9]/g, '').replace(/gh/g, 'g').replace(/sh/g, 's')
-                .replace(/([a-z])\\\\1+/g, '$1').replace(/[fvw]/g, 'p')
+                .replace(/([a-z])\\1+/g, '$1').replace(/[fvw]/g, 'p')
                 .replace(/[z]/g, 'j').replace(/[cq]/g, 'k').replace(/[aeiouy]/g, '');
         }
 
@@ -1762,7 +1762,14 @@
         });
 
         function toggleMenu(e) { e.stopPropagation(); $('dropdown-menu').classList.toggle('hidden'); }
-        function closeCustomAlert() { untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; }
+                function closeCustomAlert() { 
+            untrackModal('alert'); $('custom-alert').style.display = 'none'; checkModalOpen(); 
+            $('alert-box').style.borderColor = "var(--border-color)"; $('alert-title').style.color = "var(--text-light)"; 
+            // SURGICAL FIX: Bersihkan polusi CSS injeksi dari Struk Kasir saat ditutup manual
+            $('custom-alert').style.alignItems = ''; $('custom-alert').style.paddingTop = ''; 
+            $('alert-box').style.marginTop = ''; $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;'; 
+            $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;'; 
+        }
         function applyModalColor(title, customColor) { const c = customColor || TemaNotifikasi[title] || "var(--mono-main)"; $('alert-title').innerText = title; $('alert-title').style.color = c; $('alert-box').style.borderColor = c; return c; }
         
         function showAlert(msg, title = "Info", color = null) { 
@@ -1823,8 +1830,8 @@
             let hpp = parseInt(String(hppVal).replace(/\D/g, ''), 10) || 0;
             let margin = parseFloat(elMargin.value);
             
-            // Perbaikan: Izinkan margin negatif agar kasir bisa menghitung harga Cuci Gudang
-            if (hpp > 0 && !isNaN(margin) && margin !== 0 && margin < 100) {
+                        // Perbaikan: Izinkan margin negatif agar kasir bisa menghitung harga Cuci Gudang
+            if (hpp > 0 && !isNaN(margin) && margin < 100) { // SURGICAL FIX: Cabut blokir margin 0% agar bisa set Harga Jual = Harga Modal
                 let hargaJual = hpp / (1 - (margin / 100));
                 elJual.value = fmt(Math.ceil(hargaJual / 100) * 100);
                 updateWarnaMargin(elMargin, margin);
@@ -2100,11 +2107,12 @@
                 
                 const ts = Date.now();
                 
-                if (activeId) {
+                                if (activeId) {
                     const idx = db.findIndex(x => String(x.id) === String(activeId)); 
                     if (idx === -1) throw new Error("Barang tidak ditemukan di database!");
                     
                     db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, exp, t, u1, u2, iq, updatedAt: ts };
+                    delete db[idx]._isGhost; // SURGICAL FIX: Cabut kutukan Ghost secara permanen jika data sengaja disimpan ulang
                     await saveItemToIDB(db[idx]); 
                     
                     if (worker) worker.postMessage({ type: 'update', item: db[idx] }); 
@@ -2330,13 +2338,14 @@
                     hideLoading(); 
                     tampilkanToast("Upload Data Berhasil!", "var(--mono-main)"); 
                 })
-                .catch((err) => { 
+                                .catch((err) => { 
                     isApiLoading = false; hideLoading(); 
                     if (window.registerBackgroundSync) {
                         try {
                             let histBackup = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
                             const tx = idb.transaction('sync-outbox', 'readwrite');
-                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db, history: histBackup, timestamp: Date.now() });
+                            // SURGICAL FIX: Sterilisasi absolut pada payload Background Sync untuk mencegah Zombie Data terupload diam-diam
+                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db.filter(i => !i._isGhost), history: histBackup, timestamp: Date.now() });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
@@ -2376,9 +2385,11 @@
                 function processNextChunk() {
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
-                        if (chunk.length === 0) {
-                            db = Array.from(tempMap.values()); updateMaps(); 
-                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
+                                                        if (chunk.length === 0) {
+                                    // SURGICAL FIX: Amankan Ghost Item dari pemusnahan massal saat Sync Cloud/Excel berjalan di tengah proses Edit Struk
+                                    let ghostItems = db.filter(i => i._isGhost);
+                                    db = Array.from(tempMap.values()).concat(ghostItems); updateMaps(); 
+                                    if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost) }); 
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none'; pendingAutoAdds.clear();
                             if (isCartMode) renderCartUI(); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); isApiLoading = false; hideLoading(); 
                             if (rejectedCloudCount > 0) { showAlert(`Update Selesai!<br><br><span style="color:var(--warning);">⚠️ ${rejectedCloudCount} data ditolak dari Cloud (Format rusak).</span>`, "Peringatan Sinkronisasi", "var(--warning)"); } else { tampilkanToast(forceSync ? "Berhasil memuat ulang semua data!" : `Berhasil update ${dataCloud.length} data!`, "var(--mono-main)"); }
@@ -2481,8 +2492,8 @@
                         let skippedCount = 0; let failedCount = 0; let processedItems = new Map(); 
                         let dbMapById = new Map(); let dbMapByName = new Map(); let dbMapByBarcode = new Map();
                         
-                        db.forEach(x => { 
-                            if(!x.deleted) { 
+                                                db.forEach(x => { 
+                            if(!x.deleted && !x._isGhost) { 
                                 if(x.id) dbMapById.set(String(x.id), x); 
                                 if(x.n) dbMapByName.set(String(x.n).toLowerCase(), x); 
                                 if(x.b) dbMapByBarcode.set(String(x.b), x); 
@@ -2529,10 +2540,9 @@
                             let existingItem = dbMapById.get(String(norm.id)) || dbMapByName.get(String(norm.n).toLowerCase());
                             
                             if (existingItem) { 
-                                processedItems.set(existingItem.id, { ...existingItem, ...norm, id: existingItem.id, updatedAt: currentTs, deleted: false }); 
+                                processedItems.set(existingItem.id, { ...existingItem, ...norm, id: existingItem.id, updatedAt: currentTs }); 
                             } else { 
                                 norm.updatedAt = currentTs; 
-                                norm.deleted = false; 
                                 processedItems.set(norm.id, norm); 
                                 dbMapByName.set(String(norm.n).toLowerCase(), norm);
                             }
@@ -2621,9 +2631,12 @@
                     if (isScanLocked) return; isScanLocked = true;
                     playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
                     
-                    // --- INJEKSI MESIN GS1 PARSER ---
+                                        // --- INJEKSI MESIN GS1 PARSER ---
                     if (scannedText.startsWith('01') && scannedText.length >= 16) {
-                        let gtin = scannedText.substring(2, 16).replace(/^0+/, ''); // Buang nol di depan
+                        let gtin = scannedText.substring(2, 16);
+                        // SURGICAL FIX: Jangan hapus semua angka nol! Hapus HANYA 1 angka nol pertama (Package Indicator GTIN-14) agar nol bawaan Barcode EAN-13 tidak rusak/hilang.
+                        if (gtin.length === 14 && gtin.startsWith('0')) gtin = gtin.substring(1);
+                        
                         let expMatch = scannedText.match(/17(\d{6})/);
                         if (expMatch && (scanMode === 'input' || scanMode === 'input-grosir')) {
                             let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = d.substring(2,4);
@@ -2631,9 +2644,13 @@
                             $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
                             tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
                         }
-                        scannedText = gtin; // Kembalikan ke format GTIN murni untuk pencarian database
+                        scannedText = gtin; 
                     }
                     // --------------------------------
+                    // SURGICAL FIX: Blokir string kosong absolut agar tidak memicu Ghost Match pada barang yang belum memiliki barcode
+                    if (!scannedText || scannedText.trim() === '') {
+                        closeScanner(); return tampilkanToast("Barcode Kosong/Tidak Valid!", "var(--danger)");
+                    }
 
                     if (scanMode === 'cart') handlePhysicalScanner(scannedText);
                     else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
@@ -3471,8 +3488,12 @@
                     let localIds = new Set(localHist.map(h => h.id));
                     let newItems = 0;
                     
-                    response.data.forEach(cloudTx => {
-                        if (!localIds.has(cloudTx.id)) {
+                                        response.data.forEach(cloudTx => {
+                        let existingIdx = localHist.findIndex(h => h.id === cloudTx.id);
+                        if (existingIdx !== -1) {
+                            localHist[existingIdx] = cloudTx; // SURGICAL FIX: Timpa/Update data lokal jika ada revisi dari Google Sheets
+                            newItems++; 
+                        } else {
                             localHist.push(cloudTx);
                             newItems++;
                         }
@@ -3618,8 +3639,14 @@
         function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { closeScanner(); }
-            else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
-            else if (id === 'alert') { $('custom-alert').style.display = 'none'; checkModalOpen(); }
+                        else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
+            else if (id === 'alert') { 
+                $('custom-alert').style.display = 'none'; checkModalOpen(); 
+                // SURGICAL FIX: Bersihkan polusi CSS injeksi saat modal ditutup paksa lewat tombol Back HP
+                $('custom-alert').style.alignItems = ''; $('custom-alert').style.paddingTop = ''; 
+                $('alert-box').style.marginTop = ''; $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;'; 
+                $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;'; 
+            }
             else if (id === 'pin') { $('pin-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'sync') { $('sync-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'offline') { $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
@@ -3649,11 +3676,11 @@
                     hideLoading();
                 }
                 
-                let encoder = new TextEncoder();
+                                let encoder = new TextEncoder();
                 let initPrint = [0x1B, 0x40, 0x1B, 0x61, 0x01]; // Init & Center Align
                 let textHead = encoder.encode("TOKO KELONTONG\nPs. Sunggingan Lt. 2\nTelp: 082226334999\n--------------------------------\n");
                 let alignLeft = [0x1B, 0x61, 0x00];
-                let bodyStr = `No  : ${trxId}\nTgl : ${new Date().toLocaleString('id-ID')}\n--------------------------------\n`;
+                let bodyStr = `No  : ${trxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
                 
                 items.forEach(i => {
                     let n = i.n.substring(0, 32); let sub = fmt(i.sub);
