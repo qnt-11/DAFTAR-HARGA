@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '19.0'; 
+const APP_VERSION = '19.1'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -226,15 +226,16 @@ self.addEventListener('fetch', event => {
   // [QA LEAD FIX] Daftarkan ke waitUntil secara SINKRON absolut di Thread Utama
   event.waitUntil(pFetchDyn);
 
-  event.respondWith(
-    caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
-      if (cachedRes) return cachedRes; // Render 0ms, pFetchDyn tetap jalan aman di latar belakang
+                event.respondWith(
+                caches.match(req, { ignoreSearch: true }).catch(() => null).then(cachedRes => {
+                  if (cachedRes) return cachedRes; // Render 0ms, pFetchDyn tetap jalan aman di latar belakang
 
-      return pFetchDyn.then(res => {
-        return res || new Response('', { status: 503, statusText: 'Service Unavailable' });
-      });
-    })
-  );
+                  return pFetchDyn.then(res => {
+                    return res || new Response('', { status: 503, statusText: 'Service Unavailable' });
+                  });
+                })
+              );
+            }); // [QA LEAD FIX] Penutup Event Listener 'fetch' yang hilang (FATAL SYNTAX ERROR)
 
 // ==========================================
 // BACKGROUND SYNC (OFFLINE MUTATION & SILENT UPLOAD)
