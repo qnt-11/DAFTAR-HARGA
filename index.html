@@ -209,13 +209,10 @@
             <label>Nama Barang</label>
             <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;">
 
-            <div class="form-grid" style="margin-top: 14px; margin-bottom: 14px;">
+                        <div class="form-grid" style="margin-top: 14px; margin-bottom: 14px;">
                 <div style="flex: 7;">
                     <label style="margin-top: 0;">Expired</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent; flex:1; margin-bottom:0;">
-                        <button type="button" onclick="startWASMOCR()" style="background:var(--wa-bg); border:1px solid var(--warning); border-radius:8px; width:44px; color:var(--warning); outline:none; display:flex; justify-content:center; align-items:center; cursor:pointer;">📷</button>
-                    </div>
+                    <input type="text" id="i-exp" placeholder="- Tidak Ada -" readonly onclick="openPicker('i-exp', 'date')" style="cursor: pointer; caret-color: transparent; margin-bottom: 0;">
                 </div>
                 <div style="flex: 3;">
                     <label style="margin-top: 0;">Akronim</label>
@@ -288,9 +285,9 @@
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
             </div>
 
-            <div id="wrap-iq">
+                                    <div id="wrap-iq">
                 <label id="label-iq">Isi per ...</label>
-                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="syncModalGrosir();">
+                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }">
             </div> 
 
             <div class="modal-btns">
@@ -473,7 +470,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 18.9</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.1</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -1055,11 +1052,21 @@
             }
         }
         
+                // [QA LEAD FIX] Smart Scroll Hijacking: Lebih mulus, anti-lompat, dan hanya aktif jika kolom tertutup keyboard
         document.addEventListener('focus', function(e) {
-            if (e.target.tagName && e.target.tagName.toLowerCase() === 'input' && e.target.closest('.modal-box')) {
+            const el = e.target;
+            if (el && (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') && el.closest('.modal-box')) {
+                // Beri jeda 400ms agar animasi native keyboard OS selesai dahulu (mencegah tabrakan visual)
                 setTimeout(() => {
-                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
+                    const rect = el.getBoundingClientRect();
+                    const viewHeight = window.innerHeight;
+                    
+                    // Cek koordinat: Hanya gulir JIKA elemen terlalu dekat ke tepi atas layar 
+                    // ATAU terlalu dekat ke batas bawah keyboard (safe-zone 60px)
+                    if (rect.top < 60 || rect.bottom > (viewHeight - 60)) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 400);
             }
         }, true);
 
@@ -1241,7 +1248,7 @@
             return parts.length >= 2 ? `${NamaBln[parseInt(parts[1], 10) - 1]} ${parts[0]}` : dStr; 
         }
 
-        function parseBulanTahunExcel(str) { 
+                function parseBulanTahunExcel(str) { 
             if (!str) return ""; 
             if (!isNaN(str) && Number(str) > 20000) { 
                 let d = new Date(Date.UTC(1970, 0, Math.floor(Number(str) - 25569) + 1)); 
@@ -1251,15 +1258,27 @@
             if (p.length === 2) { 
                 let b = NamaBln.findIndex(x => x.toLowerCase() === p[0].toLowerCase()); 
                 if(b===-1) b = NamaBlnPendek.findIndex(x => x.toLowerCase() === p[0].toLowerCase()); 
-                if (b !== -1) return `${p[1]}-${String(b + 1).padStart(2, '0')}-01`; 
+                if (b !== -1) {
+                    let y = parseInt(p[1], 10);
+                    if (y < 100) y += 2000;
+                    return `${y}-${String(b + 1).padStart(2, '0')}-01`;
+                }
                 if (!isNaN(p[0]) && !isNaN(p[1])) {
                     let m = parseInt(p[0], 10); let y = parseInt(p[1], 10);
                     if (m > 12) { let t=m; m=y; y=t; } 
+                    if (y < 100) y += 2000;
                     return `${y}-${String(m).padStart(2, '0')}-01`;
                 }
             } 
             let pt = String(str).split(/[\-\/]/); 
-            return pt.length === 3 ? `${pt[0].length === 4 ? pt[0] : pt[2]}-${String(pt[1]).padStart(2, '0')}-${String(pt[0].length === 4 ? pt[2] : pt[0]).padStart(2, '0')}` : ''; 
+            if (pt.length === 3) {
+                let thn = pt[0].length === 4 ? pt[0] : pt[2];
+                let bln = String(pt[1]).padStart(2, '0');
+                let tgl = String(pt[0].length === 4 ? pt[2] : pt[0]).padStart(2, '0');
+                if (thn.length <= 2) thn = String(parseInt(thn, 10) + 2000);
+                return `${thn}-${bln}-${tgl}`;
+            }
+            return ''; 
         }
 
         function parseExcelPrice(val) { 
@@ -1796,15 +1815,16 @@
             }
         }
 
-        function calcPriceFromMargin(type) {
+                function calcPriceFromMargin(type) {
             let hppVal = type === 'p1' ? $('i-hpp').value : $('i-hpp-grosir').value;
             let elMargin = type === 'p1' ? $('i-m1') : $('i-m2');
             let elJual = type === 'p1' ? $('i-p1') : $('i-p2');
             
             let hpp = parseInt(String(hppVal).replace(/\D/g, ''), 10) || 0;
-            let margin = parseFloat(elMargin.value) || 0;
+            let margin = parseFloat(elMargin.value);
             
-            if (hpp > 0 && margin > 0 && margin < 100) {
+            // Perbaikan: Izinkan margin negatif agar kasir bisa menghitung harga Cuci Gudang
+            if (hpp > 0 && !isNaN(margin) && margin !== 0 && margin < 100) {
                 let hargaJual = hpp / (1 - (margin / 100));
                 elJual.value = fmt(Math.ceil(hargaJual / 100) * 100);
                 updateWarnaMargin(elMargin, margin);
@@ -1823,13 +1843,17 @@
             }
         }
 
-        function syncModalGrosir() {
+                function syncModalGrosir() {
             let hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, ''), 10) || 0;
             let iq = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
             if (hpp > 0 && iq > 1) {
                 $('i-hpp-grosir').value = fmt(hpp * iq);
                 calcMargin('p2');
             } else if (hpp > 0 && iq <= 1) {
+                $('i-hpp-grosir').value = "";
+                calcMargin('p2');
+            } else if (hpp === 0) {
+                // Perbaikan: Bersihkan sinkronisasi secara absolut jika master HPP dihapus
                 $('i-hpp-grosir').value = "";
                 calcMargin('p2');
             }
@@ -2033,11 +2057,15 @@
                     }
                     if (p2 > 0 && iq > 1) {
                         const hppGrosir = hpp * iq;
-                        if (p2 <= p1) {
-                            isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                            return showAlert("Bencana Finansial: Harga Grosir (" + fmt(p2) + ") tidak logis karena lebih rendah/sama dengan eceran (" + fmt(p1) + ")!", "Gagal");
-                        }
-                        if (hppGrosir > 0 && p2 < hppGrosir) {
+                                        if (p2 <= p1) {
+                    isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                    return showAlert("Bencana Finansial: Harga 1 Dus (" + fmt(p2) + ") tidak logis karena lebih murah/sama dengan 1 Biji (" + fmt(p1) + ")!", "Gagal");
+                }
+                if (p2 > p1 * iq) {
+                    isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                    return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Eceran jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
+                }
+                if (hppGrosir > 0 && p2 < hppGrosir) {
                             isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
                             return showConfirm(`Harga Grosir (Rp ${fmt(p2)}) lebih rendah dari Total Modal Grosir (Rp ${fmt(hppGrosir)}).<br>Tetap simpan (Cuci Gudang)?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
                         }
@@ -2865,7 +2893,7 @@
                 btnBluetooth.className = "btn-main";
                 btnBluetooth.style.cssText = "border: 1px solid #87CEFA!important; color: #87CEFA!important; background:transparent!important; padding: 0 5px; font-size: 10px; flex: 1;";
                 btnBluetooth.innerHTML = "BLUETOOTH";
-                btnBluetooth.onclick = () => {
+                                btnBluetooth.onclick = () => {
                     if (isProcessingPayment) return;
                     let inputBayarStr = $('input-bayar-struk').value.replace(/\D/g, '');
                     let parsedBayar = parseInt(inputBayarStr, 10);
@@ -2875,6 +2903,7 @@
                     
                     let d = new Date();
                     let finalId = activeEditTrxId;
+                    let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime(); // [QA LEAD FIX] Kunci Timestamp Asli
                     if (!finalId) {
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
@@ -2883,7 +2912,7 @@
                         localStorage.setItem('TRX_SEQ', seq);
                         finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
                     }
-                    printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId); // Tembak ke Hardware
+                    printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId, finalTs); // Tembak ke Hardware
                     resetPrintModalStyle();
                 };
 
@@ -3602,7 +3631,7 @@
 
         // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
         let btDevice = null, btServer = null, btChar = null;
-        async function printBluetoothESCPOS(total, bayar, items, trxId) {
+                async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
             try {
                 if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
                 if (!btDevice || !btDevice.gatt.connected) {
@@ -3652,10 +3681,20 @@
                 }
                 
                 // Simpan transaksi offline ke Database setelah cetak sukses
-                let newTrx = { id: trxId, ts: Date.now(), total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
+                let finalTs = trxTs ? trxTs : Date.now();
+                let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
                 try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
+                
                 let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                hist.unshift(newTrx); localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50)));
+                if (activeEditTrxId) {
+                    let hIdx = hist.findIndex(x => x.id === trxId);
+                    if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
+                } else { 
+                    hist.unshift(newTrx); 
+                }
+                
+                try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
+                
                 cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
                 tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
                 
@@ -3709,53 +3748,6 @@
             } catch(e){}
         }
 
-        // --- INJEKSI MESIN WASM AI OCR (LAZY LOAD) ---
-        // [QA LEAD FIX] Perbaikan Sintaks URL Cacat dan DOM Leak Protection
-        async function startWASMOCR() {
-            if (!window.Tesseract) {
-                showLoading("Download AI OCR Engine...<br>(Hanya perlu sekali seumur hidup)", "#FFD700");
-                let script = document.createElement('script');
-                script.id = "tesseract-engine-script"; // ID protection
-                script.src = 'https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js';
-                document.body.appendChild(script);
-                
-                try {
-                    await new Promise((resolve, reject) => {
-                        script.onload = resolve;
-                        script.onerror = () => {
-                            if (document.getElementById("tesseract-engine-script")) {
-                                document.body.removeChild(script);
-                            }
-                            reject(new Error("Gagal mengunduh AI. Periksa koneksi internet Anda."));
-                        };
-                    });
-                } catch (err) {
-                    hideLoading();
-                    showAlert(err.message, "Network Error", "var(--danger)");
-                    return; // Hentikan eksekusi dengan aman, hindari Unhandled Promise
-                }
-                hideLoading();
-            }
-            let input = document.createElement('input');
-            input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
-            input.onchange = async (e) => {
-                if(!e.target.files[0]) return;
-                showLoading("AI sedang membaca Teks Gambar...", "#FFD700");
-                try {
-                    let { data: { text } } = await Tesseract.recognize(e.target.files[0], 'eng');
-                    let match = text.match(/(?:EXP|ED|KADALUARSA)[\s\:\.\-]*(\d{1,2})[\/\-\.](\d{2,4})/i);
-                    if (match) {
-                        let m = match[1].padStart(2, '0'); let y = match[2].length === 2 ? "20"+match[2] : match[2];
-                        $('i-exp').dataset.rawDate = `${y}-${m}-01`; $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
-                        tampilkanToast("Tanggal Terbaca Otomatis!", "#FFD700");
-                    } else {
-                        showAlert("Tidak ada teks kedaluwarsa yang terdeteksi AI. Silakan ketik manual atau foto ulang lebih jelas.", "Gagal OCR", "var(--warning)");
-                    }
-                } catch(err) { tampilkanToast("OCR Error. Periksa internet Anda.", "var(--danger)"); }
-                hideLoading();
-            };
-            input.click();
-        }
     </script>
 </body>
 </html>
