@@ -101,11 +101,11 @@
                     tx.oncomplete = forceReload;
                     tx.onerror = forceReload;
                 } catch (e) { forceReload(); }
-            } else {
+                       } else {
                 forceReload();
             }
             
-            setTimeout(forceReload, 1500); 
+            setTimeout(forceReload, 4000); 
         }
 
         window.addEventListener('online', () => { 
@@ -152,9 +152,10 @@
             if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
         };
         requestDB.onsuccess = (e) => { 
-            db = e.target.result; 
-            loadLedger(); 
-        };
+    db = e.target.result; 
+    db.onversionchange = () => db.close();
+    loadLedger(); 
+};
         requestDB.onerror = function() { 
             const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
             if (t && ledger.value === '') ledger.value = t; 
@@ -183,12 +184,12 @@
                 };
 
                                                 req.onsuccess = function() { 
-                    const localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER');
-                    if (req.result && typeof req.result.text === 'string') { 
-                        if (localText && localText.length > req.result.text.length) {
-                            if (ledger.value === '') ledger.value = localText;
-                            saveLedger(); 
-                        } else {
+    const localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER');
+    if (req.result && typeof req.result.text === 'string') { 
+        if (localText && localText !== req.result.text) {
+            if (ledger.value === '') ledger.value = localText;
+            saveLedger(); 
+        } else {
                             if (ledger.value === '') ledger.value = req.result.text; 
                         }
                     } else if (localText) {
