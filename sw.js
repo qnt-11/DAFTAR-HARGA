@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '19.3'; 
+const APP_VERSION = '19.4'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -55,17 +55,6 @@ function trimCache(cacheName, maxItems) {
   return currentTask;
 }
 
-async function manageStorage() {
-  if (navigator.storage && navigator.storage.estimate) {
-    try {
-      const quota = await navigator.storage.estimate();
-      if (quota.quota && (quota.usage / quota.quota > 0.8)) {
-        await trimCache(CACHE_DYNAMIC, 20); 
-      }
-    } catch(e) {}
-  }
-}
-
 // ==========================================
 // SIKLUS HIDUP SERVICE WORKER
 // ==========================================
@@ -94,8 +83,7 @@ self.addEventListener('activate', event => {
           return caches.delete(key); 
         }
       }));
-    }).then(async () => {
-      await manageStorage(); 
+        }).then(async () => {
       return self.clients.claim();
     }) 
   );
@@ -109,7 +97,9 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
+    // [QA LEAD FIX] Filter mutlak: Cegah Service Worker membajak navigasi ke situs eksternal
   if (req.method !== 'GET' || url.hostname.includes('script.google') || !url.protocol.startsWith('http')) return;
+  if (req.mode === 'navigate' && url.origin !== self.location.origin) return;
 
   // ---------------------------------------------------------
   // STRATEGI 1: Network-First untuk File Utama HTML
@@ -118,23 +108,20 @@ self.addEventListener('fetch', event => {
     const cleanReqUrl = req.url.split('?')[0];
     
     // [QA LEAD FIX] Tarik eksekusi fetch ke hulu secara SINKRON absolut di Thread Utama SW
-        const pFetch = fetch(req).then(async res => {
+                const pFetch = fetch(req).then(res => { // [ELITE QA FIX] Hapus `async` untuk memutus belenggu Deadlock I/O
       if (res && res.ok && res.type !== 'error' && res.type !== 'opaque') {
         const resToCache = res.clone();
-        try { 
-          // [SURGICAL FIX] Mencegah Memory Leak 10 Tahun: Pisahkan cache rute dinamis dari CACHE_CORE
-          const pwaRoot = new URL('./', self.location).href;
-          const isCore = cleanReqUrl === pwaRoot || cleanReqUrl === pwaRoot + 'index.html' || cleanReqUrl.endsWith(OFFLINE_URL);
-          const targetCacheName = isCore ? CACHE_CORE : CACHE_DYNAMIC;
-          
-          const cache = await caches.open(targetCacheName); 
+        const pwaRoot = new URL('./', self.location).href;
+        const isCore = cleanReqUrl === pwaRoot || cleanReqUrl === pwaRoot + 'index.html' || cleanReqUrl.endsWith(OFFLINE_URL);
+        const targetCacheName = isCore ? CACHE_CORE : CACHE_DYNAMIC;
+        
+        // [QA LEAD FIX] Lempar operasi disk (tulis cache/trim) ke thread background terisolasi tanpa await!
+        caches.open(targetCacheName).then(async cache => {
           await cache.put(cleanReqUrl, resToCache); 
-          
-          // Rute navigasi dinamis dilimitasi agar tidak membuat memori HP penuh
           if (!isCore) await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS);
-        } catch(e) {}
+        }).catch(() => {});
       }
-      return res;
+      return res; // Murni me-return respons ke layar UI SECEPAT KILAT
     });
 
     // [QA LEAD FIX] Daftarkan waitUntil secara SINKRON pada First-Tick (Mencegah InvalidStateError)
@@ -195,10 +182,12 @@ self.addEventListener('fetch', event => {
           return cachedRes;
         }
 
-                return fetch(req).then(async res => {
+                                                           // [SURGICAL FIX] Cabut pemaksaan Mode CORS agar tidak memblokir resource pihak ketiga
+                const fetchReq = req;
+                return fetch(fetchReq).then(async res => {
           const contentType = res.headers.get('content-type') || '';
-          // [SURGICAL FIX] Tolak status Opaque (res.type === 'opaque' / status 0) untuk melumpuhkan ancaman 700MB Quota Bomb
-          if (res && res.ok && res.type !== 'error' && res.type !== 'opaque' && !contentType.includes('text/html')) {
+          
+          if (res && (res.ok || res.type === 'opaque') && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -221,19 +210,19 @@ self.addEventListener('fetch', event => {
   // STRATEGI 3: Stale-While-Revalidate untuk Aset Dinamis
   // ---------------------------------------------------------
         // [QA LEAD FIX] Tarik fetch jaringan ke hulu secara SINKRON instan (SWR selalu butuh jaringan)
-  const pFetchDyn = fetch(req).then(async networkRes => {
+    const pFetchDyn = fetch(req).then(networkRes => { // [ELITE QA FIX] Hapus `async`
     if (networkRes && networkRes.ok && networkRes.type !== 'error' && networkRes.type !== 'opaque') {
       const contentType = networkRes.headers.get('content-type') || '';
       if (!contentType.includes('text/html')) {
         const resToCache = networkRes.clone();
-        try { 
-          const cache = await caches.open(CACHE_DYNAMIC); 
-          await cache.put(req.url, resToCache); // SURGICAL FIX: Amankan parameter URL agar aset multi-versi tidak bertabrakan
+        // [QA LEAD FIX] Tulis cache dinamis di luar pipeline rendering utama
+        caches.open(CACHE_DYNAMIC).then(async cache => {
+          await cache.put(req.url, resToCache); 
           await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
-        } catch(e) {}
+        }).catch(() => {});
       }
     }
-    return networkRes;
+    return networkRes; // Langsung lepaskan objek ke layar browser
   }).catch(() => null);
 
   // [QA LEAD FIX] Daftarkan ke waitUntil secara SINKRON absolut di Thread Utama
@@ -289,7 +278,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbymUtPHw-_O6w-reo0zLhz-FKxfWzR25lBNDfO_hF5-WIZaTU3M2R4C7Cxmaoqxltch/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyUh74MJkE3l5u_QZA6wl67Dr_-5PdLbwLcqo5zBV8DoBT2rlNGR55j3PmIZC9DFKI/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
@@ -302,7 +291,10 @@ async function processOfflineBackup() {
           } catch(e) { 
             throw new Error("API mengembalikan non-JSON. Sync ditunda.");
           }
-          if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
+                    if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
+
+          // [SURGICAL FIX] Garbage Collection Paksa: Musnahkan payload raksasa dari RAM SW segera setelah transmisi usai untuk mencegah OOM Crash!
+          delete payload.data; 
 
           const resHist = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
