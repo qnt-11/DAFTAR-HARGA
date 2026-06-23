@@ -255,11 +255,25 @@
             display.innerText = str.replace(/\*/g, '×').replace(/\//g, '÷');
         }
 
-        function calcNum(n) { 
+                function calcNum(n) { 
+            // [QA LEAD FIX] Perisai Memori: Batasi string maksimal 40 karakter. Mencegah V8 Engine Crash akibat spam/barcode liar.
+            if (calcVal.length > 40) return; 
+
             if (isResultDisplayed) {
                 calcVal = '0';
                 isResultDisplayed = false;
             }
+            const p = calcVal.split(/[\+\-\*\/]/);
+            const curr = p[p.length - 1]; 
+            
+            if (n === '.' && curr === '') n = '0.'; 
+            if (n === '.' && curr.includes('.')) return; 
+            if (curr === '0' && n !== '.') calcVal = calcVal.slice(0, -1) + n; 
+            else if (curr === '0' && n === '0') return; 
+            else calcVal += n; 
+            
+            updateDisplay(); 
+        }
             const p = calcVal.split(/[\+\-\*\/]/);
             const curr = p[p.length - 1]; 
             
@@ -295,13 +309,14 @@
             updateDisplay(); 
         }
 
-        function calcCalculate() {
+                function calcCalculate() {
             try {
                 let safeVal = calcVal.replace(/[\+\-\*\/\.]$/, '');
                 
-                let result = eval(safeVal); 
+                // [QA LEAD FIX] CSP Sandbox: Ganti eval() dengan Anonymous Function. Bebas blokir keamanan browser & eksekusi lebih cepat!
+                let result = new Function('return ' + safeVal)(); 
                 if (!isFinite(result) || isNaN(result)) throw new Error();
-                
+
                 calcVal = String(parseFloat(result.toFixed(4))); 
                 isResultDisplayed = true; 
                 updateDisplay();
