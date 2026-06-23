@@ -506,7 +506,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.6</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.7</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -1003,7 +1003,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 
                 let titleBox = document.querySelector('.cp-title-box span:first-child');
                 if (titleBox) { titleBox.innerText = "Edit Struk"; titleBox.style.color = "var(--warning)"; }
-                tampilkanToast("+ Barang Tambahan", "var(--warning)");
+                tampilkanToast("+ Tambah Barang", "var(--warning)");
             };
 
             if (!h) {
@@ -2144,7 +2144,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 if (!bypassAnomaly) {
                     if (hpp > 0 && p1 < hpp) {
                         isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                        return showConfirm(`Harga Satuan (Rp ${fmt(p1)}) lebih rendah dari HPP Modal (Rp ${fmt(hpp)}).<br>Tetap simpan (Cuci Gudang)?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
+                        return showConfirm(`Harga Satuan (Rp ${fmt(p1)}) lebih rendah dari HPP Modal Satuan (Rp ${fmt(hpp)}).<br>Tetap simpan?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
                     }
                     if (p2 > 0 && iq > 1) {
                         const hppGrosir = hpp * iq;
@@ -2154,24 +2154,24 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 }
                 if (p2 > p1 * iq) {
                     isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                    return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Eceran jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
+                    return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Satuan jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
                 }
                 if (hppGrosir > 0 && p2 < hppGrosir) {
                             isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                            return showConfirm(`Harga Grosir (Rp ${fmt(p2)}) lebih rendah dari Total Modal Grosir (Rp ${fmt(hppGrosir)}).<br>Tetap simpan (Cuci Gudang)?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
+                            return showConfirm(`Harga Grosir (Rp ${fmt(p2)}) lebih rendah dari Total Modal Grosir (Rp ${fmt(hppGrosir)}).<br>Tetap simpan?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
                         }
                     }
                 }
                 
                 if (b2 !== '') {
-                    if (iq < 2) return showAlert("Isi Grosir wajib minimal 2 jika Barcode Grosir diisi!", "Gagal"); 
-                    if (b2 === b) return showAlert("Barcode Grosir tidak boleh sama persis dengan Satuan!", "Gagal"); 
+                    if (iq < 2) return showAlert("Isi Per ... wajib diisi jika Barcode Grosir diisi!", "Gagal"); 
+                    if (b2 === b) return showAlert("Barcode Grosir tidak boleh sama persis dengan Barcode Satuan!", "Gagal"); 
                     const exB2 = db.find(x => !x.deleted && (String(x.b) === b2 || String(x.b2) === b2) && String(x.id) !== String(activeId)); 
                     if (exB2) return showAlert("Barcode Grosir sudah dipakai pada barang lain!", "Gagal"); 
                 }
 
                 if (p2 > 0 && iq < 2) { 
-                    return showAlert("Jika Harga Grosir diisi, Isi Grosir harus lebih dari 1!", "Gagal"); 
+                    return showAlert("Jika Harga Grosir diisi, Isi Per ... Wajib diisi!", "Gagal"); 
                 } 
 
                 const cleanName = prop(nRaw);
@@ -2185,7 +2185,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 
                 let t = String($('i-t').value).trim().toLowerCase(); 
                 if (t && isAcronymUsed(t, activeId)) {
-                    return showAlert("Singkatan / Kode Cepat sudah dipakai barang lain!", "Gagal"); 
+                    return showAlert("Singkatan sudah dipakai barang lain!", "Gagal"); 
                 } 
                 if (!t) t = generateSmartAcronym(cleanName, activeId);
                 
