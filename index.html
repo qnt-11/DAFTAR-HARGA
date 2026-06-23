@@ -96,7 +96,39 @@
         .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
         .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; will-change: transform; transform: translateZ(0); backface-visibility: hidden; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } body.mode-kasir.search-focus { --cart-h: 15vh; } body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
+/* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
+/* 1. Transisi Kinetik: Sembunyikan dengan animasi ukuran dan opacity (BUKAN display:none) */
+#cp-list { transition: opacity 0.2s ease-out, padding 0.3s ease; }
+body.mode-kasir.search-focus { --cart-h: 60px; } /* Setara tinggi Header Total Belanja */
+body.mode-kasir.search-focus #cp-list { opacity: 0 !important; pointer-events: none; overflow: hidden; padding-top: 0; padding-bottom: 0; }
+body.mode-kasir.search-focus #cart-panel-container { border-bottom: none; transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+body.mode-kasir.search-focus #micro-receipt { display: block !important; animation: microPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* 2. Mode Full Screen Keranjang (Elastic Toggle) */
+body.mode-kasir.cart-expanded { overflow: hidden !important; }
+body.mode-kasir.cart-expanded #cart-panel-container { max-height: 90vh !important; height: 90vh; transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+body.mode-kasir.cart-expanded #cp-list { opacity: 1 !important; pointer-events: auto !important; } /* [SURGICAL FIX] Paksa daftar barang tampil meskipun state keyboard (search-focus) masih menggantung */
+body.mode-kasir.cart-expanded #search-area-box,
+body.mode-kasir.cart-expanded #tabs-bar,
+body.mode-kasir.cart-expanded #list,
+body.mode-kasir.cart-expanded .fab { display: none !important; }
+body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color: var(--mono-main) !important; }
+
+/* 3. Styling Micro-Receipt & Animasi Pantulan (Bounce Feedback) */
+#micro-receipt { display: none; font-size: 10px; color: #FFD700; font-weight: 700; margin-top: 2px; letter-spacing: 0.5px; white-space: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; -ms-overflow-style: none; pointer-events: auto; }
+#micro-receipt::-webkit-scrollbar { display: none; }
+
+@keyframes microPop {
+    0% { opacity: 0; transform: scale(0.9) translateY(-5px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes pricePop {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.15); filter: brightness(1.5); color: #FFD700; }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+ body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
     </style>
 </head>
 <body>
@@ -135,12 +167,16 @@
 
     <div id="sticky-roof-group" class="sticky-roof-group">
         <div id="cart-panel-container">
-            <div class="cp-header">
-                <div class="cp-title-box">
-                    <span style="font-size:10px; color:#888; font-weight:800; letter-spacing:1px;">TOTAL BELANJA</span>
+                                 <div class="cp-header">
+                <div class="cp-title-box" onclick="toggleCartExpand()" style="cursor: pointer; position: relative; padding-right: 15px; user-select: none; flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size:10px; color:#888; font-weight:800; letter-spacing:1px;">TOTAL BELANJA</span>
+                        <svg id="cp-expand-icon" style="transition: transform 0.3s ease, color 0.3s ease; color: #888;" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
                     <span id="cp-grand-total" style="font-size:18px; color:var(--danger); font-weight:800; font-family:'Montserrat', sans-serif;">Rp 0</span>
+                    <div id="micro-receipt"></div>
                 </div>
-                <div style="display: flex; gap: 5px; align-items: center;">
+                <div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
                     <button class="icon-btn" onclick="promptPrint()" style="color:var(--mono-main)">
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     </button>
@@ -241,7 +277,7 @@
                 <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP(); calcMargin('p2');" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
                 <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this); calcMargin('p1'); syncModalGrosir();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
             </div>
-            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi modal Grosir, Satuan akan terisi otomatis.</div>
+            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi harga dari supplier, Satuan akan terisi otomatis.</div>
             
             <div class="form-grid">
                 <div style="flex: 39;">
@@ -470,7 +506,7 @@
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.3</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.4</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -523,7 +559,7 @@
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbymUtPHw-_O6w-reo0zLhz-FKxfWzR25lBNDfO_hF5-WIZaTU3M2R4C7Cxmaoqxltch/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyUh74MJkE3l5u_QZA6wl67Dr_-5PdLbwLcqo5zBV8DoBT2rlNGR55j3PmIZC9DFKI/exec";
                 const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
@@ -583,7 +619,7 @@
             if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
         }
 
-               searchInput.addEventListener('keydown', (e) => {
+                       searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && isCartMode) {
                 e.preventDefault();
                 if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
@@ -591,6 +627,7 @@
                 if (val !== '') {
                     if (handleSearchInput.cancel) handleSearchInput.cancel();
                     handleSearchLogic(val);
+                    pendingAutoAdds.clear(); // Hapus orphaned request sebelumnya agar memori tidak bocor
                     pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
                 }
             }
@@ -638,17 +675,21 @@
             updateGrandTotal();
         }
 
-        function validateQtyBlur(id, el) {
+                function validateQtyBlur(id, el) {
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
             if (isNaN(parsed) || parsed <= 0) {
                 el.value = "1";
                 cartState[id].q = 1;
                 delete cartState[id].manualPrice;
-                saveCartMem();
-                updateRowVisuals(id);
-                updateGrandTotal();
+            } else {
+                // [SURGICAL FIX] Paksa elemen input UI (View) menyinkronkan dirinya dengan State memori 
+                // untuk mencegah Halusinasi Angka saat kasir mengetik melampaui batas clamp 99999
+                el.value = cartState[id].q;
             }
+            saveCartMem();
+            updateRowVisuals(id);
+            updateGrandTotal();
         }
 
             function handleLivePrice(id, el) {
@@ -793,12 +834,12 @@
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
                             </div>
-                            <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
+                                                        <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
-                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
                             <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
-                               <input type="tel" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
+                               <input type="text" inputmode="decimal" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
                             </div>
                         </div>
                     </div>`;
@@ -817,7 +858,7 @@
                 if (recItem) {
                     html += `
                     <div style="padding: 10px 16px; background: rgba(135,206,250,0.05); border-top: 1px dashed rgba(135,206,250,0.2); border-bottom: 1px dashed rgba(135,206,250,0.2); animation: popInBouncy 0.3s ease;">
-                        <span style="font-size:9.5px; color:#87CEFA; font-weight:800; letter-spacing:0.5px;">🤖 AI PREDIKSI: SERING DIBELI BERSAMA</span>
+                        <span style="font-size:9.5px; color:#87CEFA; font-weight:800; letter-spacing:0.5px;">AI PREDIKSI: SERING DIBELI BERSAMA</span>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
                             <span style="font-size:13px; color:#fff; font-weight:600;">${escapeHTML(recItem.n)}</span>
                             <button onclick="modifyCartItem('${recItem.id}', 1)" style="background:var(--mono-main); border:none; color:#000; padding:6px 12px; border-radius:6px; font-size:10px; font-weight:800; cursor:pointer;">+ TAMBAH</button>
@@ -831,7 +872,7 @@
             $('cp-grand-total').innerText = `Rp ${fmt(grandTotal)}`;
         }
 
-        function modifyCartItem(id, qty) {
+                        function modifyCartItem(id, qty) {
             if (!cartState[id]) {
                 if (qty > 0) cartState[id] = { q: qty };
             } else {
@@ -839,15 +880,59 @@
                 delete cartState[id].manualPrice; 
                 if (cartState[id].q <= 0) delete cartState[id];
             }
+
             if (Object.keys(cartState).length === 0) clearEditMode();
             saveCartMem();
-            renderCartUI();
+            renderCartUI(); // DOM keranjang diperbarui di sini
+            
+            // [INJEKSI KINETIC FEEDBACK] Dieksekusi setelah render selesai agar UI terasa hidup
+            if (qty > 0) {
+                const itemDB = db.find(x => String(x.id) === String(id));
+                if (itemDB) {
+                    const microEl = document.getElementById('micro-receipt');
+                    if (microEl) {
+                        microEl.innerText = `+ ${itemDB.n}`;
+                        // Force Re-trigger Animasi Teks Mikro (Reset & Mainkan ulang)
+                        microEl.style.animation = 'none';
+                        microEl.offsetHeight; 
+                        microEl.style.animation = 'microPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+                    }
+                    
+                    // Force Re-trigger Animasi Pantulan (Bouncy Pop) pada Total Harga
+                    const gtEl = document.getElementById('cp-grand-total');
+                    if (gtEl) {
+                        gtEl.style.display = 'inline-block'; // Mutlak agar transform scale berfungsi
+                        gtEl.style.animation = 'none';
+                        gtEl.offsetHeight;
+                        gtEl.style.animation = 'pricePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    }
+                }
+            }
+        }
+
+                // [INJEKSI MESIN ELASTIC CART TOGGLE]
+        function toggleCartExpand() {
+            if (!document.body.classList.contains('mode-kasir')) return;
+            if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--warning)");
+            
+            document.body.classList.toggle('cart-expanded');
+            if (document.body.classList.contains('cart-expanded')) {
+                // Paksa tutup keyboard HP saat menginspeksi keranjang Full Screen
+                let activeEl = document.activeElement;
+                if (activeEl && typeof activeEl.blur === "function") activeEl.blur();
+            }
         }
 
         function clearEditMode() {
             activeEditTrxId = null;
             activeEditTrxTs = null;
             db = db.filter(x => !x._isGhost);
+            
+            // Auto-Reset: Menutup keranjang & mereset teks mikro setiap kali struk diprint/dihapus
+            document.body.classList.remove('cart-expanded');
+            const microEl = document.getElementById('micro-receipt');
+            if (microEl) microEl.innerText = ``;
+
             let titleBox = document.querySelector('.cp-title-box span:first-child');
             if (titleBox) { titleBox.innerText = "TOTAL BELANJA"; titleBox.style.color = "#888"; }
         }
@@ -896,8 +981,8 @@
                         let iq = Math.max(1, dbItem.iq || 1);
                         let defaultSub = 0;
                         if (dbItem.p1 > 0 && dbItem.p2 > 0 && iq > 1 && it.q >= (iq / 2) && it.q > 1) {
-                            defaultSub = Math.round(it.q * (dbItem.p2 / iq));
-                        } else {
+    defaultSub = Math.round((it.q * dbItem.p2) / iq);
+} else {
                             defaultSub = Math.round(it.q * dbItem.p1);
                         }
                         // Jika subtotal lama berbeda dengan harga default, kembalikan status manualPrice
@@ -1444,8 +1529,7 @@
                 for(let i=0; i<workerList.length; i++) phoneticMap[workerList[i].id] = indoPhonetic(workerList[i].n);
                 if(e.data.pop) popMap = e.data.pop; 
             } 
-            else if (e.data.type === 'pop_update') { popMap = e.data.pop; }
-            else if (e.data.type === 'add') {
+                        else if (e.data.type === 'add') {
                 workerList.push(e.data.item); 
                 phoneticMap[e.data.item.id] = indoPhonetic(e.data.item.n);
             } 
@@ -1928,10 +2012,10 @@
         function computeDVS() { listOffsets = [0]; let cur = 0; for (let i = 0; i < filteredData.length; i++) { cur += filteredData[i]._cHeight || (tab === 'exp' ? 85 : 75); listOffsets.push(cur); } $('list').style.height = (cur + 150) + 'px'; }
         function getDVSStartIndex(st) { let l = 0, h = listOffsets.length - 1; while (l <= h) { let m = Math.floor((l + h) / 2); if (listOffsets[m] === st) return m; if (listOffsets[m] < st) l = m + 1; else h = m - 1; } return h > 0 ? h : 0; }
         
-        function applyFiltersAndRender(silentB = null) {
+                function applyFiltersAndRender() {
             if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost);
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
-            let base = silentB ? active.filter(i => i.b === silentB || i.b2 === silentB) : (exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active)); const today = Date.now();
+            let base = exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active); const today = Date.now();
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
 
             if (!q || tab === 'exp') { 
@@ -1940,7 +2024,7 @@
                 else if (sortAZ) { filteredData.sort((a,b) => { let an = String(a.n||"").toLowerCase(), bn = String(b.n||"").toLowerCase(); return an < bn ? -1 : (an > bn ? 1 : ((b.updatedAt||0) - (a.updatedAt||0))); }); } 
                 else { filteredData.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0)); }
             }
-            const sumEl = $('search-summary'); if (q && !silentB && !exact) { sumEl.innerText = `Ditemukan ${filteredData.length} barang`; sumEl.classList.remove('hidden'); } else sumEl.classList.add('hidden');
+            const sumEl = $('search-summary'); if (q && !exact) { sumEl.innerText = `Ditemukan ${filteredData.length} barang`; sumEl.classList.remove('hidden'); } else sumEl.classList.add('hidden');
             lastStartIndex = lastEndIndex = -1; computeDVS(); renderVirtualList(false);
         }
 
@@ -2111,7 +2195,7 @@
                     const idx = db.findIndex(x => String(x.id) === String(activeId)); 
                     if (idx === -1) throw new Error("Barang tidak ditemukan di database!");
                     
-                    db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, exp, t, u1, u2, iq, updatedAt: ts };
+                    db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, exp, t, u1, u2, iq, updatedAt: Math.max(ts, (db[idx].updatedAt || 0) + 1) };
                     delete db[idx]._isGhost; // SURGICAL FIX: Cabut kutukan Ghost secara permanen jika data sengaja disimpan ulang
                     await saveItemToIDB(db[idx]); 
                     
@@ -2235,7 +2319,13 @@
             showConfirm("Bersihkan memori?", "Optimasi Sistem", "#FFA500", () => { 
                 tampilkanToast("Mengoptimalkan...", "#FFA500"); recentSearches = []; trendingSearches = {}; localStorage.removeItem('DB_WA_RECENT'); localStorage.removeItem('DB_WA_TRENDING'); 
                 const tx = idb.transaction('items', 'readwrite'), s = tx.objectStore('items'); let c = 0; const aDb = []; 
-                db.forEach(i => { if (i.deleted) { s.delete(i.id); c++; } else aDb.push(i); }); 
+                                db.forEach(i => { 
+    if (i._isGhost) { 
+        s.delete(i.id); c++; 
+    } else { 
+        aDb.push(i); 
+    } 
+}); 
                 tx.oncomplete = () => { db = aDb; if(worker) worker.postMessage({ type: 'init', db: db }); updateMaps(); clearSearch(); setTimeout(() => showAlert(`Optimasi Sistem<br>Sampah: ${c} Data dibersihkan.`, "PEMBERITAHUAN!", "#FFA500"), 500); }; 
             }); 
         }
@@ -2320,7 +2410,7 @@
                             const results = [];
                             req.onsuccess = (e) => {
                                 const cursor = e.target.result;
-                                if (cursor && results.length < 2500) {
+                               if (cursor && results.length < 300) {
                                     results.push(cursor.value);
                                     cursor.continue();
                                 } else { resolve(results); }
@@ -2333,24 +2423,43 @@
                 })
                 .then(r => r.json())
                 .then(historyRes => {
-                    if (historyRes.status !== 'success') throw new Error(historyRes.message);
-                    isApiLoading = false; 
+    if (historyRes.status !== 'success') throw new Error(historyRes.message);
+    try {
+        const tx = idb.transaction('items', 'readwrite');
+        const s = tx.objectStore('items');
+        db = db.filter(i => { if (i.deleted || i._isGhost) { s.delete(i.id); return false; } return true; });
+        updateMaps();
+    } catch(e) {}
+    isApiLoading = false;
                     hideLoading(); 
                     tampilkanToast("Upload Data Berhasil!", "var(--mono-main)"); 
                 })
-                                .catch((err) => { 
+                                   .catch((err) => { 
                     isApiLoading = false; hideLoading(); 
                     if (window.registerBackgroundSync) {
-                        try {
-                            let histBackup = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                        return new Promise((resolve) => {
+                            try {
+                                const store = idb.transaction('history', 'readonly').objectStore('history');
+                                const req = store.index('ts_idx').openCursor(null, 'prev');
+                                const results = [];
+                                req.onsuccess = (e) => {
+                                    const cursor = e.target.result;
+                                    // Bypass batas 50 localStorage: Ekstrak hingga 1000 riwayat murni dari IndexedDB
+                                    if (cursor && results.length < 1000) {
+                                        results.push(cursor.value);
+                                        cursor.continue();
+                                    } else { resolve(results); }
+                                };
+                                req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
+                            } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
+                        }).then(histBackup => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
-                            // SURGICAL FIX: Sterilisasi absolut pada payload Background Sync untuk mencegah Zombie Data terupload diam-diam
                             tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db.filter(i => !i._isGhost), history: histBackup, timestamp: Date.now() });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
                             };
-                        } catch(e) { showAlert("Gagal melindungi data ke antrean offline.", "Error Kritis"); }
+                        }).catch(() => { showAlert("Gagal melindungi data ke antrean offline.", "Error Kritis"); });
                     } else { showAlert("Periksa Jaringan. Silakan coba lagi.", "Error"); }
                 }); 
             }, "UPLOAD"); 
@@ -2408,7 +2517,7 @@
                             }
                         }); 
                         tx.oncomplete = () => { 
-                            currentIndex += chunkSize; requestAnimationFrame(processNextChunk); 
+                            currentIndex += chunkSize; setTimeout(processNextChunk, 0); 
                         }; 
                         tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
                     } catch (error) {
@@ -2514,7 +2623,7 @@
                             
                             if (!norm || !norm.n) { failedCount++; continue; }
                             
-                            if (!norm.t) { norm.t = generateSmartAcronym(norm.n, null, tA); if(norm.t) tA.add(norm.t); }
+                            if (!norm.t) { norm.t = generateSmartAcronym(norm.n, null); }
                             if (norm.b !== '' && norm.b2 === norm.b) norm.b2 = ''; 
                             if (norm.b2 !== '' && norm.iq < 2) norm.b2 = ''; 
                             
@@ -2583,7 +2692,7 @@
 
                                 tx.oncomplete = () => { 
                                     currentIndex += chunkSize; 
-                                    requestAnimationFrame(processImportChunk); 
+setTimeout(processImportChunk, 0); 
                                 }; 
                                 tx.onerror = () => { 
                                     isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
@@ -2872,7 +2981,8 @@
                         let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
                         if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
                         localStorage.setItem('TRX_SEQ', seq);
-                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+                        let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
+finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
                     let newTrx = { id: finalId, ts: finalTs, total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
@@ -3204,6 +3314,19 @@
                 totalOmzet += h.total;
                 totalModal += (h.modal || 0); 
                 
+                            // [SURGICAL FIX] Rekapitulasi Data Induk "Top 10" ditarik KE ATAS batas limit 200 agar akurat absolut
+                if (Array.isArray(h.items)) {
+                    h.items.forEach(it => {
+                        let key = it.id || it.n;
+                        if (!itemAgg[key]) {
+                            let liveData = it.id ? dbLookup[it.id] : null;
+                            itemAgg[key] = { n: liveData ? liveData.n : it.n, q: 0, iq: liveData ? liveData.iq : it.iq, u1: liveData ? liveData.u1 : it.u1, u2: liveData ? liveData.u2 : it.u2 };
+                        }
+                        let qVal = parseFloat(it.q) || 0;
+                        itemAgg[key].q = parseFloat((itemAgg[key].q + qVal).toFixed(4));
+                    });
+                }
+
                 // [SURGICAL FIX] Kalkulasi jalan terus, tapi DOM direm di 200 TRX untuk mencegah UI Freeze
                 if (index >= 200) return;
 
@@ -3212,31 +3335,13 @@
                 let itemsHtml = '';                
                 if (Array.isArray(h.items)) {
                     h.items.forEach(it => {
-                        // [SURGICAL FIX] Sinkronisasi rendering teks History dengan fungsi global Keranjang
                         let qtyText = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2);
-
                         itemsHtml += `
                         <div style="display:flex; align-items:flex-start; gap:8px; font-size:11.5px; margin-bottom:8px;">
                             <span style="color:#87CEFA; font-weight:800; flex-shrink:0; width:65px;">${escapeHTML(qtyText)}</span>
                             <span style="color:#e0e0e0; flex:1; line-height:1.3; word-break:break-word;">${escapeHTML(it.n)}</span>
                             <span style="color:#fff; font-weight:700; flex-shrink:0; text-align:right;">Rp ${fmt(it.sub)}</span>
                         </div>`;
-                        let key = it.id || it.n;
-                        if (!itemAgg[key]) {
-
-                            let liveData = it.id ? dbLookup[it.id] : null;
-                            itemAgg[key] = { 
-                                n: liveData ? liveData.n : it.n, 
-                                q: 0, 
-                                iq: liveData ? liveData.iq : it.iq, 
-                                u1: liveData ? liveData.u1 : it.u1, 
-                                u2: liveData ? liveData.u2 : it.u2 
-                            };
-                        }
-                        let qVal = parseFloat(it.q) || 0;
-                        let baseQ = qVal; 
-                        
-                        itemAgg[key].q = parseFloat((itemAgg[key].q + baseQ).toFixed(4));
                   });
                 } else {
                     itemsHtml += `<div style="font-size:11px; color:#ccc;">${h.items} Item (Format Lama)</div>`;
@@ -3437,7 +3542,7 @@
                 text += `Simpan struk sebagai bukti\n\n`;
                 text += `Terima Kasih\nSelamat Belanja Kembali\n\`\`\``;
 
-                let intentUrl = `[https://api.whatsapp.com/send?text=$](https://api.whatsapp.com/send?text=$){encodeURIComponent(text)}`;
+                let intentUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
                 let a = document.createElement('a');
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
@@ -3570,7 +3675,7 @@
         }
         initApp();
         
-        function processQueuedFile(file) { showLoading("Mengimpor data dari file...<br>Mohon tunggu.", "var(--warning)"); setTimeout(() => { importData({ target: { files: [file] } }); setTimeout(hideLoading, 1500); }, 300); }
+                function processQueuedFile(file) { importData({ target: { files: [file] } }); }
         if ('launchQueue' in window) { window.launchQueue.setConsumer((launchParams) => { if (launchParams.files && launchParams.files.length > 0) launchParams.files[0].getFile().then(file => { if (isDbReady) processQueuedFile(file); else pendingLaunchFile = file; }); }); }
         
         if ('serviceWorker' in navigator) { 
@@ -3661,13 +3766,23 @@
                 async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
             try {
                 if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
-                if (!btDevice || !btDevice.gatt.connected) {
-                    showLoading("Mencari Printer Bluetooth...", "#87CEFA");
-                    btDevice = await navigator.bluetooth.requestDevice({
-                        acceptAllDevices: true,
-                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
-                    });
-                    btServer = await btDevice.gatt.connect();
+                                if (!btDevice || !btDevice.gatt.connected) {
+    showLoading("Menghubungkan Printer...", "#87CEFA");
+    if (btDevice && !btDevice.gatt.connected) {
+        try { await btDevice.gatt.connect(); } catch(e) { btDevice = null; }
+    }
+    if (!btDevice) {
+        btDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
+        });
+    }
+    
+    // [SURGICAL FIX] Web Bluetooth GATT Timeout Protector (Anti-Infinite Hang)
+    const connectPromise = btDevice.gatt.connect();
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Printer offline atau di luar jangkauan (15 Detik).")), 15000));
+                    btServer = await Promise.race([connectPromise, timeoutPromise]);
+                    
                     const services = await btServer.getPrimaryServices();
                     let service = services.find(s => s.uuid.includes('18f0') || s.uuid.includes('e781') || s.uuid.includes('4953'));
                     if(!service) service = services[0];
@@ -3683,7 +3798,9 @@
                 let bodyStr = `No  : ${trxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
                 
                 items.forEach(i => {
-                    let n = i.n.substring(0, 32); let sub = fmt(i.sub);
+                    // [SURGICAL FIX] Sterilisasi Unicode/Emoji agar tidak merusak Hardware Buffer ESC/POS
+                    let n = String(i.n).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '').substring(0, 32); 
+                    let sub = fmt(i.sub);
                     let qU = `${i.q}x${fmt(i.q > 0 ? Math.round(i.sub / i.q) : i.sub)}`;
                     let pad = 32 - qU.length - sub.length;
                     bodyStr += `${n}\n${qU}${" ".repeat(Math.max(1, pad))}${sub}\n`;
@@ -3701,13 +3818,7 @@
                 payload.set(bodyData, offset); offset += bodyData.length;
                 payload.set(cut, offset);
                 
-                // MTU Chunking (Max 256 bytes dengan Jeda Hardware 20ms)
-                for (let i = 0; i < payload.length; i += 256) {
-                    await btChar.writeValue(payload.slice(i, i + 256));
-                    await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
-                }
-                
-                // Simpan transaksi offline ke Database setelah cetak sukses
+                               // Simpan transaksi offline ke Database SEBELUM cetak perangkat keras untuk mitigasi Data Loss
                 let finalTs = trxTs ? trxTs : Date.now();
                 let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
                 try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
@@ -3719,10 +3830,17 @@
                 } else { 
                     hist.unshift(newTrx); 
                 }
-                
                 try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
-                
+
+                                // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
                 cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+
+                // MTU Chunking (Max 256 bytes dengan Jeda Hardware 20ms)
+                for (let i = 0; i < payload.length; i += 256) {
+                    await btChar.writeValue(payload.slice(i, i + 256));
+                    await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
+                }
+                
                 tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
                 
             } catch (err) {
