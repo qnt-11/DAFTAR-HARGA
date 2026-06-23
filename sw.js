@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '19.5'; 
+const APP_VERSION = '19.6'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -278,7 +278,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyUh74MJkE3l5u_QZA6wl67Dr_-5PdLbwLcqo5zBV8DoBT2rlNGR55j3PmIZC9DFKI/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyH7LbKKYVQhImRsQn4ShNH-PwP6os4NfzPOvwusHGQpeMW5Tz1vspmajyXnoGkCkQ1/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
