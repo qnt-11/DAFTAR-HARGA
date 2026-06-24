@@ -80,12 +80,13 @@
         body::before { content: ""; position: fixed; top: -2px; left: 0; right: 0; height: 4px; background-color: #000000; z-index: 999999; pointer-events: none; }
         .hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
-        body.modal-open { overflow: hidden !important; touch-action: none; }
+                body.modal-open { overflow: hidden !important; }
         .sticky-roof-group { z-index: 900; } .sticky-roof-group::after { z-index: 901; } .header { z-index: 1000; } .dropdown-content { z-index: 2000; } .search-dropdown-box { z-index: 2000; } .scanner-overlay { z-index: 3510; } .scan-stop, .btn-torch{ z-index: 3520; } .modal { z-index: 4000; } #sync-custom-options { z-index: 4100; } #scanner-wrap { z-index: 4500; } #loading-modal { z-index: 5500; } #toast-notification { z-index: 6000; }
         .header { padding: calc(15px + env(safe-area-inset-top, 0px)) 20px 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--wa-header); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); margin-bottom: 15px; border-top: none !important; border-bottom: none !important; }
         .header-left { display: flex; flex-direction: column; justify-content: center; } .header h1 { font-size: 18px; margin: 0; color: var(--text-light); } .header-date-location { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; letter-spacing: 0.5px; } .top-btns { display: flex; gap: 10px; color: var(--text-light); align-items: center; } .icon-btn { cursor: pointer; background: none; border: none; padding: 6px; color: inherit; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; width: 44px; height: 44px; outline: none; } .icon-btn:active { transform: scale(0.9); opacity: 0.8; } .header-upload-btn { display: flex; flex-direction: column; gap: 2px; color: #87CEFA; padding: 0; } .dropdown-wrapper { position: relative; display: flex; align-items: center; } .dropdown-content { position: absolute; top: 48px; right: 0; background: rgba(21, 21, 21, 0.98); backdrop-filter: blur(8px); min-width: 180px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; border: 1px solid var(--border-color); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.05); } .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--text-light); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 44px; } .dropdown-item:last-child { border-bottom: none; } .dropdown-item:active { background-color: rgba(255,255,255,0.15); } .dropdown-item input[type="file"] { display: none; }
         @keyframes laser-updown-header { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } } .laser-beam-header { animation: laser-updown-header 1.5s infinite ease-in-out; filter: drop-shadow(0 0 2px red); will-change: transform; transform: translate3d(0,0,0); } .glow-cloud { filter: drop-shadow(0 0 6px rgba(135, 206, 250, 0.8)); }
-        .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); transition: mask-image 0.3s, -webkit-mask-image 0.3s; overflow-x: hidden; } .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; }
+        .sticky-roof-group { position: sticky; top: 0; display: flex; flex-direction: column; background: var(--wa-bg); } .sticky-roof-group::after { content: ''; position: absolute; bottom: -15px; left: 0; right: 0; height: 15px; background: linear-gradient(to bottom, var(--wa-bg) 0%, transparent 100%); pointer-events: none; } #cart-panel-container { display: none; max-height: var(--cart-h); height: auto; flex-direction: column; transition: max-height 0.3s ease; } .cp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px 16px; background: transparent; border-bottom: none; flex-shrink: 0; border-top: none !important; } .cp-title-box { display: flex; flex-direction: column; } .cp-btn { background: transparent; border: 1px solid var(--mono-sec); color: var(--mono-main); padding: 8px 14px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; outline: none; transition: 0.2s; letter-spacing: 0.5px; } .cp-btn:active { transform: scale(0.95); background: var(--highlight-bg); } .cp-btn.reset { border-color: var(--danger); color: var(--danger); } .cp-btn.reset:active { background: rgba(255, 59, 48, 0.15); } .cp-list { flex: 1; overflow-y: auto; padding: 0 16px 60px; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); mask-image: linear-gradient(to bottom, black 85%, transparent 100%); overflow-x: hidden; }
+ .cp-item-wrap { position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); } .cp-trash-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--danger); cursor: pointer; } .cp-item-front { position: relative; background: var(--wa-bg); transition: transform 0.2s ease; z-index: 2; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; width: 100%; } .cpi-info { flex: 1; min-width: 0; padding-right: 15px; pointer-events: none; } .cpi-name { font-size: 14px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpi-empty { text-align: center; color: #555; font-size: 12px; font-weight: 600; padding: 30px 0; }
         .search-area { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px 16px; position: relative; } .search-row-1 { display: flex; width: 100%; gap: 10px; align-items: center; } .search-box { flex: 1; display: flex; align-items: center; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 12px; position: relative; } 
         .search-box input { width: 100%; background: transparent; border: none; padding: 14px 88px 14px 5px; color: var(--text-light); font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; } 
         .search-icon { width: 20px; height: 20px; color: var(--text-muted); pointer-events: none; margin-right: 8px; flex-shrink: 0; } 
@@ -96,7 +97,45 @@
         .search-summary-wrap { width: 100%; text-align: left; } .search-summary { font-size: 10px; color: var(--mono-main); font-weight: 600; letter-spacing: 0.5px; margin-left: 5px; } .highlight { background-color: var(--highlight-bg); color: #ffffff; border-radius: 3px; padding: 0 2px; } .search-dropdown-box { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: rgba(21, 21, 21, 0.98); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 15px 35px rgba(0,0,0,0.9); overflow: hidden; } .sd-title { font-size: 10px; color: var(--text-muted); padding: 12px 16px 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; } .sd-title span.clear-btn { color: var(--danger); cursor: pointer; font-size: 9px; padding: 12px; margin: -12px; display: flex; align-items: center; justify-content: center; } .sd-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; min-height: 44px; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); } .sd-item:active { background-color: rgba(255,255,255,0.15); }
         .tabs-row { display: flex; align-items: center; padding: 5px 12px 15px 12px; gap: 6px; position: relative; width: 100%; overflow: hidden; } .tab { padding: 8px 12px; border-radius: 8px; background: var(--wa-card); border: 1px solid var(--border-color); font-size: 10.5px; color: var(--text-muted); cursor: pointer; font-weight: 700; font-family: 'Montserrat', sans-serif; text-transform: uppercase; transition: 0.2s; outline: none; min-height: 40px; display: flex; align-items: center; justify-content: center; white-space: nowrap; } .tab.active { background: rgba(255, 255, 255, 0.15); color: var(--mono-main); border-color: var(--mono-main); box-shadow: 0 0 8px rgba(255, 255, 255, 0.1); } #t-cart { padding: 10px 14px; margin-left: 0; } #t-cart svg { color: var(--text-muted); transition: color 0.2s; } #t-cart.active svg { color: var(--mono-main); } .sort-btn { flex-shrink: 0; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; gap: 4px; outline: none; padding: 0; background: transparent; border: none; align-items: center; justify-content: center; } .sort-btn span { display: block; height: 2px; background: currentColor; border-radius: 2px; transition: background 0.2s; } .sort-btn span:nth-child(1) { width: 18px; } .sort-btn span:nth-child(2) { width: 12px; } .sort-btn span:nth-child(3) { width: 6px; } .sort-btn.active span { background: var(--mono-main); color: var(--mono-main); } #s-btn-tabs { width: 44px; height: 44px; margin-left: auto; margin-right: 12px !important; flex-shrink: 0; align-items: flex-end; } #s-btn-search { display: none; width: 46px; height: 46px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; margin-right: 0; }
         .list { position: relative; padding-bottom: 50px; padding-top: 12px; width: 100%; overflow-x: hidden; } body.is-scrolling .render-container { pointer-events: none; } .render-container { position: absolute; top: 12px; left: 0; width: 100%; padding-left: 16px; padding-right: 16px; will-change: transform; transform: translateZ(0); } .card { position: relative; display: flex; align-items: flex-start; padding: 15px 18px 15px 18px; padding-right: 90px; background: var(--wa-card); border: 1px solid var(--border-color); border-radius: 12px; height: auto; overflow: hidden; box-sizing: border-box; touch-action: pan-y; will-change: transform; transform: translateZ(0); backface-visibility: hidden; } .card-exp-mode { height: auto !important; min-height: 70px !important; padding-bottom: 15px !important; align-items: center !important; padding-right: 18px !important; } .info { flex: 1; min-width: 0; pointer-events: none; } .name { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-light); display: flex; align-items: center; } .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .card-badge { font-size: 11px; color: #777777; margin-left: 8px; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; border: 1px solid #333; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-top: -2px; } .card-price-ecer { font-size: 13px; color: var(--mono-sec); font-weight: 700; margin-bottom: 3px; } .card-price-grosir { font-size: 12px; color: var(--mono-sec); font-weight: 700; margin-bottom: 6px; } .card-barcode { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;} .card-exp { font-size: 11px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;} .card-exp.warning { color: var(--warning); } .card-exp.danger { color: var(--danger); } .action-btns-absolute { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 2px; } .card-action-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.85; border-radius: 8px; outline: none; transition: background-color 0.15s ease, opacity 0.15s ease; } .card-action-btn:active { background: rgba(255,255,255,0.1); opacity: 1; } .btn-edit-icon { color: var(--mono-main); } .btn-add-cart { width: 40px; height: 40px; background: #000000; color: #ffffff; border: 2px solid var(--border-color); border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); outline: none; transition: transform 0.2s, border-color 0.2s; } .btn-add-cart:active { transform: scale(0.9); border-color: var(--mono-sec); } .empty-msg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; color: #555555; font-size: 12px; font-weight: 600; text-align: center; letter-spacing: 0.5px; pointer-events: none; } .scroll-letter { position: fixed; right: 20px; top: 50%; color: rgba(255, 255, 255, 0.7); font-size: 30px; font-weight: 800; opacity: 0; pointer-events: none; text-shadow: 0px 4px 15px rgba(0, 0, 0, 1), 0px 0px 5px rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(0.7); transition: opacity 0.2s ease, transform 0.2s ease-out; } .scroll-letter.show { opacity: 1; transform: translateY(-50%) scale(1); } .fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom, 0px)); right: 20px; background: #000000; width: 60px; height: 60px; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--border-color); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); z-index: 800; cursor: pointer; transition: transform 0.2s, border-color 0.2s; outline: none; } .fab:active { transform: scale(0.9); border-color: var(--mono-sec); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); } .modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; } .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; } .btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; } .modal-box { background: var(--wa-card); padding: 24px 22px; border-radius: 16px; width: 100%; max-width: 320px; border: 2px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.9); text-align: left; animation: popInBouncy 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 85vh; overflow-y: auto; overscroll-behavior: contain; margin: auto; transition: border-color 0.3s ease; } #pin-modal { align-items: flex-start; padding-top: 15vh; overflow-y: auto; } #pin-box { margin: 0 auto; } @keyframes popInBouncy { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .modal-box label { display: block; font-size: 10px; color: #888888; margin-bottom: 6px; margin-top: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; } .modal-box label:first-child { margin-top: 0; } .modal-box input, .modal-box textarea { width: 100%; padding: 12px 14px; background: var(--wa-bg); border: 1px solid var(--border-color); color: var(--text-light); font-size: 14px; font-family: 'Montserrat', sans-serif; font-weight: 600; outline: none; border-radius: 8px; transition: border-color 0.2s; margin-bottom: 2px;} .modal-box input:focus, .modal-box textarea:focus { border-color: var(--mono-main); } .form-grid { display: flex; gap: 10px; margin-top: 14px; align-items: flex-start;} .form-grid .col-price { flex: 7; } .form-grid .col-price label { margin-top: 0; } .form-grid .col-unit { flex: 3; } .form-grid .col-unit label { margin-top: 0; } .quick-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; } .q-chip { padding: 6px 12px; background: #222; border: 1px solid var(--border-color); border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s; } .q-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); } .q-chip-del { color: var(--danger); border-color: rgba(255,59,48,0.3); } #wrap-iq { display: none; margin-top: 14px; animation: slideDown 0.2s ease-out; } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .barcode-row { display: flex; gap: 8px; align-items: center; } .modal-box input[id^="i-b"] { flex: 1; margin: 0; } .modal-box button[onclick*="openScanner"] { background: var(--wa-bg); border: 1px solid var(--border-color); border-radius: 8px; height: 44px; width: 46px; transition: all 0.2s ease; outline:none; display:flex; justify-content:center; align-items:center; } .modal-box button[onclick*="openScanner"]:active { background: #222; transform: scale(0.95); }
+.modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 25px; }
+
+/* SURGICAL FIX: Ultimate Mobile Keyboard & Scroll Rescue FINAL */
+.modal { 
+    align-items: flex-start !important; /* Mulai dari atas agar form tidak pernah terpotong di luar layar */
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 15px 20px 15px !important; 
+    box-sizing: border-box; 
+    overflow-y: auto !important; /* Pindahkan scroll ke area layar hitam (overlay) */
+    -webkit-overflow-scrolling: touch; /* Efek scroll mulus di iOS */
+}
+
+.modal-box { 
+    margin: auto !important; /* Form akan ke tengah otomatis jika tidak ada keyboard */
+    max-height: none !important; /* Bebaskan batasan tinggi form */
+    height: auto !important; 
+    overflow-y: visible !important; /* Matikan scroll di dalam kotak form */
+    padding-bottom: 24px !important; 
+}
+
+/* Isolasi khusus Form Tambah/Edit Barang */
+#mod-box {
+    display: block !important; 
+}
+
+/* Tombol kembali normal, ikut ter-scroll di paling bawah form */
+#mod-box .modal-btns {
+    position: relative !important;
+    bottom: auto !important; 
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 25px 0 0 0 !important;
+    border-top: none !important;
+    z-index: 1 !important;
+    box-shadow: none !important;
+}
+
+.btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; }
+.btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
 /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
 /* 1. Transisi Kinetik: Sembunyikan dengan animasi ukuran dan opacity (BUKAN display:none) */
 #cp-list { transition: opacity 0.2s ease-out, padding 0.3s ease; }
@@ -243,7 +282,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
             
             <label>Nama Barang</label>
-            <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;">
+                        <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;" onfocus="if(!activeId && this.value==='') document.getElementById('i-t').dataset.manual='0';" oninput="if(!activeId && document.getElementById('i-t').dataset.manual !== '1') document.getElementById('i-t').value = generateSmartAcronym(this.value, null);">
 
                         <div class="form-grid" style="margin-top: 14px; margin-bottom: 14px;">
                 <div style="flex: 7;">
@@ -252,24 +291,29 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 </div>
                 <div style="flex: 3;">
                     <label style="margin-top: 0;">Akronim</label>
-                    <input type="text" id="i-t" placeholder="" autocomplete="off" style="text-transform: lowercase;">
+                                        <input type="text" id="i-t" placeholder="" autocomplete="off" style="text-transform: lowercase;" oninput="this.dataset.manual='1';">
                 </div>
             </div>
             
-            <label>Barcode Satuan</label>
-            <div class="barcode-row">
-                <input type="text" id="i-b" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()">
-                <button type="button" onclick="openScanner('input')">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="white" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
-                </button>
-            </div>
-
-            <label>Barcode Grosir</label>
-            <div class="barcode-row">
-                <input type="text" id="i-b2" placeholder="Opsional" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()">
-                <button type="button" onclick="openScanner('input-grosir')">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="white" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
-                </button>
+                                                <div style="display:flex; gap:10px;">
+                <div style="flex:1; min-width:0;">
+                    <label>Barcode Satuan</label>
+                    <div style="position:relative; width:100%;">
+                        <input type="text" id="i-b" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
+                        <button type="button" onclick="openScanner('input')" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; padding:0; background:transparent!important; border:none!important; display:flex; align-items:center; justify-content:center; z-index:10; outline:none;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="#888" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
+                        </button>
+                    </div>
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <label>Barcode Grosir</label>
+                    <div style="position:relative; width:100%;">
+                        <input type="text" id="i-b2" placeholder="Opsional" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
+                        <button type="button" onclick="openScanner('input-grosir')" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; padding:0; background:transparent!important; border:none!important; display:flex; align-items:center; justify-content:center; z-index:10; outline:none;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="#888" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <label style="color:#87CEFA;">HPP</label>
@@ -300,31 +344,32 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>
             </div>
             
-            <div class="form-grid">
-                <div style="flex: 39;">
+                                    <div class="form-grid" style="margin-bottom: 10px;">
+                <div style="flex: 7; min-width:0;">
                     <label>Harga Grosir</label>
-                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
+                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" onfocus="this.select()" oninput="formatRp(this); calcMargin('p2');">
                 </div>
-                <div style="flex: 23;">
+                <div style="flex: 3; min-width:0;">
                     <label style="white-space: nowrap;">Margin %</label>
-                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; transition: color 0.3s, border-color 0.3s; padding: 12px 8px; text-align: center;">
-                </div>
-                <div style="flex: 38;">
-                    <label>Grosir</label>
-                    <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
+                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" onfocus="this.select()" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
                 </div>
             </div>
-            <div class="quick-chip-row" id="chip-row-u2">
+            <div class="form-grid">
+                <div style="flex: 1; min-width:0;">
+                    <label>Satuan Grosir</label>
+                    <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
+                </div>
+                <div style="flex: 1; min-width:0; display:none; margin-top:0 !important; animation: popInBouncy 0.2s ease;" id="wrap-iq">
+                    <label id="label-iq" style="color:#FFA500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Isi /...</label>
+                    <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" onfocus="this.select()" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
+                </div>
+            </div>
+            <div class="quick-chip-row" id="chip-row-u2" style="margin-bottom: 10px;">
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Slop'; toggleIsiGrosir();">Slop</div>
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Dus'; toggleIsiGrosir();">Dus</div>
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Karton'; toggleIsiGrosir();">Karton</div>
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
             </div>
-
-                                    <div id="wrap-iq">
-                <label id="label-iq">Isi per ...</label>
-                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }">
-            </div> 
 
             <div class="modal-btns">
                 <button class="btn-main btn-cancel" id="btn-cancel-item" onclick="hideMod()">BATAL</button>
@@ -506,7 +551,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.7</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.8</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
@@ -559,7 +604,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyUh74MJkE3l5u_QZA6wl67Dr_-5PdLbwLcqo5zBV8DoBT2rlNGR55j3PmIZC9DFKI/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
                 const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
             "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
@@ -598,10 +643,10 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                         let isCartMode = false;
         let isApiLoading = false; 
         
-        // SURGICAL FIX 1: State Penahan Mode Edit Struk
-        let activeEditTrxId = null;
-        let activeEditTrxTs = null;
-        
+        // SURGICAL FIX: Persistent Edit State (Anti-Amnesia Memory)
+let activeEditTrxId = localStorage.getItem('DB_WA_EDIT_ID') || null;
+let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStorage.getItem('DB_WA_EDIT_TS'), 10) : null;
+
         let cartState = {};
         try { cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; } catch(e) { localStorage.removeItem('DB_WA_CART'); }
 
@@ -915,21 +960,27 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             if (!document.body.classList.contains('mode-kasir')) return;
             if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--warning)");
             
-            document.body.classList.toggle('cart-expanded');
+                        document.body.classList.toggle('cart-expanded');
             if (document.body.classList.contains('cart-expanded')) {
+                trackModal('cart-expand');
                 // Paksa tutup keyboard HP saat menginspeksi keranjang Full Screen
                 let activeEl = document.activeElement;
                 if (activeEl && typeof activeEl.blur === "function") activeEl.blur();
+            } else {
+                untrackModal('cart-expand');
             }
         }
 
         function clearEditMode() {
-            activeEditTrxId = null;
-            activeEditTrxTs = null;
-            db = db.filter(x => !x._isGhost);
-            
-            // Auto-Reset: Menutup keranjang & mereset teks mikro setiap kali struk diprint/dihapus
+    activeEditTrxId = null;
+    activeEditTrxTs = null;
+    localStorage.removeItem('DB_WA_EDIT_ID');
+    localStorage.removeItem('DB_WA_EDIT_TS');
+    db = db.filter(x => !x._isGhost);
+
+                        // Auto-Reset: Menutup keranjang & mereset teks mikro setiap kali struk diprint/dihapus
             document.body.classList.remove('cart-expanded');
+            untrackModal('cart-expand');
             const microEl = document.getElementById('micro-receipt');
             if (microEl) microEl.innerText = ``;
 
@@ -993,9 +1044,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 });
                 
                 activeEditTrxId = hData.id;
-                activeEditTrxTs = hData.ts;
-                
-                saveCartMem();
+activeEditTrxTs = hData.ts;
+localStorage.setItem('DB_WA_EDIT_ID', activeEditTrxId);
+localStorage.setItem('DB_WA_EDIT_TS', activeEditTrxTs);
+
+saveCartMem();
                 closeHistory();
                 if (!isCartMode) toggleCartMode();
                 renderCartUI();
@@ -1108,8 +1161,14 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 
         function handleMainTouchEnd(e, card, id) {
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-            const diffX = touchStartX - touchCurrentX;
-            
+const diffX = touchStartX - touchCurrentX;
+const diffY = Math.abs(touchStartY - e.changedTouches[0].clientY);
+if (diffY > 40) {
+    card.style.transform = 'translateX(0px)';
+    if (swipedCardElem === card) swipedCardElem = null;
+    return;
+}
+
             touchStartX = 0;
             touchCurrentX = 0;
             touchStartY = 0;
@@ -1137,23 +1196,16 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             }
         }
         
-                // [QA LEAD FIX] Smart Scroll Hijacking: Lebih mulus, anti-lompat, dan hanya aktif jika kolom tertutup keyboard
-        document.addEventListener('focus', function(e) {
-            const el = e.target;
-            if (el && (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') && el.closest('.modal-box')) {
-                // Beri jeda 400ms agar animasi native keyboard OS selesai dahulu (mencegah tabrakan visual)
-                setTimeout(() => {
-                    const rect = el.getBoundingClientRect();
-                    const viewHeight = window.innerHeight;
-                    
-                    // Cek koordinat: Hanya gulir JIKA elemen terlalu dekat ke tepi atas layar 
-                    // ATAU terlalu dekat ke batas bawah keyboard (safe-zone 60px)
-                    if (rect.top < 60 || rect.bottom > (viewHeight - 60)) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 400);
-            }
-        }, true);
+// [INJEKSI QA LEAD] Smart Scroll Auto-Focus Natural
+document.addEventListener('focus', function(e) {
+    const el = e.target;
+    if (el && (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') && el.closest('.modal-box')) {
+        // Beri jeda 400ms agar animasi native keyboard HP selesai
+        setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 400);
+    }
+}, true);
 
         let wakeLock = null;
         let isRequestingWakeLock = false; 
@@ -1215,9 +1267,14 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                     if (!database.objectStoreNames.contains('items')) database.createObjectStore('items', { keyPath: 'id' }); 
                     if (!database.objectStoreNames.contains('sync-outbox')) database.createObjectStore('sync-outbox', { keyPath: 'id' });
                     if (!database.objectStoreNames.contains('history')) {
-                        const histStore = database.createObjectStore('history', { keyPath: 'id' });
-                        histStore.createIndex('ts_idx', 'ts', { unique: false });
-                    }
+    const histStore = database.createObjectStore('history', { keyPath: 'id' });
+    histStore.createIndex('ts_idx', 'ts', { unique: false });
+} else {
+    const histStore = e.target.transaction.objectStore('history');
+    if (!histStore.indexNames.contains('ts_idx')) {
+        histStore.createIndex('ts_idx', 'ts', { unique: false });
+    }
+}
                 }; 
                 req.onsuccess = (e) => resolve(idb = e.target.result); 
                 req.onerror = (e) => reject(e.target.error); 
@@ -1769,7 +1826,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             const c = term.trim(); if(!c || c.toLowerCase() === 'constructor' || c.toLowerCase() === '__proto__') return; 
             recentSearches = [c, ...recentSearches.filter(t => t.toLowerCase() !== c.toLowerCase())].slice(0, 5); localStorage.setItem('DB_WA_RECENT', JSON.stringify(recentSearches)); 
             trendingSearches[c.toLowerCase()] = (trendingSearches[c.toLowerCase()] || 0) + 1; const keys = Object.keys(trendingSearches); 
-            if (keys.length > 50) { let min = keys.reduce((a, b) => trendingSearches[a] < trendingSearches[b] ? a : b); delete trendingSearches[min]; } localStorage.setItem('DB_WA_TRENDING', JSON.stringify(trendingSearches)); 
+            if (keys.length > 50) { let min = keys.reduce((a, b) => trendingSearches[a] < trendingSearches[b] ? a : b); delete trendingSearches[min]; } 
+try {
+    localStorage.setItem('DB_WA_RECENT', JSON.stringify(recentSearches)); 
+    localStorage.setItem('DB_WA_TRENDING', JSON.stringify(trendingSearches)); 
+} catch(e) {}
         }
         
         function clearRecentLogs() { recentSearches = []; localStorage.setItem('DB_WA_RECENT', JSON.stringify([])); showSearchSuggestions(); }
@@ -1878,7 +1939,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             trackModal('alert'); 
         }
         
-        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi per ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
+        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
         // [SURGICAL FIX] Logika Two-Way Margin (Eceran & Grosir)
         function updateWarnaMargin(el, margin) {
@@ -2034,10 +2095,14 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             if (!isCartMode) { const f = el.closest('.action-fav'); if (f) { e.stopPropagation(); return toggleFav(f.dataset.id, f); } const ed = el.closest('.action-edit'); if (ed) { e.stopPropagation(); return showMod(ed.dataset.id); } }
         });
 
-        function renderVirtualList(isScrolling = false) {
+                function renderVirtualList(isScrolling = false) {
             const rend = $('render-container'), empty = $('empty-message-container'); 
-            if (isScrolling && swipedCardElem) return; 
-            
+            if (isScrolling && swipedCardElem) {
+                swipedCardElem.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                swipedCardElem.style.transform = 'translateX(0px)';
+                swipedCardElem = null;
+            }
+
             if (filteredData.length === 0) { $('list').style.height = '0px'; rend.innerHTML = ''; empty.innerHTML = `<div class="empty-msg">${tab === 'fav' ? "Belum ada favorit" : (tab === 'exp' ? "Tidak ada barang expired" : "Belum ada data")}</div>`; empty.classList.remove('hidden'); return; }
             
             const now = Date.now();
@@ -2138,7 +2203,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 let iq = parseInt($('i-iq').value) || 0;
                 
                 if (!String(nRaw).trim() || p1 === 0) { 
-                    return showAlert("Nama barang dan Harga Satuan tidak boleh kosong/nol!", "Gagal"); 
+                    return showAlert("Nama barang dan Harga Satuan tidak boleh kosong!", "Gagal"); 
                 }
                 
                 if (!bypassAnomaly) {
@@ -2150,7 +2215,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                         const hppGrosir = hpp * iq;
                                         if (p2 <= p1) {
                     isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                    return showAlert("Bencana Finansial: Harga 1 Dus (" + fmt(p2) + ") tidak logis karena lebih murah/sama dengan 1 Biji (" + fmt(p1) + ")!", "Gagal");
+                    return showAlert("Bencana Finansial: Harga 1 Dus (" + fmt(p2) + ") tidak logis karena lebih murah/sama dengan 1 Pcs (" + fmt(p1) + ")!", "Gagal");
                 }
                 if (p2 > p1 * iq) {
                     isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
@@ -2185,7 +2250,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 
                 let t = String($('i-t').value).trim().toLowerCase(); 
                 if (t && isAcronymUsed(t, activeId)) {
-                    return showAlert("Singkatan sudah dipakai barang lain!", "Gagal"); 
+                    return showAlert("Akronim sudah dipakai barang lain!", "Gagal"); 
                 } 
                 if (!t) t = generateSmartAcronym(cleanName, activeId);
                 
@@ -2290,7 +2355,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 let idx = 0;
                 function putDeleteChunk() {
                     if (idx >= toDelete.length) {
-                        if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)");
+                        if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; clearEditMode(); saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)");
                         return;
                     }
                     let tx = idb.transaction('items', 'readwrite');
@@ -2376,29 +2441,38 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
                         if (isCartMode) renderCartUI(); applyFiltersAndRender();
                         
-                                                // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
+                                                   // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
                         // [QA LEAD FIX] Mencegah Memory Crash/Transaction Abort pada 36.000+ data dengan Chunking IDB
-                        try {
-                            let safeItems = db.filter(item => !item._isGhost);
-                            const txClear = idb.transaction('items', 'readwrite');
-                            txClear.objectStore('items').clear();
-                            txClear.oncomplete = () => {
-                                let idx = 0;
-                                function putChunk() {
-                                    if (idx >= safeItems.length) return;
-                                    let tx = idb.transaction('items', 'readwrite');
-                                    let store = tx.objectStore('items');
-                                    let end = Math.min(idx + 500, safeItems.length);
-                                    for (let i = idx; i < end; i++) store.put(safeItems[i]);
-                                    idx = end;
-                                    tx.oncomplete = putChunk;
-                                }
-                                putChunk();
-                            };
-                        } catch(e) {}
+                        return new Promise((resolve) => {
+                            try {
+                                let safeItems = db.filter(item => !item._isGhost);
+                                const txClear = idb.transaction('items', 'readwrite');
+                                txClear.objectStore('items').clear();
+                                txClear.oncomplete = () => {
+                                    let idx = 0;
+                                    function putChunk() {
+                                        if (idx >= safeItems.length) { resolve(); return; }
+                                        let tx = idb.transaction('items', 'readwrite');
+                                        let store = tx.objectStore('items');
+                                        let end = Math.min(idx + 500, safeItems.length);
+                                        for (let i = idx; i < end; i++) store.put(safeItems[i]);
+                                        idx = end;
+                                        tx.oncomplete = putChunk;
+                                        tx.onerror = () => resolve();
+                                    }
+                                    putChunk();
+                                };
+                                txClear.onerror = () => resolve();
+                            } catch(e) { resolve(); }
+                        }).then(() => {
+                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
+                            return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
+ }) }, 90000);
+                        });
                     }
                     localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
+ }) }, 90000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
@@ -2409,12 +2483,12 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                             const req = store.index('ts_idx').openCursor(null, 'prev');
                             const results = [];
                             req.onsuccess = (e) => {
-                                const cursor = e.target.result;
-                               if (cursor && results.length < 300) {
-                                    results.push(cursor.value);
-                                    cursor.continue();
-                                } else { resolve(results); }
-                            };
+    const cursor = e.target.result;
+    if (cursor && results.length < 1500) {
+        results.push(cursor.value);
+        cursor.continue();
+    } else { resolve(results); }
+};
                             req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                         } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
                     }).then(historyData => {
@@ -2454,7 +2528,8 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                             } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
                         }).then(histBackup => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
-                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db.filter(i => !i._isGhost), history: histBackup, timestamp: Date.now() });
+                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
+, history: histBackup, timestamp: Date.now() });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
@@ -2525,7 +2600,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                     }
                 }
                 processNextChunk();
-            }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan internet menyala.", "Error"); }); 
+            }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan jaringan internet.", "Error"); }); 
         }
 
         function exportData() { 
@@ -2596,11 +2671,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                             return showAlert("Gagal! Judul kolom (NAMA BARANG & HARGA) tidak ditemukan.", "Error"); 
                         }
 
-                        const tA = new Set(); 
                         let baseTs = Date.now(); 
                         let skippedCount = 0; let failedCount = 0; let processedItems = new Map(); 
-                        let dbMapById = new Map(); let dbMapByName = new Map(); let dbMapByBarcode = new Map();
-                        
+                                                let dbMapById = new Map(); let dbMapByName = new Map(); let dbMapByBarcode = new Map();
+                        let tempAcrSet = new Set(Array.from(acronymMap.keys())); // SURGICAL FIX: Cegah Acronym Collision
+
                                                 db.forEach(x => { 
                             if(!x.deleted && !x._isGhost) { 
                                 if(x.id) dbMapById.set(String(x.id), x); 
@@ -2623,8 +2698,10 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                             
                             if (!norm || !norm.n) { failedCount++; continue; }
                             
-                            if (!norm.t) { norm.t = generateSmartAcronym(norm.n, null); }
-                            if (norm.b !== '' && norm.b2 === norm.b) norm.b2 = ''; 
+                                                        if (!norm.t) { norm.t = generateSmartAcronym(norm.n, null, tempAcrSet); } 
+                            else if (isAcronymUsed(norm.t, null, tempAcrSet)) { norm.t = generateSmartAcronym(norm.n + " " + Math.random().toString(36).substring(2,5), null, tempAcrSet); }
+                            if (norm.t) tempAcrSet.add(norm.t.toLowerCase());
+if (norm.b !== '' && norm.b2 === norm.b) norm.b2 = ''; 
                             if (norm.b2 !== '' && norm.iq < 2) norm.b2 = ''; 
                             
                             if (!norm.id || norm.id === "undefined" || norm.id === "") {
@@ -2668,7 +2745,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                             function processImportChunk() {
                                 const chunk = itemsArray.slice(currentIndex, currentIndex + chunkSize);
                                 if (chunk.length === 0) {
-                                    if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
+                                    if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost), pop: buildPopularityData() });
                                     updateMaps(); renderCartUI(); clearSearch(); 
                                     isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
 
@@ -3034,10 +3111,11 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     if (!finalId) {
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                        let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                                                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
                         if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
                         localStorage.setItem('TRX_SEQ', seq);
-                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+                        let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
+                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
                     printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId, finalTs); // Tembak ke Hardware
                     resetPrintModalStyle();
@@ -3124,13 +3202,14 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             if (!finalId) {
                 let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                 let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
                 if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
                 localStorage.setItem('TRX_SEQ', seq);
-                finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}`;
+                let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
+                finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             }
-            let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
-            let receiptNo = finalId; 
+                        let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
+            let receiptNo = finalId ? finalId.split('-').slice(0, 2).join('-') : ''; 
             let totalItemCount = 0;
 
             // Kalkulasi padding dinamis agar Jam selalu rata kanan dengan kode TRX
@@ -3369,15 +3448,16 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 }
                 totalFisik = Math.round(totalFisik * 1000) / 1000;
 
-                let splitJam = timeStr.split(' '); 
-                let shortId = h.id ? h.id.replace(/^TRX-/, '') : 'LAMA'; 
+                                                let splitJam = timeStr.split(' '); 
+                if (!h.id) { h.id = 'CORRUPT-' + Math.random().toString(36).substring(2, 8); }
+                let shortId = h.id.split('-')[1] || h.id.replace(/^TRX-/, ''); 
 
                 // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
                 html += `
                 <div style="background: #111; border: 1px solid #333; border-radius: 8px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8);">
-                    <div onclick="const d = document.getElementById('det-${h.id}'); const i = document.getElementById('icn-${h.id}'); if(d.style.display==='none'){d.style.display='block'; i.style.transform='rotate(180deg)';}else{d.style.display='none'; i.style.transform='rotate(0deg)';}" 
-                         style="padding: 12px 14px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid #87CEFA;">
-                        
+                    <div onclick="const d = this.nextElementSibling; const i = this.querySelector('svg'); if(d.style.display==='none'){d.style.display='block'; i.style.transform='rotate(180deg)';}else{d.style.display='none'; i.style.transform='rotate(0deg)';}" 
+     style="padding: 12px 14px; display: flex; flex-direction: column; cursor: pointer; border-left: 3px solid #87CEFA;">
+
                         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px dashed #333; padding-bottom: 6px;">
                             <span style="font-family: monospace; font-size:11px; font-weight:800; color:#87CEFA; letter-spacing:1px;">TRX-${shortId}</span>
                             <span style="font-size:10px; font-weight:600; color:#888;">${splitJam[1]} WIB</span>
@@ -3480,10 +3560,10 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
                 let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
-                // 1. Ekstraksi ID & Total Item
-                let receiptNo = hData.id; // SURGICAL FIX: Gunakan ID Riwayat Asli secara absolut
+                                      // 1. Ekstraksi ID & Total Item
+                let receiptNo = hData.id ? hData.id.split('-').slice(0, 2).join('-') : 'LAMA';
                 let totalItemCount = 0;
-                
+
                 // Kalkulasi spasi dinamis
                 let padLen = Math.max(1, receiptNo.length - dDate.length - dTime.length);
                 let dateStrAligned = dDate + " ".repeat(padLen) + dTime;
@@ -3642,7 +3722,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 hideLoading(); 
                 $('loading-title').innerText = origTitle;
                 $('loading-title').style.fontStyle = origStyle;
-                showAlert("Gagal terhubung ke Cloud. Periksa internetmu.", "KONEKSI GAGAL", "var(--danger)");
+                showAlert("Gagal terhubung ke Cloud. Periksa jaringan internet.", "KONEKSI GAGAL", "var(--danger)");
             });
         }
 
@@ -3667,8 +3747,23 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
                 await initDB(); db = await loadAllFromIDB(); 
                 runMarketBasketAI(); // <--- INJEKSI PELATUK AI LOKAL
-                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
-                updateMaps(); renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
+                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
+                updateMaps(); 
+                
+                // SURGICAL FIX: Rehidrasi Ghost Item dari History pasca Force-Close
+                if (activeEditTrxId) {
+                    let histCache = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                    let hData = histCache.find(x => x.id === activeEditTrxId);
+                    if (hData && Array.isArray(hData.items)) {
+                        hData.items.forEach(it => {
+                            if (!db.find(x => String(x.id) === String(it.id))) {
+                                db.push({ id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true });
+                            }
+                        });
+                    }
+                }
+                
+                renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
                 if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
                 checkOfflineLedger(); // [SURGICAL FIX] Jembatan Penarik Data Offline Darurat
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
@@ -3746,19 +3841,21 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             else if (id === 'scanner') { closeScanner(); }
                         else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
             else if (id === 'alert') { 
-                $('custom-alert').style.display = 'none'; checkModalOpen(); 
-                // SURGICAL FIX: Bersihkan polusi CSS injeksi saat modal ditutup paksa lewat tombol Back HP
-                $('custom-alert').style.alignItems = ''; $('custom-alert').style.paddingTop = ''; 
-                $('alert-box').style.marginTop = ''; $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;'; 
-                $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;'; 
-            }
+    $('custom-alert').style.display = 'none'; checkModalOpen(); 
+    // SURGICAL FIX: Bersihkan polusi CSS injeksi saat modal ditutup paksa lewat tombol Back HP
+    $('custom-alert').style.alignItems = ''; $('custom-alert').style.paddingTop = ''; 
+    $('alert-box').style.marginTop = ''; $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;'; 
+    $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;'; 
+    $('alert-box').style.alignSelf = ''; // Tambahkan pembersihan ini
+}
             else if (id === 'pin') { $('pin-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'sync') { $('sync-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'offline') { $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'history') { closeHistory(); }
             else if (id === 'full-date-picker') { closeFullDatePicker(); }
-            else if (id === 'top10') { closeTop10(); } 
+                        else if (id === 'top10') { closeTop10(); } 
             else if (id === 'about') { closeAboutModal(); }
+            else if (id === 'cart-expand') { document.body.classList.remove('cart-expanded'); }
         }
 
         // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
@@ -3794,8 +3891,9 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                                 let encoder = new TextEncoder();
                 let initPrint = [0x1B, 0x40, 0x1B, 0x61, 0x01]; // Init & Center Align
                 let textHead = encoder.encode("TOKO KELONTONG\nPs. Sunggingan Lt. 2\nTelp: 082226334999\n--------------------------------\n");
-                let alignLeft = [0x1B, 0x61, 0x00];
-                let bodyStr = `No  : ${trxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
+                                let alignLeft = [0x1B, 0x61, 0x00];
+                let displayTrxId = trxId ? trxId.split('-').slice(0, 2).join('-') : '';
+                let bodyStr = `No  : ${displayTrxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
                 
                 items.forEach(i => {
                     // [SURGICAL FIX] Sterilisasi Unicode/Emoji agar tidak merusak Hardware Buffer ESC/POS
