@@ -176,7 +176,7 @@ self.addEventListener('fetch', event => {
     event.waitUntil(lifeLock); 
 
     event.respondWith(
-      caches.match(req).catch(() => null).then(cachedRes => {
+            caches.match(req.url).catch(() => null).then(cachedRes => {
         if (cachedRes) {
           taskResolver(); // Matikan kunci hidup, SW boleh tidur
           return cachedRes;
@@ -187,7 +187,7 @@ self.addEventListener('fetch', event => {
                 return fetch(fetchReq).then(async res => {
           const contentType = res.headers.get('content-type') || '';
           
-          if (res && (res.ok || res.type === 'opaque') && res.type !== 'error' && !contentType.includes('text/html')) {
+                    if (res && res.ok && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -265,7 +265,9 @@ async function processOfflineBackup() {
           return resolve();
       }
       
-      const tx = idb.transaction('sync-outbox', 'readonly');
+            const tx = idb.transaction('sync-outbox', 'readonly');
+      tx.onabort = () => { idb.close(); reject(new Error("Transaksi Readonly dibatalkan OS.")); };
+      tx.onerror = (e) => { idb.close(); reject(new Error("Transaksi Readonly Error.")); };
       const store = tx.objectStore('sync-outbox');
       const getReq = store.get('pending-backup');
       
@@ -278,7 +280,7 @@ async function processOfflineBackup() {
         const payload = getReq.result;
         
         try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbyH7LbKKYVQhImRsQn4ShNH-PwP6os4NfzPOvwusHGQpeMW5Tz1vspmajyXnoGkCkQ1/exec";
+          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
           
           const resData = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
