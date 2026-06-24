@@ -262,18 +262,7 @@
             if (isResultDisplayed) {
                 calcVal = '0';
                 isResultDisplayed = false;
-            }
-            const p = calcVal.split(/[\+\-\*\/]/);
-            const curr = p[p.length - 1]; 
-            
-            if (n === '.' && curr === '') n = '0.'; 
-            if (n === '.' && curr.includes('.')) return; 
-            if (curr === '0' && n !== '.') calcVal = calcVal.slice(0, -1) + n; 
-            else if (curr === '0' && n === '0') return; 
-            else calcVal += n; 
-            
-            updateDisplay(); 
-        }
+            }           
             const p = calcVal.split(/[\+\-\*\/]/);
             const curr = p[p.length - 1]; 
             
