@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '20.0'; 
+const APP_VERSION = '20.1'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -15,44 +15,31 @@ const OFFLINE_URL = 'offline.html';
 const cdnDomains = [
   'unpkg.com', 
   'fonts.googleapis.com', 
-  'fonts.gstatic.com',
-  'tessdata.projectnaptha.com', // [SURGICAL FIX] Whitelist Database Bahasa OCR AI
-  'raw.githubusercontent.com'   // [SURGICAL FIX] Whitelist Fallback Tesseract
+  'fonts.gstatic.com'
 ];
 
 // ==========================================
 // MANAJEMEN MEMORI (ANTI-LAG)
 // ==========================================
+let isTrimming = {}; 
 
-let trimQueues = {}; 
-
-// [SURGICAL FIX] Enterprise Promise Queueing System (Anti-Bypass)
-function trimCache(cacheName, maxItems) {
-  if (!trimQueues[cacheName]) {
-    trimQueues[cacheName] = Promise.resolve();
-  }
+// [SURGICAL FIX] Mutex Lock Atomic System (Anti-Memory Leak)
+async function trimCache(cacheName, maxItems) {
+  if (isTrimming[cacheName]) return; 
+  isTrimming[cacheName] = true;
   
-  const currentTask = trimQueues[cacheName].then(async () => {
-    try {
-      const cache = await caches.open(cacheName);
-      const keys = await cache.keys();
-      if (keys.length > maxItems) {
-        const keysToDelete = keys.slice(0, keys.length - maxItems);
-        await Promise.all(keysToDelete.map(key => cache.delete(key)));
-      }
-    } catch (err) {
-      console.warn('[SW] Gagal membersihkan memori:', err);
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxItems) {
+      const keysToDelete = keys.slice(0, keys.length - maxItems);
+      await Promise.all(keysToDelete.map(key => cache.delete(key)));
     }
-  }).catch(() => {}); 
-  
-  trimQueues[cacheName] = currentTask;
-  
-  // Lepaskan referensi memori (Garbage Collection) jika tidak ada antrean lain
-  currentTask.finally(() => { 
-    if (trimQueues[cacheName] === currentTask) trimQueues[cacheName] = null; 
-  });
-  
-  return currentTask;
+  } catch (err) {
+    console.warn('[SW] Gagal membersihkan memori:', err);
+  } finally {
+    isTrimming[cacheName] = false;
+  }
 }
 
 // ==========================================
@@ -277,15 +264,41 @@ async function processOfflineBackup() {
             return resolve();
         }
         
-        const payload = getReq.result;
-        
-        try {
-          const CLOUD_API = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
+                  const payload = getReq.result;
           
-          const resData = await fetch(CLOUD_API, {
-            method: 'POST', body: JSON.stringify({ action: 'backup', data: payload.data })
-          });
-          if (!resData.ok) throw new Error("Network Error"); 
+          try {
+            const CLOUD_API = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
+            
+                        // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
+            const itemsData = await new Promise((res, rej) => {
+                const txItems = idb.transaction('items', 'readonly');
+                const store = txItems.objectStore('items');
+                const req = store.openCursor();
+                const cleanItems = [];
+                
+                req.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        if (!cursor.value._isGhost) {
+                            delete cursor.value._cHeight; // Mutasi langsung (Zero-Copy) cegah Memory Bloat
+                            cleanItems.push(cursor.value);
+                        }
+                        cursor.continue();
+                    } else {
+                        res(cleanItems);
+                    }
+                };
+                req.onerror = () => rej(new Error("Gagal membaca store items"));
+            });
+
+            // Amankan String Payload, lalu bantai array dari RAM sebelum I/O Fetch menahan thread
+            const backupPayloadStr = JSON.stringify({ action: 'backup', data: itemsData });
+            itemsData.length = 0; 
+
+            const resData = await fetch(CLOUD_API, {
+              method: 'POST', body: backupPayloadStr
+            });
+            if (!resData.ok) throw new Error("Network Error"); 
           
           let jsonResData;
           try { 
@@ -293,10 +306,7 @@ async function processOfflineBackup() {
           } catch(e) { 
             throw new Error("API mengembalikan non-JSON. Sync ditunda.");
           }
-                    if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
-
-          // [SURGICAL FIX] Garbage Collection Paksa: Musnahkan payload raksasa dari RAM SW segera setelah transmisi usai untuk mencegah OOM Crash!
-          delete payload.data; 
+                              if (jsonResData.status !== "success") throw new Error("Server Sibuk: Data Barang gagal disinkronkan");
 
           const resHist = await fetch(CLOUD_API, {
             method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: payload.history })
