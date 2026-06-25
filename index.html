@@ -168,15 +168,16 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     100% { transform: scale(1); filter: brightness(1); }
 }
  body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
-/* SURGICAL FIX: EXTREME COMPRESSION FORM UI */
+/* SURGICAL FIX: EXTREME COMPRESSION FORM UI (REVISION 2) */
+#mod { padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important; } /* Naikkan batas tepi atas layar */
+#mod-box { padding-top: 18px !important; } /* Kurangi ruang kosong di atas judul form */
 #mod-box label { margin-top: 8px !important; margin-bottom: 3px !important; }
 #mod-box input { padding: 8px 12px !important; font-size: 13px !important; margin-bottom: 0 !important; height: 36px !important; }
-/* ---> TAMBAHKAN BARIS INI (Proteksi Teks Barcode) <--- */
 #mod-box input#i-b, #mod-box input#i-b2 { padding-right: 42px !important; }
 #mod-box .form-grid { margin-top: 8px !important; margin-bottom: 4px !important; }
-#mod-box .quick-chip-row { margin-top: 2px !important; margin-bottom: 4px !important; }
+#mod-box .quick-chip-row { margin-top: 2px !important; margin-bottom: 6px !important; }
 #mod-box .q-chip { padding: 5px 10px !important; font-size: 10px !important; }
-#mod-box .modal-btns { margin-top: 15px !important; }
+#mod-box .modal-btns { margin-top: 26px !important; } /* Jauhkan tombol Batal & Simpan dari area Chip */
 #mod-box button[onclick*="openScanner"] { height: 36px !important; width: 40px !important; }
 #mod-box h3#m-tit { margin-bottom: 6px !important; }
 #mod-box div[style*="font-size: 9.5px"] { margin-top: 2px !important; margin-bottom: 6px !important; }
@@ -568,7 +569,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             </h3>
             <div style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 15px;">
                 <div style="font-weight: 800; color: var(--mono-main); font-size: 14px;">DAFTAR HARGA & KASIR</div>
-                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 19.8</div>
+                <div style="font-size: 11px; color: #888; font-family: monospace; margin-bottom: 10px;">Version: 💯</div>
                 
                 <div style="margin-bottom: 10px;">
                     <div style="font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase;">Status Engine:</div>
