@@ -168,6 +168,18 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     100% { transform: scale(1); filter: brightness(1); }
 }
  body.mode-kasir .sticky-roof-group { padding-top: env(safe-area-inset-top, 0px); }
+/* SURGICAL FIX: EXTREME COMPRESSION FORM UI */
+#mod-box label { margin-top: 8px !important; margin-bottom: 3px !important; }
+#mod-box input { padding: 8px 12px !important; font-size: 13px !important; margin-bottom: 0 !important; height: 36px !important; }
+/* ---> TAMBAHKAN BARIS INI (Proteksi Teks Barcode) <--- */
+#mod-box input#i-b, #mod-box input#i-b2 { padding-right: 42px !important; }
+#mod-box .form-grid { margin-top: 8px !important; margin-bottom: 4px !important; }
+#mod-box .quick-chip-row { margin-top: 2px !important; margin-bottom: 4px !important; }
+#mod-box .q-chip { padding: 5px 10px !important; font-size: 10px !important; }
+#mod-box .modal-btns { margin-top: 15px !important; }
+#mod-box button[onclick*="openScanner"] { height: 36px !important; width: 40px !important; }
+#mod-box h3#m-tit { margin-bottom: 6px !important; }
+#mod-box div[style*="font-size: 9.5px"] { margin-top: 2px !important; margin-bottom: 6px !important; }
     </style>
 </head>
 <body>
@@ -316,13 +328,18 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 </div>
             </div>
 
-            <label style="color:#87CEFA;">HPP</label>
-            <div style="display:flex; gap:10px;">
-                <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP(); calcMargin('p2');" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
-                <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this); calcMargin('p1'); syncModalGrosir();" style="flex:1; border-color:#87CEFA; background:rgba(135,206,250,0.05);">
+                                   <div class="form-grid">
+                <div style="flex: 1; min-width: 0;">
+                    <label style="color: #87CEFA; margin-top: 0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">HPP Grosir (Dus)</label>
+                    <input type="tel" id="i-hpp-grosir" pattern="[0-9]*" placeholder="Modal 1 Dus" oninput="formatRp(this); autoCalcHPP(); calcMargin('p2');" style="border-color: #87CEFA; background: rgba(135,206,250,0.05); margin-bottom: 0;">
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <label style="color: #87CEFA; margin-top: 0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">HPP Satuan (Ecer)</label>
+                    <input type="tel" id="i-hpp" pattern="[0-9]*" placeholder="Modal 1 Pcs" oninput="formatRp(this); calcMargin('p1'); syncModalGrosir();" style="border-color: #87CEFA; background: rgba(135,206,250,0.05); margin-bottom: 0;">
+                </div>
             </div>
-            <div style="font-size:9.5px; color:#87CEFA; margin-bottom:14px; margin-top:6px; font-weight:600;">*Isi harga dari supplier, Satuan akan terisi otomatis.</div>
-            
+            <div style="font-size: 9.5px; color: #87CEFA; margin-bottom: 14px; margin-top: 6px; font-weight: 600;">*Isi harga dari supplier, Satuan akan terisi otomatis.</div>
+
             <div class="form-grid">
                 <div style="flex: 39;">
                     <label>Harga Satuan</label>
@@ -347,11 +364,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                                     <div class="form-grid" style="margin-bottom: 10px;">
                 <div style="flex: 7; min-width:0;">
                     <label>Harga Grosir</label>
-                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" onfocus="this.select()" oninput="formatRp(this); calcMargin('p2');">
+                   <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
                 </div>
                 <div style="flex: 3; min-width:0;">
                     <label style="white-space: nowrap;">Margin %</label>
-                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" onfocus="this.select()" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
+                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
                 </div>
             </div>
             <div class="form-grid">
@@ -361,7 +378,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 </div>
                 <div style="flex: 1; min-width:0; display:none; margin-top:0 !important; animation: popInBouncy 0.2s ease;" id="wrap-iq">
                     <label id="label-iq" style="color:#FFA500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Isi /...</label>
-                    <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" onfocus="this.select()" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
+                    <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
                 </div>
             </div>
             <div class="quick-chip-row" id="chip-row-u2" style="margin-bottom: 10px;">
@@ -650,11 +667,12 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
         let cartState = {};
         try { cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; } catch(e) { localStorage.removeItem('DB_WA_CART'); }
 
-        function handleSearchLogic(val) {
+                function handleSearchLogic(val) {
             currentSearchReqId++;
             currentInjectedQty = 1;
-            currentCleanQuery = val.trim();
-            
+            // SURGICAL FIX: Basmi Karakter Kontrol ASCII tersembunyi dari Hardware Scanner
+            currentCleanQuery = val.replace(/[\x00-\x1F\x7F]/g, '').trim();
+
             const qtyMatch = currentCleanQuery.match(/^(\d{1,4})[x\*]\s*(.*)/i);
             if (qtyMatch) {
                 currentInjectedQty = parseInt(qtyMatch[1], 10);
@@ -801,12 +819,14 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             if(unitText) unitText.innerText = formatQtyBreakdown(q, iq, item.u1, item.u2);
         }
 
-                function updateGrandTotal() {
+                        function updateGrandTotal() {
             let grandTotal = 0;
             let needsSave = false; 
+            // SURGICAL FIX: Reduksi 2.5 Juta Siklus CPU menjadi 50rb (O(1) Map Lookup)
+            let fastDbMap = new Map(); db.forEach(x => fastDbMap.set(String(x.id), x));
 
             Object.keys(cartState).forEach(k => {
-                const item = db.find(x => String(x.id) === k);
+                const item = fastDbMap.get(k);
                 if (!item || item.deleted) {
                     delete cartState[k];
                     needsSave = true;
@@ -842,15 +862,17 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             let grandTotal = 0;
             let html = '';
             
-            const keys = Object.keys(cartState);
+                        const keys = Object.keys(cartState);
             if (keys.length === 0) {
                 list.innerHTML = '<div class="cpi-empty">Keranjang Kosong</div>';
                 $('cp-grand-total').innerText = 'Rp 0';
                 return;
             }
 
+            // SURGICAL FIX: Render instan untuk mode Kasir
+            let fastDbMap = new Map(); db.forEach(x => fastDbMap.set(String(x.id), x));
             keys.forEach(id => {
-                const item = db.find(x => String(x.id) === id);
+                const item = fastDbMap.get(id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q;
                     const iq = Math.max(1, item.iq || 1);
@@ -2526,10 +2548,10 @@ try {
                                 };
                                 req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                             } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
-                        }).then(histBackup => {
+                                                }).then(histBackup => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
-                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
-, history: histBackup, timestamp: Date.now() });
+                            // SURGICAL FIX: Mencegah IDB DataCloneError. Kirim signal saja, biarkan sw.js membaca langsung dari store 'items' dan 'history'.
+                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: [], history: histBackup, timestamp: Date.now() });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
@@ -2603,7 +2625,8 @@ try {
             }).catch(() => { isApiLoading = false; hideLoading(); showAlert("Koneksi Gagal / Server Sibuk. Pastikan jaringan internet.", "Error"); }); 
         }
 
-        function exportData() { 
+                function exportData() { 
+            $('dropdown-menu').classList.add('hidden'); // SURGICAL FIX: Bunuh Zombie Menu
             try {
                 if (typeof XLSX === 'undefined') throw new Error("Sistem Excel belum termuat. Pastikan internet menyala untuk fitur ini.");
                 const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
@@ -2611,7 +2634,8 @@ try {
             } catch (err) { showAlert(err.message, "Gagal Export", "var(--danger)"); }
         }
 
-        function importData(e) { 
+                function importData(e) { 
+            $('dropdown-menu').classList.add('hidden'); // SURGICAL FIX: Bunuh Zombie Menu
             if (isApiLoading) { tampilkanToast("Proses import sedang berjalan...", "var(--warning)"); return; }
             const f = e.target.files[0]; if(!f) return; 
             if (f.size > 2 * 1024 * 1024) { if (e.target) e.target.value = ''; return showAlert("Gagal! Ukuran file maksimal 2MB.", "Error"); }
