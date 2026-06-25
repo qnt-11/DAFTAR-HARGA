@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyH7LbKKYVQhImRsQn4ShNH-PwP6os4NfzPOvwusHGQpeMW5Tz1vspmajyXnoGkCkQ1/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -362,31 +362,31 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>
             </div>
             
-                                    <div class="form-grid" style="margin-bottom: 10px;">
-                <div style="flex: 7; min-width:0;">
+            <div class="form-grid">
+                <div style="flex: 39;">
                     <label>Harga Grosir</label>
                    <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
                 </div>
-                <div style="flex: 3; min-width:0;">
+                <div style="flex: 23;">
                     <label style="white-space: nowrap;">Margin %</label>
                     <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
                 </div>
-            </div>
-            <div class="form-grid">
-                <div style="flex: 1; min-width:0;">
+                <div style="flex: 38;">
                     <label>Satuan Grosir</label>
                     <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
                 </div>
-                <div style="flex: 1; min-width:0; display:none; margin-top:0 !important; animation: popInBouncy 0.2s ease;" id="wrap-iq">
-                    <label id="label-iq" style="color:#FFA500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Isi /...</label>
-                    <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
-                </div>
             </div>
+            
             <div class="quick-chip-row" id="chip-row-u2" style="margin-bottom: 10px;">
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Slop'; toggleIsiGrosir();">Slop</div>
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Dus'; toggleIsiGrosir();">Dus</div>
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Karton'; toggleIsiGrosir();">Karton</div>
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
+            </div>
+
+            <div id="wrap-iq" style="display:none; animation: popInBouncy 0.2s ease;">
+                <label id="label-iq" style="color:#FFA500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Isi /...</label>
+                <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
             </div>
 
             <div class="modal-btns">
@@ -623,10 +623,9 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     <script>
         const $ = (id) => document.getElementById(id);
         const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
-                const TemaNotifikasi = { 
-            "Error": "var(--danger)", "Gagal": "var(--danger)", "Hapus": "var(--danger)", 
-            "Peringatan": "var(--warning)", "Peringatan Sinkronisasi": "var(--warning)", "Optimasi Sistem": "#FFA500",
-            "Info": "var(--mono-main)", "Laporan Import": "var(--warning)", "Offline Sync Aktif": "var(--warning)" 
+                        const TemaNotifikasi = { 
+            "Error": "var(--danger)", "Gagal": "var(--danger)", 
+            "Peringatan": "var(--warning)", "Info": "var(--mono-main)" 
         };
         const NamaBln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const NamaBlnPendek = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -688,12 +687,11 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 e.preventDefault();
                 if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
                 let val = searchInput.value.trim();
-                if (val !== '') {
-                    if (handleSearchInput.cancel) handleSearchInput.cancel();
-                    handleSearchLogic(val);
-                    pendingAutoAdds.clear(); // Hapus orphaned request sebelumnya agar memori tidak bocor
-                    pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
-                }
+                            if (val !== '') {
+                if (handleSearchInput.cancel) handleSearchInput.cancel();
+                handleSearchLogic(val);
+                pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
+            }
             }
         });
 
@@ -823,11 +821,8 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                         function updateGrandTotal() {
             let grandTotal = 0;
             let needsSave = false; 
-            // SURGICAL FIX: Reduksi 2.5 Juta Siklus CPU menjadi 50rb (O(1) Map Lookup)
-            let fastDbMap = new Map(); db.forEach(x => fastDbMap.set(String(x.id), x));
-
-            Object.keys(cartState).forEach(k => {
-                const item = fastDbMap.get(k);
+                                Object.keys(cartState).forEach(k => {
+                        const item = db.find(x => String(x.id) === String(k));
                 if (!item || item.deleted) {
                     delete cartState[k];
                     needsSave = true;
@@ -870,10 +865,8 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 return;
             }
 
-            // SURGICAL FIX: Render instan untuk mode Kasir
-            let fastDbMap = new Map(); db.forEach(x => fastDbMap.set(String(x.id), x));
-            keys.forEach(id => {
-                const item = fastDbMap.get(id);
+                            keys.forEach(id => {
+                    const item = db.find(x => String(x.id) === String(id));
                 if (item && !item.deleted) {
                     const q = cartState[id].q;
                     const iq = Math.max(1, item.iq || 1);
@@ -897,7 +890,7 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                         <div class="cp-trash-bg" onclick="modifyCartItem('${item.id}', -9999)">
                             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </div>
-                        <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${item.id}')" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <div class="cpi-info" style="flex: 1; min-width: 0; padding: 0;">
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
@@ -1182,7 +1175,7 @@ saveCartMem();
             }
         }
 
-        function handleMainTouchEnd(e, card, id) {
+            function handleMainTouchEnd(e, card) {
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
 const diffX = touchStartX - touchCurrentX;
 const diffY = Math.abs(touchStartY - e.changedTouches[0].clientY);
@@ -2160,7 +2153,7 @@ try {
                 } else {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
-                        swipeAttributes = `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this, '${it.id}')"`;
+                        swipeAttributes = `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"`;
                         trashBgHtml = `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>`;
                         rightSideUI = `<div class="action-btns-absolute"><button class="card-action-btn action-fav" data-id="${it.id}" style="color:${it.f?'var(--mono-main)':'var(--text-muted)'};"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="${it.f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
                     } else rightSideUI = `<div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: auto;"><button class="btn-add-cart calc-add" data-id="${it.id}">+</button></div>`;
@@ -2229,6 +2222,19 @@ try {
                     return showAlert("Nama barang dan Harga Satuan tidak boleh kosong!", "Gagal"); 
                 }
                 
+                                // Pengecekan Absolut: Bencana Finansial tidak boleh di-bypass!
+                if (p2 > 0 && iq > 1) {
+                    if (p2 <= p1) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Bencana Finansial: Harga Grosir (" + fmt(p2) + ") tidak logis karena lebih murah/sama dengan 1 Pcs (" + fmt(p1) + ")!", "Gagal");
+                    }
+                    if (p2 > p1 * iq) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Satuan jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
+                    }
+                }
+
+                // Peringatan HPP (Boleh di-bypass oleh Admin)
                 if (!bypassAnomaly) {
                     if (hpp > 0 && p1 < hpp) {
                         isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
@@ -2236,15 +2242,7 @@ try {
                     }
                     if (p2 > 0 && iq > 1) {
                         const hppGrosir = hpp * iq;
-                                        if (p2 <= p1) {
-                    isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                    return showAlert("Bencana Finansial: Harga 1 Dus (" + fmt(p2) + ") tidak logis karena lebih murah/sama dengan 1 Pcs (" + fmt(p1) + ")!", "Gagal");
-                }
-                if (p2 > p1 * iq) {
-                    isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
-                    return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Satuan jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
-                }
-                if (hppGrosir > 0 && p2 < hppGrosir) {
+                        if (hppGrosir > 0 && p2 < hppGrosir) {
                             isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
                             return showConfirm(`Harga Grosir (Rp ${fmt(p2)}) lebih rendah dari Total Modal Grosir (Rp ${fmt(hppGrosir)}).<br>Tetap simpan?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
                         }
@@ -2891,7 +2889,7 @@ setTimeout(processImportChunk, 0);
 
         function showOfflineLedger(text) { $('offline-ledger-view').value = text; $('offline-ledger-modal').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('offline'); }
         function closeOfflineLedger() { untrackModal('offline'); $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
-        function clearOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; const tx = dbOff.transaction('CatatanDarurat', 'readwrite'); tx.objectStore('CatatanDarurat').delete(1); tx.oncomplete = () => { closeOfflineLedger(); tampilkanToast("Catatan dihapus!", "var(--danger)"); }; }; } catch(err){} }
+        function clearOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (!dbOff.objectStoreNames.contains('CatatanDarurat')) return closeOfflineLedger(); const tx = dbOff.transaction('CatatanDarurat', 'readwrite'); tx.objectStore('CatatanDarurat').delete(1); tx.oncomplete = () => { closeOfflineLedger(); tampilkanToast("Catatan dihapus!", "var(--danger)"); }; }; } catch(err){} }
         function checkOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (dbOff.objectStoreNames.contains('CatatanDarurat')) { const tx = dbOff.transaction('CatatanDarurat', 'readonly'); const store = tx.objectStore('CatatanDarurat'); const getReq = store.get(1); getReq.onsuccess = () => { if (getReq.result && getReq.result.text && getReq.result.text.trim().length > 0) { showConfirm("Terdapat catatan transaksi saat offline yang belum direkap.", "Info Offline", "var(--warning)", () => { showOfflineLedger(getReq.result.text); }, "LIHAT CATATAN"); } }; } }; } catch(err) {} }
 
         function updateHistDateDisplay(val) {
