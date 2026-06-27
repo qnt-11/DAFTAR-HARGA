@@ -174,7 +174,7 @@ self.addEventListener('fetch', event => {
                 return fetch(fetchReq).then(async res => {
           const contentType = res.headers.get('content-type') || '';
           
-                    if (res && res.ok && res.type !== 'error' && !contentType.includes('text/html')) {
+          if (res && (res.ok || res.type === 'opaque') && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -269,7 +269,6 @@ async function processOfflineBackup() {
         }
         
         const payload = cursor.value; // Ambil snapshot TERTINGGI/TERBARU
-        const activeOutboxId = payload.id; 
           try {
             const CLOUD_API = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
             
@@ -358,10 +357,10 @@ async function processOfflineBackup() {
 
             getReq.onerror = (e) => {
         idb.close();
-        reject(new Error("Gagal membaca antrean Sync IDB: " + (e.target.error?.message || "Unknown Error")));
+        reject(new Error("Gagal membaca antrean Sync IDB: " + (e.target.error && e.target.error.message ? e.target.error.message : "Unknown Error")));
       };
 
       };
-    req.onerror = (e) => reject(new Error("Gagal membuka database: " + (e.target.error?.message || "Access Denied/Unknown Error")));
+    req.onerror = (e) => reject(new Error("Gagal membuka database: " + (e.target.error && e.target.error.message ? e.target.error.message : "Access Denied/Unknown Error")));
   }).finally(() => { isSyncing = false; });
 }
