@@ -75,7 +75,8 @@
     <style>
         :root { --wa-bg: #000000; --wa-card: #151515; --wa-header: #000000; --text-light: #ffffff; --text-muted: #a0a0a0; --border-color: #333333; --danger: #ff3b30; --warning: #FFD700; --highlight-bg: rgba(255, 255, 255, 0.2); --mono-main: #ffffff; --mono-sec: #aaaaaa; --cart-h: 40vh; }
         html { overscroll-behavior: none; background-color: #000000; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+             * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+        input, textarea { -webkit-user-select: auto !important; user-select: auto !important; }
         body { margin: 0; background: var(--wa-bg); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-weight: 500; overflow-x: hidden; width: 100%; min-height: 100vh; position: relative; color-scheme: dark; }
         body::before { content: ""; position: fixed; top: -2px; left: 0; right: 0; height: 4px; background-color: #000000; z-index: 999999; pointer-events: none; }
         .hidden { display: none !important; }
@@ -135,7 +136,8 @@
 }
 
 .btn-main { width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.15s ease, opacity 0.2s; display: flex; justify-content: center; align-items: center; min-height: 44px; outline: none; }
-.btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; } body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
+.btn-main:active { transform: scale(0.96); } .btn-mono { background-color: var(--mono-main) !important; color: #000000 !important; border: none !important; } .btn-cancel { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; } button:disabled, input:disabled, .btn-main:disabled { opacity: 0.5 !important; cursor: not-allowed; transform: scale(1) !important; pointer-events: none; } .picker-header-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; }.picker-nav-new { background: none; border: none; color: white; font-size: 18px; font-weight: 800; cursor: pointer; outline: none; } .picker-year-new { font-size: 15px; font-weight: 700; color: var(--mono-main); font-family: 'Montserrat', sans-serif; } .picker-grid-new { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; } .month-item { color: white; font-size: 13px; font-weight: 600; padding: 12px 0; border-radius: 8px; cursor: pointer; text-align: center; } .month-item.active { background: var(--mono-main); color: #000; } .spinner { width: 45px; height: 45px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--mono-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; transition: border-top-color 0.3s ease; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } #scanner-wrap { display: none; background: #000; position: fixed; inset: 0; } #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; } #reader video { object-fit: cover; width: 100%; height: 100%; } #qr-shaded-region { display: none !important; } .scanner-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; justify-content: center; align-items: center; } .scanner-box { width: 260px; height: 180px; border: 2px solid #ffffff; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 0 0 4000px rgba(0,0,0,0.85); transform: translateY(-15vh); } .scanner-laser { width: 100%; height: 2px; background: red; position: absolute; box-shadow: 0 0 15px 2px red; animation: scan-anim 2s infinite ease-in-out; } @keyframes scan-anim { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } } .scan-stop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #000000; color: var(--danger); border: 1px solid var(--danger); padding: 15px 40px; border-radius: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; min-height: 48px; pointer-events: auto; letter-spacing: 1px; outline:none;} .btn-torch { position: absolute; top: 40px; right: 20px; width: 46px; height: 46px; border-radius: 23px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); transition: all 0.2s ease; outline: none; } .btn-torch:active { transform: scale(0.9); } #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px); background: rgba(21, 21, 21, 0.95); border: 1px solid var(--border-color); border-bottom: 2px solid var(--mono-main); color: var(--text-light); padding: 14px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; white-space: nowrap; } #toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; } body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; }
+ body.mode-kasir #cart-panel-container { display: flex; } body.mode-kasir #s-btn-search { display: flex; } /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
 /* [INJEKSI ZERO-LATENCY UX: AUTO-COLLAPSE & ELASTIC CART] */
 /* 1. Transisi Kinetik: Sembunyikan dengan animasi ukuran dan opacity (BUKAN display:none) */
 #cp-list { transition: opacity 0.2s ease-out, padding 0.3s ease; }
@@ -181,7 +183,225 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 #mod-box button[onclick*="openScanner"] { height: 36px !important; width: 40px !important; }
 #mod-box h3#m-tit { margin-bottom: 6px !important; }
 #mod-box div[style*="font-size: 9.5px"] { margin-top: 2px !important; margin-bottom: 6px !important; }
-    </style>
+
+/* INJEKSI MASTER: 5 FITUR ENTERPRISE CSS (RESTORASI TOTAL & ANTI-BUG) */
+
+/* 1. PERISAI ATAP (Mencegah Kartu Tembus Pandang) */
+.header, #sticky-roof-group, #search-area-box { background: #050505 !important; z-index: 100 !important; }
+
+/* 2. FITUR PEEK OVERLAY & MARGIN COLOR */
+.peek-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; border-radius: 12px; }
+.card.peek-active .peek-overlay { opacity: 1; pointer-events: auto; }
+.card { border-left: 4px solid var(--border-color); } 
+.card.margin-high { border-left-color: #4dff4d; }
+.card.margin-mid { border-left-color: #FFD700; }
+.card.margin-low { border-left-color: #ff3b30; }
+
+/* 3. SPLIT-SCREEN LANDSCAPE (Rasio 50:50 & Arsitektur Scroll Enterprise) */
+@media (orientation: landscape) and (min-width: 600px) {
+    html, body { height: 100% !important; overflow: hidden !important; }
+    
+    /* [QA LEAD FIX] Ubah 100vh menjadi 100% absolut agar layar bawah tidak tertelan Navigasi OS Android */
+    body.mode-kasir { display: flex !important; flex-direction: row !important; width: 100vw !important; height: 100% !important; overflow: hidden !important; }
+    body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; }
+    
+    /* Panel Keranjang (Kiri 50vw - Terkunci Permanen & Anti-Collapse) */
+    body.mode-kasir #sticky-roof-group { position: relative !important; width: 50vw !important; height: 100% !important; flex: none !important; border-right: 1px solid var(--border-color) !important; background: #050505 !important; z-index: 900 !important; display: flex !important; flex-direction: column !important; transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important; }
+    
+    /* [SURGICAL FIX] Full Screen Cart Overwrite untuk Landscape (Anti-Freeze) */
+    body.mode-kasir.cart-expanded #sticky-roof-group { width: 100vw !important; border-right: none !important; }
+    body.mode-kasir #cart-panel-container,
+    body.mode-kasir.search-focus #cart-panel-container { flex: 1 1 auto !important; display: flex !important; flex-direction: column !important; max-height: 100% !important; height: 100% !important; overflow: hidden !important; border-bottom: none !important; }
+    
+    /* [SURGICAL FIX] Mepet Layar Absolut & Anti-Cutoff OS: Gunakan padding 50px untuk menyamai daftar kanan */
+    body.mode-kasir #cp-list,
+    body.mode-kasir.search-focus #cp-list { flex: 1 1 auto !important; overflow-y: auto !important; padding-bottom: 50px !important; pointer-events: auto !important; opacity: 1 !important; -webkit-mask-image: none !important; mask-image: none !important; }
+    
+    /* Panel Kanan Wrapper (Daftar Barang Bawah) */
+    body.mode-kasir #list { position: relative !important; width: 50vw !important; height: 100% !important; flex: 0 0 50vw !important; margin-left: 0 !important; padding: 0 12px !important; padding-top: 64px !important; overflow-y: auto !important; box-sizing: border-box !important; }
+    body.mode-kasir .render-container { position: relative !important; top: 0 !important; left: 0 !important; }
+    
+    /* Panel Pencarian (Kanan 50vw Atas - Pinned - Tanpa Garis Bawah) */
+    body.mode-kasir #search-area-box { position: fixed !important; left: 50vw !important; width: 50vw !important; top: 0 !important; background: #050505 !important; padding: 8px 14px !important; box-sizing: border-box !important; z-index: 950 !important; border-bottom: none !important; display: flex !important; height: 60px !important; }
+
+    /* [SURGICAL FIX] Pusatkan Teks "Belum ada data" & Notifikasi Hapus murni di tengah Panel Kanan (75vw) */
+    body.mode-kasir .empty-msg,
+    body.mode-kasir .ghost-toast { left: 75% !important; }
+
+    /* Pemampatan Kartu POS Enterprise */
+    body.mode-kasir .card { padding: 8px 10px !important; padding-right: 48px !important; min-height: auto !important; border-radius: 6px !important; margin-bottom: 6px !important; }
+    body.mode-kasir .card .name { font-size: 13px !important; margin-bottom: 3px !important; }
+    body.mode-kasir .card .card-price-ecer { font-size: 12px !important; color: #FFD700 !important; }
+    body.mode-kasir .card .card-barcode { font-size: 10px !important; }
+    body.mode-kasir .btn-add-cart { width: 34px !important; height: 34px !important; border-radius: 8px !important; font-size: 20px !important; }
+}
+
+/* 3.5. KOMPRESI FORMULIR PRINT (Khusus Landscape + Keyboard Aktif) */
+@media (orientation: landscape) and (max-height: 500px) {
+    #custom-alert { align-items: flex-start !important; padding-top: 10px !important; }
+    #custom-alert > div { max-height: 85vh !important; overflow-y: auto !important; padding: 12px !important; border-radius: 8px !important; }
+    #custom-alert div[style*="font-size: 24px"] { font-size: 18px !important; margin-bottom: 4px !important; }
+    #custom-alert div[style*="font-size: 10px"] { margin-bottom: 0 !important; }
+    #input-bayar-struk { padding: 6px !important; font-size: 14px !important; margin-bottom: 5px !important; }
+    .smart-cash-row { margin-bottom: 5px !important; gap: 4px !important; }
+    .smart-cash-chip { padding: 4px 0 !important; font-size: 10px !important; border-radius: 4px !important; }
+    #custom-alert div[style*="padding: 8px 12px"] { padding: 6px 10px !important; }
+    .slide-to-pay-container { height: 36px !important; margin-top: 5px !important; }
+}
+
+/* 4. FITUR UI ENTERPRISE LAINNYA */
+.scanner-laser.locked { background: #3CB371; box-shadow: 0 0 15px 2px #3CB371; animation: none; top: 50%; height: 4px; border-radius: 2px; }
+.scanner-box.locked { border-color: #3CB371; }
+.ghost-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; border: 1px solid var(--border-color); color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 15px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+.ghost-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.ghost-toast button { background: var(--danger); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; outline: none; }
+.flying-badge { position: fixed; z-index: 9999; pointer-events: none; width: 26px; height: 26px; background: var(--mono-main); color: #000; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 900; box-shadow: 0 4px 15px rgba(255,255,255,0.6); transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.45s cubic-bezier(0.4, -0.5, 0.8, 0.4), transform 0.45s ease-in, opacity 0.45s ease-in; }
+.btn-ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.6); top: 50%; left: 50%; width: 20px; height: 20px; margin-top: -10px; margin-left: -10px; pointer-events: none; transform: scale(0); animation: ripple-anim 0.4s linear; }
+@keyframes ripple-anim { to { transform: scale(4.5); opacity: 0; } }
+.smart-cash-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.smart-cash-chip { flex: 1; background: #222; border: 1px solid var(--border-color); color: var(--mono-main); font-size: 11px; font-weight: 800; padding: 6px 0; border-radius: 6px; cursor: pointer; text-align: center; }
+.smart-cash-chip:active { background: var(--mono-main); color: #000; transform: scale(0.95); }
+
+/* =========================================================
+   [ELITE QA] BUKU PANDUAN UI/UX (ISOLATED NAMESPACE)
+   ========================================================= */
+
+/* Tombol Menu About */
+.qa-guide-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 16px;
+    margin-top: 15px;
+    background: rgba(135, 206, 250, 0.1);
+    border: 1px solid #87CEFA;
+    border-radius: 12px;
+    color: #87CEFA;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.qa-guide-btn:active { transform: scale(0.97); background: rgba(135, 206, 250, 0.2); }
+
+/* Overlay Layar Penuh */
+.qa-guide-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #000;
+    z-index: 9999;
+    transform: translateY(100%); /* Sembunyi di bawah */
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+}
+.qa-guide-overlay.active { transform: translateY(0); }
+
+/* Header Sticky */
+.qa-guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(17, 17, 17, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.qa-guide-header h2 { margin: 0; font-family: 'Audiowide', sans-serif; color: #FFF; font-size: 18px; }
+.qa-guide-close { background: none; border: none; color: #FF4C4C; font-size: 28px; cursor: pointer; font-weight: bold; }
+
+/* Quick Jump Chips */
+.qa-guide-chips {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px 20px;
+    background: #111;
+    border-bottom: 1px solid #222;
+    gap: 10px;
+    white-space: nowrap;
+}
+.qa-guide-chips::-webkit-scrollbar { display: none; }
+.qa-guide-chip {
+    background: #222; border: 1px solid #444; color: #E0E0E0;
+    padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+}
+.qa-guide-chip:active { background: #87CEFA; color: #000; }
+
+/* Area Membaca */
+.qa-guide-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #080808;
+    color: #E0E0E0;
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
+    font-size: 13px;
+    padding-bottom: 100px;
+}
+.qa-guide-card {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.qa-guide-card h3 {
+    color: #FFD700;
+    border-bottom: 1px dashed #444;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.qa-guide-card ol, .qa-guide-card ul {
+    padding-left: 20px;
+    margin: 0;
+}
+.qa-guide-card li {
+    margin-bottom: 10px;
+}
+.qa-guide-card li::marker {
+    color: #87CEFA;
+    font-weight: 800;
+}
+.qa-guide-card strong {
+    color: #FFF;
+}
+
+/* Tabel Simulasi Dark Mode */
+.qa-tier-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+.qa-tier-table th { background: #222; color: #FFF; padding: 10px; text-align: left; border: 1px solid #444; }
+.qa-tier-table td { padding: 10px; border: 1px solid #444; vertical-align: top; }
+.qa-tier-table tr:nth-child(even) { background: #1a1a1a; }
+.qa-tier-table tr:nth-child(odd) { background: #151515; }
+
+/* Teks Neon */
+.qa-text-blue { color: #87CEFA; font-weight: bold; }
+.qa-text-gold { color: #FFD700; font-weight: bold; }
+.qa-text-green { color: #32CD32; font-weight: bold; }
+
+/* Info Card */
+.qa-info-card {
+    background: rgba(135, 206, 250, 0.05);
+    border-left: 4px solid #87CEFA;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 4px;
+}
+
+</style>
 </head>
 <body>
     <div class="header" id="header-bar">
@@ -250,10 +470,10 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 
         <div class="search-area" id="search-area-box">
             <div class="search-row-1">
-                <div class="search-box">
+                                  <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" id="q" placeholder="search..." autocomplete="off">
-                    
+
                     <button id="mic-btn" class="mic-btn" onclick="startVoiceSearch()">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
                     </button>
@@ -286,14 +506,17 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     
     <div class="scroll-letter" id="scroll-letter">A</div>
 
-    <button class="fab" onclick="showMod()">
+            <button class="fab" onclick="showMod()">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
 
-    <div id="mod" class="modal">
-        <div class="modal-box" id="mod-box">
+        <div id="mod" class="modal">
+        <div class="modal-box" id="mod-box" style="position: relative;">
+                     <button type="button" id="mod-fav-btn" onclick="const b=this, s=b.querySelector('svg'); if(b.dataset.fav==='true'){b.dataset.fav='false'; b.style.color='var(--text-muted)'; s.setAttribute('fill','none');}else{b.dataset.fav='true'; b.style.color='var(--danger)'; s.setAttribute('fill','currentColor');} b.style.transform='scale(1.2)'; setTimeout(()=>b.style.transform='scale(1)', 150);" data-fav="false" style="position: absolute; top: 22px; right: 22px; background: transparent; border: none; cursor: pointer; color: var(--text-muted); outline: none; transition: transform 0.2s ease, color 0.2s;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
             <h3 id="m-tit" class="audiowide-regular" style="color:var(--mono-main); margin-top:0; margin-bottom:12px; font-size:16px;">Tambah Barang</h3>
-            
+
             <label>Nama Barang</label>
                         <input type="text" id="i-n" autocomplete="off" style="text-transform: capitalize;" onfocus="if(!activeId && this.value==='') document.getElementById('i-t').dataset.manual='0';" oninput="if(!activeId && document.getElementById('i-t').dataset.manual !== '1') document.getElementById('i-t').value = generateSmartAcronym(this.value, null);">
 
@@ -384,9 +607,17 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u2').value=''; toggleIsiGrosir();">Kosong</div>
             </div>
 
-            <div id="wrap-iq" style="display:none; animation: popInBouncy 0.2s ease;">
+                        <div id="wrap-iq" style="display:none; animation: popInBouncy 0.2s ease;">
                 <label id="label-iq" style="color:#FFA500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Isi /...</label>
                 <input type="tel" id="i-iq" pattern="[0-9]*" placeholder="0" oninput="let mg = parseInt(String(document.getElementById('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0; if(mg > 0) { autoCalcHPP(); } else { syncModalGrosir(); }" style="border-color:#FFA500; background:rgba(255,165,0,0.05); color:#FFA500; font-weight:800;">
+            </div>
+
+            <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="color: #FFD700; margin: 0;">Multi-Tier (Opsional)</label>
+                    <button type="button" onclick="addTierRow()" style="background: transparent; border: 1px solid #FFD700; color: #FFD700; border-radius: 4px; font-size: 9px; padding: 4px 8px; font-weight: bold; cursor: pointer;">+ TAMBAH</button>
+                </div>
+                <div id="tier-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
 
             <div class="modal-btns">
@@ -612,9 +843,144 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px 6px; text-align: center; font-family: monospace; font-size: 9px; color: var(--mono-main); margin-bottom: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 [Sistem Status: Optimal | Local Storage: Aktif]
             </div>
+            <button id="qaBtnOpenGuide" class="qa-guide-btn">
+                <span>📖 PANDUAN APLIKASI POS</span>
+                <span>❯</span>
+            </button>
 
-            <div class="modal-btns">
+                        <div class="modal-btns">
                 <button class="btn-main" style="border: 1px solid var(--border-color)!important; color: var(--text-light)!important; background:transparent!important;" onclick="closeAboutModal()">TUTUP</button>
+            </div>
+        </div>
+    </div>
+            
+      <div id="qaGuideOverlay" class="qa-guide-overlay">
+    <div class="qa-guide-header">
+        <h2>📖 BUKU PANDUAN KASIR</h2>
+        <button id="qaBtnCloseGuide" class="qa-guide-close">&times;</button>
+    </div>
+    
+    <div class="qa-guide-chips">
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-add').scrollIntoView({behavior: 'smooth'})">+ Tambah Barang</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-peek').scrollIntoView({behavior: 'smooth'})">Intip Modal HPP</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-del').scrollIntoView({behavior: 'smooth'})">Hapus & Undo</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-pos').scrollIntoView({behavior: 'smooth'})">Transaksi Kasir</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-pay').scrollIntoView({behavior: 'smooth'})">Bayar & Cetak</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('tut-search').scrollIntoView({behavior: 'smooth'})">Cari Pintar</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('sect-tier').scrollIntoView({behavior: 'smooth'})">Harga Multi-Tier</button>
+    </div>
+
+    <div class="qa-guide-body">
+        
+        <div class="qa-guide-card">
+            <h3 id="tut-add">1. Tambah Barang Baru</h3>
+            <ol>
+                <li>Ketuk ikon <strong>(+)</strong> di sudut kanan bawah.</li>
+                <li>Isi <strong>Nama Barang</strong>. Sistem akan otomatis membuat Akronim/Kode Cepat.</li>
+                <li>Ketuk <strong>ikon Kamera</strong> pada kolom Barcode, lalu scan barcode produk.</li>
+                <li>Isi <strong>Harga Modal (HPP)</strong> dan <strong>Harga Jual</strong>. Anda juga bisa sekadar mengetik persentase di kolom <strong>Margin %</strong>.</li>
+                <li>Pilih satuan (Pcs/Box), lalu ketuk <strong>SIMPAN</strong>.</li>
+            </ol>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3 id="tut-peek">2. Fitur Intip Modal (HPP)</h3>
+            <p style="font-size:11px; color:#aaa; margin-top:-5px; margin-bottom:12px;">Modal disembunyikan agar aman dari pantauan pembeli.</p>
+            <ol>
+                <li>Temukan barang di daftar utama.</li>
+                <li><strong>Tekan & Tahan (Press & Hold)</strong> jari Anda pada kartu barang tersebut.</li>
+                <li>Kartu akan berubah gelap dan menampilkan <strong>Modal HPP & Profit Margin</strong>.</li>
+                <li>Lepaskan jari Anda untuk mengembalikan tampilan ke normal.</li>
+            </ol>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3 id="tut-del">3. Hapus Barang & Undo</h3>
+            <ol>
+                <li><strong>Geser ke kiri (Swipe Left)</strong> pada kartu barang secara cepat.</li>
+                <li>Barang akan terhapus dan muncul notifikasi hitam di bawah layar.</li>
+                <li>Ketuk <strong>UNDO</strong> pada notifikasi (dalam 4 detik) jika Anda tidak sengaja menghapusnya.</li>
+            </ol>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3 id="tut-pos">4. Transaksi & Keranjang</h3>
+            <ol>
+                <li>Ketuk tombol <strong>[+]</strong> pada ujung kanan kartu barang untuk memasukkan ke keranjang.</li>
+                <li>Buka keranjang dengan mengetuk <strong>Ikon Keranjang</strong> di menu atas/bawah.</li>
+                <li><strong>Ubah Qty:</strong> Ketuk langsung angka jumlah barang di dalam keranjang.</li>
+                <li><strong>Diskon Khusus:</strong> Ketuk nominal harga barang di keranjang untuk mengedit harga (potong harga kustom).</li>
+            </ol>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3 id="tut-pay">5. Pembayaran & Cetak</h3>
+            <ol>
+                <li>Di layar keranjang, ketuk <strong>Ikon Printer</strong> di pojok kanan atas.</li>
+                <li>Gunakan <strong>Smart Cash Chips</strong> (tombol tebakan AI di bawah nominal) untuk mengisi uang bayar secara instan tanpa mengetik manual!</li>
+                <li>Ketuk <strong>PRINT</strong> (untuk printer Thermal biasa) atau <strong>BLUETOOTH</strong> (jika menggunakan printer mesin ESC/POS khusus).</li>
+            </ol>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3 id="tut-search">6. Fitur Cari Pintar & Suara</h3>
+            <ul>
+                <li><strong>Pencarian Akronim:</strong> Ketik <code>mng</code>, otomatis muncul <em>Minyak Goreng</em>.</li>
+                <li><strong>Pengecualian (-):</strong> Ketik <code>Rokok -Garam</code> untuk menyembunyikan merek Garam.</li>
+                <li><strong>Filter Harga:</strong> Ketik <code>Susu <= 15000</code> untuk mencari susu di bawah 15rb.</li>
+                <li><strong>Pencarian Suara:</strong> Ketuk <strong>Ikon Mikrofon</strong> dan ucapkan: <em>"Tambah dua promag"</em>. Barang langsung masuk keranjang!</li>
+            </ul>
+        </div>
+
+                <div class="qa-guide-card">
+            <h3 id="sect-tier">7. Cara Input Multi-Tier (Grosir Kompleks)</h3>
+            <p style="font-size: 11px; margin-bottom: 12px; color: #ccc;"><strong>Studi Kasus: Obat Promag (4 Level Kemasan)</strong><br>
+            • <strong>Modal (Supplier):</strong> 1 Pack = Rp 91.000 (Isi 4 Dus).<br>
+            • <strong>Rincian Isi:</strong> 1 Dus = 3 Strip. 1 Strip = 10 Butir.<br>
+            • <strong>Target Jual:</strong> Eceran <strong>Rp 1.000</strong>/btr. Beli 5 btr <strong>Rp 4.500</strong>. Beli 1 Strip (10 btr) <strong>Rp 8.500</strong>. Beli 1 Dus (30 btr) <strong>Rp 24.500</strong>.</p>
+            
+            <div style="background:#0a0a0a; padding:12px 12px 15px 12px; border-radius:8px; font-size:12px; margin-bottom:15px; border:1px solid #333; line-height: 1.7;">
+                <strong style="color: #87CEFA; letter-spacing: 0.5px;">LANGKAH PENGISIAN FORM BARANG:</strong>
+                <ol style="padding-left: 18px; margin-top: 8px; margin-bottom: 0;">
+                    <li><strong>HPP Grosir (Modal Terbesar):</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">91000</code>.</li>
+                    <li><strong>Satuan Grosir:</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">Pack</code>. Muncul kotak baru <strong>Isi /...</strong>, Anda harus menghitung total butir dalam 1 Pack (4 Dus × 3 Strip × 10 Butir). Ketik angkanya: <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">120</code>.<br><em style="font-size: 10px; color: #888;">(Sistem AI akan otomatis mengetahui bahwa Modal Asli Anda adalah Rp 758 /butir).</em></li>
+                    <li><strong>Harga Satuan:</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">1000</code> dan kotak Satuan isi <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">Butir</code>.</li>
+                    <li><strong>Harga Grosir:</strong> <strong>KOSONGKAN!</strong> <br><em style="font-size: 10px; color: #ff3b30;">(PENTING: Karena barang ini punya 3 level grosir yang berbeda, biarkan Harga Grosir utama kosong. Kita atur semuanya di Multi-Tier).</em></li>
+                    <li>Gulir ke bawah ke bagian <strong>Multi-Tier</strong>, ketuk tombol <strong style="color:#FFD700; border:1px solid #FFD700; padding:2px 6px; border-radius:4px; font-size:10px;">+ TAMBAH</strong> sebanyak 3 kali untuk memunculkan 3 baris.</li>
+                    <li><strong>Baris 1 (Promo 5 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">5</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">900</code> <em>(Dari Rp 4.500 dibagi 5)</em>.</li>
+                    <li><strong>Baris 2 (Level 1 Strip / 10 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">10</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">850</code> <em>(Dari Rp 8.500 dibagi 10)</em>.</li>
+                    <li><strong>Baris 3 (Level 1 Dus / 30 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">30</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">816.67</code> <em>(Dari Rp 24.500 dibagi 30)</em>.</li>
+                    <li>Ketuk <strong>SIMPAN</strong>. Selesai!</li>
+                </ol>
+            </div>
+
+            <p style="font-size: 11px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; color: #888;">Simulasi Otomatis Saat Kasir Transaksi:</p>
+            <table class="qa-tier-table">
+                <tr>
+                    <th>Kasir Ketik Qty</th>
+                    <th>Deteksi AI Harga Oleh Sistem</th>
+                </tr>
+                <tr>
+                    <td><strong>3 Btr</strong></td>
+                    <td>Gagal diskon. Kena harga Ecer Rp 1.000 <br><strong>(Total Rp 3.000)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>6 Btr</strong></td>
+                    <td class="qa-text-blue">Lolos Tier-1 (≥ 5). Harga disunat jadi Rp 900 <br><strong>(Total Rp 5.400)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>12 Btr</strong><br><small>(1 Strip + 2 Btr)</small></td>
+                    <td class="qa-text-gold">Lolos Tier-2 (≥ 10). Harga disunat jadi Rp 850 <br><strong>(Total Rp 10.200)</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>35 Btr</strong><br><small>(1 Dus + 5 Btr)</small></td>
+                    <td class="qa-text-green">Lolos Tier-3 (≥ 30). Harga disunat jadi Rp 816.67 <br><strong>(Total Rp 28.583)</strong></td>
+                </tr>
+            </table>
+
+            <div class="qa-info-card" style="margin-top: 15px;">
+                <strong>💡 KUNCI EFISIENSI ENTERPRISE:</strong><br>
+                Dengan mengosongkan <strong>Harga Grosir</strong> dan murni menggunakan <strong>Multi-Tier</strong>, satu kode barang (Barcode Promag) bisa memuat puluhan harga berbeda secara dinamis. Kasir hanya perlu men-scan 1 kali, ketik total Qty (misal: 35), dan mesin akan mencarikan potongan harga paling murah secara otomatis!
             </div>
         </div>
     </div>
@@ -622,7 +988,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
                         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", 
             "Peringatan": "var(--warning)", "Info": "var(--mono-main)" 
@@ -766,6 +1132,23 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             updateGrandTotal();
         }
 
+        // --- INJEKSI MULTI-TIER ENGINE ---
+        function getCalculatedSubtotal(item, q) {
+            let iq = Math.max(1, item.iq || 1);
+            if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
+                let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
+                let appliedPrice = item.p1 || 0;
+                for (let i = 0; i < sortedTiers.length; i++) {
+                    if (q >= sortedTiers[i].q) { appliedPrice = sortedTiers[i].p; break; }
+                }
+                return Math.round(q * appliedPrice);
+            }
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
+                return Math.round((q * item.p2) / iq);
+            }
+            return Math.round(q * (item.p1 || 0));
+        }
+
         function validatePriceBlur(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val) || el.value === '') {
@@ -774,21 +1157,14 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 updateRowVisuals(id);
                 updateGrandTotal();
             } else {
-                // Perisai State: Jangan lock Manual Price jika harganya SAMA dengan kalkulasi Auto!
                 let item = db.find(x => String(x.id) === id);
                 let q = cartState[id].q || 1;
-                let iq = Math.max(1, item.iq || 1);
-                let defaultSub = 0;
-                if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                    defaultSub = Math.round((q * item.p2) / iq);
-                } else {
-                    defaultSub = Math.round(q * item.p1);
-                }
+                let defaultSub = item ? getCalculatedSubtotal(item, q) : 0;
                 
                 if (val === defaultSub) {
-                    delete cartState[id].manualPrice; // Buka kunci (kembalikan ke Auto)
+                    delete cartState[id].manualPrice;
                 } else {
-                    cartState[id].manualPrice = val;  // Kunci sebagai Manual Valid
+                    cartState[id].manualPrice = val; 
                 }
                 saveCartMem();
                 el.value = fmt(val);
@@ -800,16 +1176,9 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             const item = db.find(x => String(x.id) === id);
             if(!item) return;
             
-            const q = cartState[id].q || 1;
+                        const q = cartState[id].q || 1;
             const iq = Math.max(1, item.iq || 1);
-            let subTotal = 0;
-            
-                       // [SURGICAL FIX] Harga Grosir Proporsional (q >= iq/2) dengan Perisai Minimum Beli (q > 1)
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                subTotal = Math.round((q * item.p2) / iq);
-            } else {
-                subTotal = Math.round(q * item.p1);
-            }
+            let subTotal = getCalculatedSubtotal(item, q);
             
             let priceInput = document.getElementById('price-input-' + id);
             if(priceInput) priceInput.value = fmt(subTotal);
@@ -831,15 +1200,10 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 const q = cartState[k].q || 1;
                 const iq = Math.max(1, item.iq || 1);
                 
-                if (cartState[k].manualPrice !== undefined) {
+                                if (cartState[k].manualPrice !== undefined) {
                     grandTotal += cartState[k].manualPrice;
                 } else {
-                                        // [SURGICAL FIX] Harga Grosir Proporsional di Kalkulasi Grand Total
-                    if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                        grandTotal += Math.round((q * item.p2) / iq);
-                    } else {
-                        grandTotal += Math.round(q * item.p1);
-                    }
+                    grandTotal += getCalculatedSubtotal(item, q);
                 }
             });
 
@@ -872,15 +1236,10 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                     const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0;
                     
-                    if (cartState[id].manualPrice !== undefined) {
+                                        if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
-                        // [SURGICAL FIX] Harga Grosir Proporsional di Visual UI Cart
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                            subTotal = Math.round((q * item.p2) / iq);
-                        } else {
-                            subTotal = Math.round(q * item.p1);
-                        }
+                        subTotal = getCalculatedSubtotal(item, q);
                     }
                     
                     grandTotal += subTotal;
@@ -936,11 +1295,14 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                         function modifyCartItem(id, qty) {
             if (!cartState[id]) {
                 if (qty > 0) cartState[id] = { q: qty };
-            } else {
-                cartState[id].q = parseFloat((cartState[id].q + qty).toFixed(4));
-                delete cartState[id].manualPrice; 
-                if (cartState[id].q <= 0) delete cartState[id];
-            }
+                            } else {
+                    let oldQ = cartState[id].q;
+                    cartState[id].q = parseFloat((oldQ + qty).toFixed(4));
+                    if (cartState[id].manualPrice !== undefined && oldQ > 0) {
+                        cartState[id].manualPrice = Math.round((cartState[id].manualPrice / oldQ) * cartState[id].q);
+                    }
+                    if (cartState[id].q <= 0) delete cartState[id];
+                }
 
             if (Object.keys(cartState).length === 0) clearEditMode();
             saveCartMem();
@@ -1023,10 +1385,14 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             const loadToCart = (hData) => {
                 if (!Array.isArray(hData.items)) return tampilkanToast("Format lama tidak bisa diedit!", "var(--danger)");
                 
-                // [SURGICAL FIX] Blokir injeksi SYS-TRUNC agar tidak merusak database keranjang
-                if (hData.items.some(x => x.id === "SYS-TRUNC")) return showAlert("Struk ini terlalu besar dan telah diarsipkan oleh sistem. Tidak dapat diedit ulang.", "Ditolak", "var(--danger)");
-                
-                cartState = {};
+                                    // [SURGICAL FIX] Blokir injeksi SYS-TRUNC agar tidak merusak database keranjang
+                    if (hData.items.some(x => x.id === "SYS-TRUNC")) return showAlert("Struk ini terlalu besar dan telah diarsipkan oleh sistem. Tidak dapat diedit ulang.", "Ditolak", "var(--danger)");
+                    
+                    if (Object.keys(cartState).length > 0 && activeEditTrxId !== hData.id) {
+                        return showAlert("Mohon KOSONGKAN atau selesaikan Keranjang Belanja saat ini sebelum mengedit struk lama!", "Keranjang Terisi", "var(--warning)");
+                    }
+                    
+                    cartState = {};
                 hData.items.forEach(it => {
                     cartState[it.id] = { q: it.q };
                     
@@ -1044,14 +1410,8 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                         db.push(dbItem);
                     }
 
-                    if (dbItem) {
-                        let iq = Math.max(1, dbItem.iq || 1);
-                        let defaultSub = 0;
-                        if (dbItem.p1 > 0 && dbItem.p2 > 0 && iq > 1 && it.q >= (iq / 2) && it.q > 1) {
-    defaultSub = Math.round((it.q * dbItem.p2) / iq);
-} else {
-                            defaultSub = Math.round(it.q * dbItem.p1);
-                        }
+                                        if (dbItem) {
+                        let defaultSub = getCalculatedSubtotal(dbItem, it.q);
                         // Jika subtotal lama berbeda dengan harga default, kembalikan status manualPrice
                         if (it.sub !== defaultSub) {
                             cartState[it.id].manualPrice = it.sub;
@@ -1150,6 +1510,7 @@ saveCartMem();
         }
         
         let touchStartY = 0; 
+        let peekTimer = null; 
         function handleMainTouchStart(e) {
             if (e.touches.length > 1) return;
             const card = e.target.closest('.card') || e.target.closest('.cp-item-front');
@@ -1159,6 +1520,34 @@ saveCartMem();
             touchStartY = e.touches[0].clientY;
             touchCurrentX = touchStartX;
             card.style.transition = 'none';
+
+            // FITUR 1: Hold-to-Peek Trigger (Dengan Spatial UX Jempol)
+            if (!isCartMode && tab === 'all') {
+                peekTimer = setTimeout(() => {
+                    
+                    // --- INJEKSI SPATIAL UX (Deteksi Zona Sentuhan) ---
+                    const peekOverlay = card.querySelector('.peek-overlay');
+                    if (peekOverlay) {
+                        const halfScreen = window.innerWidth / 2;
+                        if (touchStartX < halfScreen) {
+                            // Jempol Kiri (Menekan Area < 50%) -> Teks dilempar ke Kanan
+                            peekOverlay.style.alignItems = 'flex-end';
+                            peekOverlay.style.paddingRight = '25px';
+                            peekOverlay.style.paddingLeft = '0';
+                            peekOverlay.style.textAlign = 'right';
+                        } else {
+                            // Jempol Kanan (Menekan Area > 50%) -> Teks dilempar ke Kiri
+                            peekOverlay.style.alignItems = 'flex-start';
+                            peekOverlay.style.paddingLeft = '25px';
+                            peekOverlay.style.paddingRight = '0';
+                            peekOverlay.style.textAlign = 'left';
+                        }
+                    }
+                    
+                    card.classList.add('peek-active');
+                    if (navigator.vibrate) navigator.vibrate(30);
+                }, 400);
+            }
         }
 
         function handleMainTouchMove(e, card) {
@@ -1168,6 +1557,12 @@ saveCartMem();
             const diffX = touchStartX - touchCurrentX;
             const diffY = Math.abs(touchStartY - touchCurrentY);
             
+            // Batalkan Peek jika bergerak
+            if (peekTimer && (Math.abs(diffX) > 10 || diffY > 10)) {
+                clearTimeout(peekTimer); peekTimer = null;
+                card.classList.remove('peek-active');
+            }
+
             if (diffY > diffX && diffY > 10) return;
             if (diffX > 30 && diffX < 90) {
                 isMainSwiping = true; 
@@ -1176,6 +1571,8 @@ saveCartMem();
         }
 
             function handleMainTouchEnd(e, card) {
+            if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
+            card.classList.remove('peek-active');
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
 const diffX = touchStartX - touchCurrentX;
 const diffY = Math.abs(touchStartY - e.changedTouches[0].clientY);
@@ -1527,7 +1924,8 @@ document.addEventListener('focus', function(e) {
             if (terms.length === 0) return escapeHTML(str);
             const regexStr = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
             const regex = new RegExp(`(${regexStr})`, 'gi');
-            return str.replace(regex, "\u200B$1\u200B").split("\u200B")
+                        const DELIM = "\uE000"; // Karakter Private Use Area Unicode (Mustahil diketik manusia)
+            return str.replace(regex, DELIM + "$1" + DELIM).split(DELIM)
                       .map((p, i) => i % 2 === 1 ? `<span class="highlight">${escapeHTML(p)}</span>` : escapeHTML(p))
                       .join('');
         }
@@ -1739,26 +2137,27 @@ document.addEventListener('focus', function(e) {
         };
 
         worker.onmessage = function(e) { 
-            if (e.data.type === 'result' && e.data.reqId === currentSearchReqId) { 
-                workerResult = e.data.data; 
-                
+            if (e.data.type === 'result') { 
                 if (pendingAutoAdds.has(e.data.reqId)) {
                     let injectedQ = pendingAutoAdds.get(e.data.reqId);
                     pendingAutoAdds.delete(e.data.reqId);
-                    if (workerResult.length > 0) {
-                        const topItem = workerResult[0];
+                    if (e.data.data.length > 0) {
+                        const topItem = e.data.data[0];
                         let addQty = injectedQ;
-                        if (String(topItem.b2).toLowerCase() === currentCleanQuery && topItem.iq > 1) {
-                            addQty = topItem.iq * currentInjectedQty;
+                        if (String(topItem.b2).toLowerCase() === e.data.query.toLowerCase() && topItem.iq > 1) {
+                            addQty = topItem.iq * injectedQ;
                         }
                         modifyCartItem(topItem.id, addQty);
                         tampilkanToast(`+${addQty} ${topItem.n}`, "var(--mono-main)");
-                        clearSearch(); 
-                        return; 
+                        if (e.data.reqId === currentSearchReqId) clearSearch();
                     } else {
                         tampilkanToast("Barang tidak ditemukan!", "var(--warning)");
                     }
+                    return; 
                 }
+
+                if (e.data.reqId === currentSearchReqId) {
+                    workerResult = e.data.data;
 
                 window.scrollTo({ top: 0, behavior: 'instant' }); 
                 if(workerResult.length === 0 && e.data.query.trim() !== '') {
@@ -1771,8 +2170,37 @@ document.addEventListener('focus', function(e) {
                     } catch(err) {}
                 }
                 applyFiltersAndRender(); 
-            } 
+            }
+        } // [SURGICAL FIX] INJEKSI PENUTUP IF UTAMA YANG HILANG
         };
+
+                // --- INJEKSI KASIR TANPA SENTUH 2.0 (NLP VOICE ENGINE) ---
+        function indoPhoneticMain(str) {
+            if(!str) return "";
+            return str.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/gh/g, 'g').replace(/sh/g, 's')
+                .replace(/([a-z])\1+/g, '$1').replace(/[fvw]/g, 'p').replace(/[z]/g, 'j').replace(/[cq]/g, 'k').replace(/[aeiouy]/g, '');
+        }
+        
+        function levenshteinMain(a, b, limit = 99) {
+            if(Math.abs(a.length - b.length) > limit) return 99;
+            if(a.length === 0) return b.length; if(b.length === 0) return a.length;
+            let d = []; for(let i=0; i<=b.length; i++){ d[i] = [i]; } for(let j=0; j<=a.length; j++){ d[0][j] = j; }
+            for(let i=1; i<=b.length; i++){
+                for(let j=1; j<=a.length; j++){
+                    let cost = (b.charAt(i-1) === a.charAt(j-1)) ? 0 : 1;
+                    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
+                    if(i > 1 && j > 1 && b.charAt(i-1) === a.charAt(j-2) && b.charAt(i-2) === a.charAt(j-1)) d[i][j] = Math.min(d[i][j], d[i-2][j-2] + cost);
+                }
+            } return d[b.length][a.length];
+        }
+
+                function processNLPVoice(transcript) {
+            // [ELITE QA FIX] Reroute transkrip suara langsung ke Web Worker O(1) di Background Thread!
+            $('q').value = transcript; 
+            $('q-x').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            handleSearchLogic(transcript);
+        }
 
         let voiceRecognition = null;
         function startVoiceSearch() {
@@ -1792,10 +2220,7 @@ document.addEventListener('focus', function(e) {
                 };
                 voiceRecognition.onresult = function(event) {
                     const speechResult = event.results[0][0].transcript;
-                    $('q').value = speechResult;
-                    $('q-x').style.display = 'flex';
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                    handleSearchLogic(speechResult);
+                    processNLPVoice(speechResult); // Mengalirkan suara ke Mesin NLP
                 };
                 voiceRecognition.onerror = function() {
                     tampilkanToast("Suara tidak terdengar. Coba lagi.", "var(--danger)");
@@ -1957,6 +2382,28 @@ try {
         
         function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
 
+                // --- INJEKSI LOGIKA MULTI-TIER UI ---
+        function addTierRow(qty = '', price = '') {
+            const container = $('tier-container');
+            if(!container) return;
+            const row = document.createElement('div');
+            row.className = 'tier-row';
+            row.style.cssText = 'display: flex; gap: 8px; align-items: center; animation: popInBouncy 0.2s ease-out;';
+            row.innerHTML = `
+                <div style="flex: 1;">
+                    <input type="number" class="tier-q" placeholder="Qty" value="${qty}" style="margin:0; padding:8px; font-size:12px; background:#111; color:#FFD700; border-color:#FFD700;">
+                </div>
+                <div style="flex: 2;">
+                    <input type="tel" class="tier-p" placeholder="Harga/Pcs" value="${price ? fmt(price) : ''}" oninput="formatRp(this);" style="margin:0; padding:8px; font-size:12px; background:#111;">
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); border-radius:4px; height:32px; width:32px; display:flex; justify-content:center; align-items:center; cursor:pointer; outline:none; padding:0; transition: transform 0.2s;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+        function clearTiers() { const c = $('tier-container'); if(c) c.innerHTML = ''; }
+
         // [SURGICAL FIX] Logika Two-Way Margin (Eceran & Grosir)
         function updateWarnaMargin(el, margin) {
             if (margin < 10) { el.style.color = "var(--danger)"; el.style.borderColor = "var(--danger)"; } 
@@ -2017,26 +2464,27 @@ try {
             if (hpp > 0 && iq > 1) {
                 $('i-hpp-grosir').value = fmt(hpp * iq);
                 calcMargin('p2');
-            } else if (hpp > 0 && iq <= 1) {
-                $('i-hpp-grosir').value = "";
-                calcMargin('p2');
-            } else if (hpp === 0) {
-                // Perbaikan: Bersihkan sinkronisasi secara absolut jika master HPP dihapus
+                        } else {
                 $('i-hpp-grosir').value = "";
                 calcMargin('p2');
             }
         }
-        function showMod(id = null) { 
+                function showMod(id = null) { 
             activeId = id; 
             const b = $('i-b'), b2 = $('i-b2'), n = $('i-n'), hpp = $('i-hpp'), hppG = $('i-hpp-grosir'), p1 = $('i-p1'), p2 = $('i-p2'), exp = $('i-exp'), t = $('i-t'), u1 = $('i-u1'), u2 = $('i-u2'), iq = $('i-iq'); 
+            const fBtn = $('mod-fav-btn'), fSvg = fBtn.querySelector('svg');
             $('mod-box').style.borderColor = "var(--border-color)";
+                        clearTiers(); // Reset Multi-Tier
             if (id) {  
                 const it = db.find(x => String(x.id) === String(id)); if(!it) return; 
                 $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(it.hpp) : ''; hppG.value = (it.hpp && it.iq > 1) ? fmt(it.hpp * it.iq) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
+                fBtn.dataset.fav = it.f ? 'true' : 'false'; fBtn.style.color = it.f ? 'var(--danger)' : 'var(--text-muted)'; fSvg.setAttribute('fill', it.f ? 'currentColor' : 'none');
+                if (it.tiers && Array.isArray(it.tiers)) { it.tiers.forEach(tr => addTierRow(tr.q, tr.p)); }
             } else { 
                 $('m-tit').innerText = "Tambah Barang"; b.value = b2.value = n.value = hpp.value = hppG.value = p1.value = p2.value = exp.dataset.rawDate = exp.value = t.value = u1.value = u2.value = iq.value = ''; 
+                fBtn.dataset.fav = 'false'; fBtn.style.color = 'var(--text-muted)'; fSvg.setAttribute('fill', 'none');
             } 
-            
+
             const getSafeChipData = (key, defaults) => {
                 try {
                     let data = JSON.parse(localStorage.getItem(key));
@@ -2086,11 +2534,18 @@ try {
         function setPickerDate() { const el = $(Picker.targetId); if(el) { el.dataset.rawDate = `${Picker.tempYear}-${String(Picker.tempMonth + 1).padStart(2, '0')}-01`; el.value = `${NamaBln[Picker.tempMonth]} ${Picker.tempYear}`; } hidePicker(); }
         function setTab(t) { tab = t; ['all', 'fav', 'exp'].forEach(x => $(`t-${x}`).className = t === x ? 'tab active' : 'tab'); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); }
         
-        function computeDVS() { listOffsets = [0]; let cur = 0; for (let i = 0; i < filteredData.length; i++) { cur += filteredData[i]._cHeight || (tab === 'exp' ? 85 : 75); listOffsets.push(cur); } $('list').style.height = (cur + 150) + 'px'; }
+        function computeDVS() { 
+            listOffsets = [0]; let cur = 0; 
+            for (let i = 0; i < filteredData.length; i++) { cur += filteredData[i]._cHeight || (tab === 'exp' ? 85 : 75); listOffsets.push(cur); } 
+            
+            // [SURGICAL FIX] Potong ruang kosong bawah menjadi 15px (Mepet Layar) khusus saat Mode Kasir Landscape
+            let isLandscapePOS = document.body.classList.contains('mode-kasir') && window.innerWidth >= 600 && window.matchMedia("(orientation: landscape)").matches;
+            $('list').style.height = (cur + (isLandscapePOS ? 15 : 150)) + 'px'; 
+        }
         function getDVSStartIndex(st) { let l = 0, h = listOffsets.length - 1; while (l <= h) { let m = Math.floor((l + h) / 2); if (listOffsets[m] === st) return m; if (listOffsets[m] < st) l = m + 1; else h = m - 1; } return h > 0 ? h : 0; }
         
-                function applyFiltersAndRender() {
-            if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost);
+                        function applyFiltersAndRender() {
+            if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete);
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
             let base = exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active); const today = Date.now();
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
@@ -2105,9 +2560,65 @@ try {
             lastStartIndex = lastEndIndex = -1; computeDVS(); renderVirtualList(false);
         }
 
+        function flyToCart(startX, startY, btnElem) {
+            // 1. Render Efek Ripple (Gelombang Sentuhan) di tombol
+            if (btnElem) {
+                btnElem.style.position = 'relative';
+                btnElem.style.overflow = 'hidden';
+                const ripple = document.createElement('div');
+                ripple.className = 'btn-ripple';
+                btnElem.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 400);
+            }
+
+            // 2. Render Badge Terbang (Koin +1)
+            const dot = document.createElement('div');
+            dot.className = 'flying-badge';
+            dot.innerHTML = '+1';
+            document.body.appendChild(dot);
+            
+            // Logika Pencarian Target: Tembak ke Grand Total jika terlihat, jika tidak ke Tab Cart
+            let targetIcon = document.getElementById('cp-grand-total');
+            if (!targetIcon || targetIcon.offsetWidth === 0) targetIcon = document.getElementById('t-cart');
+            if (!targetIcon) targetIcon = document.querySelector('.cp-title-box');
+            
+            const targetRect = targetIcon.getBoundingClientRect();
+            const endX = targetRect.left + (targetRect.width / 2) - 13; // 13 adalah separuh dari lebar 26px
+            const endY = targetRect.top + (targetRect.height / 2) - 13;
+
+            // Set posisi awal
+            dot.style.left = (startX - 13) + 'px';
+            dot.style.top = (startY - 13) + 'px';
+            
+            void dot.offsetWidth; // Paksa Reflow DOM agar transisi CSS berjalan mulus
+            
+            // Jalankan animasi Parabola dan Rotasi
+            dot.style.left = endX + 'px';
+            dot.style.top = endY + 'px';
+            dot.style.transform = 'scale(0.3) rotate(45deg)';
+            dot.style.opacity = '0.1';
+
+            // 3. Efek Target Berdenyut saat Koin Mendarat
+            setTimeout(() => { 
+                dot.remove(); 
+                targetIcon.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                targetIcon.style.transform = 'scale(1.15)';
+                setTimeout(() => { targetIcon.style.transform = 'scale(1)'; }, 150);
+            }, 450);
+        }
+
         $('render-container').addEventListener('click', (e) => {
             const el = e.target, addBtnCart = el.closest('.calc-add'); 
-            if (addBtnCart && isCartMode) { e.stopPropagation(); modifyCartItem(addBtnCart.dataset.id, 1); return; }
+            if (addBtnCart && isCartMode) { 
+                e.stopPropagation(); 
+                // FITUR 4: Micro-Vibration & Kinetic Feedback Profesional
+                if (navigator.vibrate) navigator.vibrate(30);
+                const rect = addBtnCart.getBoundingClientRect();
+                flyToCart(rect.left + (rect.width / 2), rect.top + (rect.height / 2), addBtnCart);
+                
+                modifyCartItem(addBtnCart.dataset.id, 1); 
+                return; 
+            }
             if (!isCartMode) { const f = el.closest('.action-fav'); if (f) { e.stopPropagation(); return toggleFav(f.dataset.id, f); } const ed = el.closest('.action-edit'); if (ed) { e.stopPropagation(); return showMod(ed.dataset.id); } }
         });
 
@@ -2121,15 +2632,18 @@ try {
 
             if (filteredData.length === 0) { $('list').style.height = '0px'; rend.innerHTML = ''; empty.innerHTML = `<div class="empty-msg">${tab === 'fav' ? "Belum ada favorit" : (tab === 'exp' ? "Tidak ada barang expired" : "Belum ada data")}</div>`; empty.classList.remove('hidden'); return; }
             
-            const now = Date.now();
+                        const now = Date.now();
             if (now - layoutCache.lastUpdate > 2000) {
                 layoutCache.listTop = $('list').offsetTop || 188;
                 layoutCache.offsetBuffer = $('sticky-roof-group').offsetHeight || 135;
                 layoutCache.lastUpdate = now;
             }
             
-            let sy = window.scrollY, st = Math.max(0, sy - (layoutCache.listTop - layoutCache.offsetBuffer)), start = getDVSStartIndex(st), visH = window.innerHeight, end = start, curVisH = 0; start = Math.max(0, start - 15); 
-            
+            let isLandscapePOS = document.body.classList.contains('mode-kasir') && window.innerWidth >= 600 && window.matchMedia("(orientation: landscape)").matches;
+            let sy = isLandscapePOS ? $('list').scrollTop : window.scrollY;
+            let st = isLandscapePOS ? sy : Math.max(0, sy - (layoutCache.listTop - layoutCache.offsetBuffer));
+            let start = getDVSStartIndex(st), visH = isLandscapePOS ? $('list').clientHeight : window.innerHeight, end = start, curVisH = 0; start = Math.max(0, start - 15); 
+        
             while(end < filteredData.length && curVisH < visH + 1200) { curVisH += (filteredData[end]._cHeight || (tab === 'exp' ? 85 : 75)); end++; }
             if (isScrolling && start === lastStartIndex && end === lastEndIndex) return; lastStartIndex = start; lastEndIndex = end;
             rend.style.transform = `translateY(${listOffsets[start]}px)`; let html = ''; const today = Date.now(), sq = $('q').value.trim(); 
@@ -2153,12 +2667,36 @@ try {
                 } else {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
-                        swipeAttributes = `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"`;
-                        trashBgHtml = `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>`;
-                        rightSideUI = `<div class="action-btns-absolute"><button class="card-action-btn action-fav" data-id="${it.id}" style="color:${it.f?'var(--mono-main)':'var(--text-muted)'};"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="${it.f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
+                        swipeAttributes = tab === 'all' ? `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"` : '';
+                        trashBgHtml = tab === 'all' ? `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>` : '';
+                        let editBtnHtml = tab === 'all' ? `<button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : '';
+                        rightSideUI = `<div class="action-btns-absolute">${editBtnHtml}</div>`;
                     } else rightSideUI = `<div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: auto;"><button class="btn-add-cart calc-add" data-id="${it.id}">+</button></div>`;
-                    
-                    html += `<div style="position:relative; margin-bottom:12px;">${trashBgHtml}<div class="card" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${swipeAttributes}><div class="info"><div class="name"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div>${it.p1?`<div class="card-price-ecer">${unit1}: Rp ${fmt(it.p1)}</div>`:''}${(it.p1 > 0 && it.p2 > 0)?`<div class="card-price-grosir" style="display:flex; justify-content:space-between; max-width:200px;"><span>${unit2}: Rp ${fmt(it.p2)}</span><span style="color:#777777;">Isi: ${it.iq || 0}</span></div>`:''}${barcodeDisplay}${exH}</div>${rightSideUI}</div></div>`;
+
+                                        // FITUR 2: Margin Color-Bar
+                    let marginClass = '';
+                    let marginPct = 0;
+                    let marginColorHex = '#4dff4d'; // Default hijau
+                    if (it.hpp > 0 && it.p1 > 0) {
+                        marginPct = ((it.p1 - it.hpp) / it.p1) * 100;
+                        if (marginPct >= 15) { marginClass = 'margin-high'; marginColorHex = '#4dff4d'; }
+                        else if (marginPct >= 5) { marginClass = 'margin-mid'; marginColorHex = '#FFD700'; }
+                        else { marginClass = 'margin-low'; marginColorHex = '#ff3b30'; }
+                    }
+
+                    // FITUR 1: Hold-to-Peek Overlay
+                    let peekHtml = '';
+                    if (!isCartMode && it.hpp > 0) {
+                        let textGrosirPeek = (it.iq > 1 && it.p2 > 0) ? `<div style="font-size:12px; color:#aaa; margin-top:4px;">Grosir: Rp ${fmt(it.hpp * it.iq)} (Margin ${(((it.p2 - (it.hpp * it.iq))/it.p2)*100).toFixed(1)}%)</div>` : '';
+                        peekHtml = `<div class="peek-overlay">
+                            <div style="color:#fff; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:4px;">HPP MODAL</div>
+                            <div style="color:#87CEFA; font-size:20px; font-weight:900;">Rp ${fmt(it.hpp)}</div>
+                            <div style="color:${marginColorHex}; font-size:13px; font-weight:800; margin-top:4px;">Margin Ecer: ${marginPct.toFixed(1)}%</div>
+                            ${textGrosirPeek}
+                        </div>`;
+                    }
+
+                    html += `<div style="position:relative; margin-bottom:12px;">${trashBgHtml}<div class="card ${marginClass}" id="c-${it.id}" style="margin-bottom:0; z-index:2;" ${swipeAttributes}>${peekHtml}<div class="info"><div class="name"><span>${dn}</span> <span class="card-badge">${safeAcronym}</span></div>${it.p1?`<div class="card-price-ecer">${unit1}: Rp ${fmt(it.p1)}</div>`:''}${(it.p1 > 0 && it.p2 > 0)?`<div class="card-price-grosir" style="display:flex; justify-content:space-between; max-width:200px;"><span>${unit2}: Rp ${fmt(it.p2)}</span><span style="color:#777777;">Isi: ${it.iq || 0}</span></div>`:''}${barcodeDisplay}${exH}</div>${rightSideUI}</div></div>`;
                 }
             }
             rend.innerHTML = html;
@@ -2173,10 +2711,13 @@ try {
             });
         }
 
-        let scrollTimeoutLock;
-        window.addEventListener('scroll', () => { 
+                let scrollTimeoutLock;
+        const handleVirtualScroll = () => { 
             if (isMainSwiping) return; 
-            let sy = window.scrollY; document.body.classList.add('is-scrolling'); clearTimeout(scrollTimeoutLock); scrollTimeoutLock = setTimeout(() => document.body.classList.remove('is-scrolling'), 150);
+            let isLandscapePOS = document.body.classList.contains('mode-kasir') && window.innerWidth >= 600 && window.matchMedia("(orientation: landscape)").matches;
+            let sy = isLandscapePOS ? $('list').scrollTop : window.scrollY; 
+            
+            document.body.classList.add('is-scrolling'); clearTimeout(scrollTimeoutLock); scrollTimeoutLock = setTimeout(() => document.body.classList.remove('is-scrolling'), 150);
             if (!$('dropdown-menu').classList.contains('hidden')) $('dropdown-menu').classList.add('hidden');
             
             const now = Date.now();
@@ -2186,7 +2727,7 @@ try {
                 layoutCache.lastUpdate = now;
             }
             
-            let st = Math.max(0, sy - (layoutCache.listTop - layoutCache.offsetBuffer));
+            let st = isLandscapePOS ? sy : Math.max(0, sy - (layoutCache.listTop - layoutCache.offsetBuffer));
             if (sortAZ && filteredData.length > 0) {
                 const sIdx = getDVSStartIndex(st);
                 if (filteredData[sIdx]) {
@@ -2196,7 +2737,9 @@ try {
                 }
             }
             if (!window._rafScroll) window._rafScroll = requestAnimationFrame(() => { try { renderVirtualList(true); } finally { window._rafScroll = null; } });
-        }, { passive: true });
+        };
+        window.addEventListener('scroll', handleVirtualScroll, { passive: true });
+        document.getElementById('list').addEventListener('scroll', handleVirtualScroll, { passive: true });
 
         async function save(bypassAnomaly = false) {
             if (isSaving) return;
@@ -2206,7 +2749,7 @@ try {
             if (btnSave) btnSave.disabled = true; 
             if (btnCancel) btnCancel.disabled = true;
 
-            try {
+                        try {
                 const nRaw = String($('i-n').value).substring(0, 80);
                 const b = String($('i-b').value).trim().toUpperCase().substring(0, 40);
                 const b2 = String($('i-b2').value).trim().toUpperCase().substring(0, 40); 
@@ -2217,7 +2760,16 @@ try {
                 const u1 = $('i-u1').value; 
                 const u2 = $('i-u2').value; 
                 let iq = parseInt($('i-iq').value) || 0;
-                
+
+                // Ambil Data Multi-Tier
+                let tiers = [];
+                const tierRows = document.querySelectorAll('#tier-container .tier-row');
+                tierRows.forEach(row => {
+                    let tQ = parseFloat(row.querySelector('.tier-q').value) || 0;
+                    let tP = parseInt(String(row.querySelector('.tier-p').value).replace(/\D/g, ''), 10) || 0;
+                    if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
+                });
+
                 if (!String(nRaw).trim() || p1 === 0) { 
                     return showAlert("Nama barang dan Harga Satuan tidak boleh kosong!", "Gagal"); 
                 }
@@ -2275,25 +2827,26 @@ try {
                 } 
                 if (!t) t = generateSmartAcronym(cleanName, activeId);
                 
-                const ts = Date.now();
+                                const ts = Date.now();
+                const isFav = $('mod-fav-btn').dataset.fav === 'true';
                 
                                 if (activeId) {
                     const idx = db.findIndex(x => String(x.id) === String(activeId)); 
                     if (idx === -1) throw new Error("Barang tidak ditemukan di database!");
                     
-                    db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, exp, t, u1, u2, iq, updatedAt: Math.max(ts, (db[idx].updatedAt || 0) + 1) };
+                    db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, f: isFav, exp, t, u1, u2, iq, tiers, updatedAt: Math.max(ts, (db[idx].updatedAt || 0) + 1) };
                     delete db[idx]._isGhost; // SURGICAL FIX: Cabut kutukan Ghost secara permanen jika data sengaja disimpan ulang
                     await saveItemToIDB(db[idx]); 
                     
                     if (worker) worker.postMessage({ type: 'update', item: db[idx] }); 
                 } else {
                     let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-                    const nIt = { id: newId, b, b2, n: cleanName, hpp, p1, p2, f: false, exp, t, u1, u2, iq, updatedAt: ts, deleted: false }; 
+                    const nIt = { id: newId, b, b2, n: cleanName, hpp, p1, p2, f: isFav, exp, t, u1, u2, iq, tiers, updatedAt: ts, deleted: false }; 
                     db.push(nIt); 
                     await saveItemToIDB(nIt); 
                     if (worker) worker.postMessage({ type: 'add', item: nIt }); 
                 }
-                
+
                 try {
                     const saveChipHist = (val, key, defaults) => {
                         let clean = String(val).trim().toLowerCase();
@@ -2352,17 +2905,52 @@ try {
             }
         }
 
+                        let ghostUndoTimer = null;
+        let pendingGhostItem = null;
         async function del(id) {
             if ($('custom-alert').style.display === 'flex') return;
-            const idx = db.findIndex(x => String(x.id) === String(id)), cardToReset = swipedCardElem; if(idx === -1) return;
-            showConfirm(`Hapus "<b>${escapeHTML(db[idx].n)}</b>"?`, "Hapus", "var(--danger)", 
-                async () => {
-                    db[idx].deleted = true; db[idx].updatedAt = Date.now(); await saveItemToIDB(db[idx]); 
+            const idx = db.findIndex(x => String(x.id) === String(id)); if(idx === -1) return;
+            
+            const itemToDel = db[idx];
+            itemToDel._isPendingDelete = true;
+            applyFiltersAndRender();
+            
+            let gToast = document.getElementById('ghost-toast-ui');
+            if(!gToast) {
+                gToast = document.createElement('div');
+                gToast.id = 'ghost-toast-ui';
+                gToast.className = 'ghost-toast';
+                gToast.innerHTML = `<span>1 Barang Dihapus</span> <button id="btn-undo-ghost">UNDO</button>`;
+                document.body.appendChild(gToast);
+            }
+            gToast.classList.add('show');
+            
+            if(ghostUndoTimer) {
+                clearTimeout(ghostUndoTimer);
+                if (pendingGhostItem && pendingGhostItem._isPendingDelete) {
+                    pendingGhostItem.deleted = true; pendingGhostItem.updatedAt = Date.now(); saveItemToIDB(pendingGhostItem);
+                    if(worker) worker.postMessage({ type: 'remove', id: String(pendingGhostItem.id) });
+                }
+            }
+            pendingGhostItem = itemToDel;
+
+            document.getElementById('btn-undo-ghost').onclick = () => {
+                clearTimeout(ghostUndoTimer);
+                delete itemToDel._isPendingDelete;
+                gToast.classList.remove('show');
+                applyFiltersAndRender(); // Kembalikan ke layar
+            };
+
+            ghostUndoTimer = setTimeout(async () => {
+                gToast.classList.remove('show');
+                if(itemToDel._isPendingDelete) {
+                    itemToDel.deleted = true; itemToDel.updatedAt = Date.now(); await saveItemToIDB(itemToDel); 
+                    delete itemToDel._isPendingDelete;
                     if(worker) worker.postMessage({ type: 'remove', id: String(id) });
                     if (cartState[id]) { delete cartState[id]; saveCartMem(); renderCartUI(); } 
-                    swipedCardElem = null; updateMaps(); applyFiltersAndRender(); tampilkanToast("Dihapus!", "var(--danger)");
-                }, "HAPUS", () => { if (cardToReset) cardToReset.style.transform = `translateX(0px)`; swipedCardElem = null; }
-            );
+                    updateMaps(); applyFiltersAndRender(); 
+                }
+            }, 4000);
         }
 
                 // [QA LEAD FIX] Chunking IDB Put untuk 36.000+ data agar HP tidak freeze/crash saat Hapus Semua Data
@@ -2416,8 +3004,8 @@ try {
             }); 
         }
 
-        function showLoading(msg, color="#87CEFA") { $('loading-text').innerHTML = msg; $('loading-spinner').style.borderTopColor = color; $('loading-title').style.color = $('loading-box').style.borderColor = color; $('loading-modal').style.display = 'flex'; document.body.classList.add('modal-open'); }
-        function hideLoading() { $('loading-modal').style.display = 'none'; checkModalOpen(); }
+         function showLoading(msg, color="#87CEFA") { $('loading-text').innerHTML = msg; $('loading-spinner').style.borderTopColor = color; $('loading-title').style.color = $('loading-box').style.borderColor = color; $('loading-modal').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('loading'); }
+        function hideLoading() { untrackModal('loading'); $('loading-modal').style.display = 'none'; checkModalOpen(); }
         
         function backupToCloud() { 
             if (db.length === 0 || isApiLoading) return;
@@ -2464,26 +3052,21 @@ try {
                         
                                                    // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
                         // [QA LEAD FIX] Mencegah Memory Crash/Transaction Abort pada 36.000+ data dengan Chunking IDB
-                        return new Promise((resolve) => {
+                                                return new Promise((resolve) => {
                             try {
                                 let safeItems = db.filter(item => !item._isGhost);
-                                const txClear = idb.transaction('items', 'readwrite');
-                                txClear.objectStore('items').clear();
-                                txClear.oncomplete = () => {
-                                    let idx = 0;
-                                    function putChunk() {
-                                        if (idx >= safeItems.length) { resolve(); return; }
-                                        let tx = idb.transaction('items', 'readwrite');
-                                        let store = tx.objectStore('items');
-                                        let end = Math.min(idx + 500, safeItems.length);
-                                        for (let i = idx; i < end; i++) store.put(safeItems[i]);
-                                        idx = end;
-                                        tx.oncomplete = putChunk;
-                                        tx.onerror = () => resolve();
-                                    }
-                                    putChunk();
-                                };
-                                txClear.onerror = () => resolve();
+                                let idx = 0;
+                                function putChunk() {
+                                    if (idx >= safeItems.length) { resolve(); return; }
+                                    let tx = idb.transaction('items', 'readwrite');
+                                    let store = tx.objectStore('items');
+                                    let end = Math.min(idx + 500, safeItems.length);
+                                    for (let i = idx; i < end; i++) store.put(safeItems[i]);
+                                    idx = end;
+                                    tx.oncomplete = putChunk;
+                                    tx.onerror = () => resolve();
+                                }
+                                putChunk();
                             } catch(e) { resolve(); }
                         }).then(() => {
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
@@ -2547,10 +3130,15 @@ try {
                                 };
                                 req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                             } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
-                                                }).then(histBackup => {
+                        }).then(histBackup => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
-                            // SURGICAL FIX: Mencegah IDB DataCloneError. Kirim signal saja, biarkan sw.js membaca langsung dari store 'items' dan 'history'.
-                            tx.objectStore('sync-outbox').put({ id: 'pending-backup', data: [], history: histBackup, timestamp: Date.now() });
+                            // [ELITE QA FIX] Dynamic Outbox Key. Mencegah sesi putus jaringan baru menimpa antrean putus jaringan lawas.
+                            tx.objectStore('sync-outbox').put({ 
+                                id: 'outbox_' + Date.now(), 
+                                data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest), 
+                                history: histBackup, 
+                                timestamp: Date.now() 
+                            });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
                                 showAlert("Sinyal Terputus! Barang & Riwayat Struk masuk ke Antrean Latar Belakang (Akan terkirim otomatis saat online).", "Offline Sync Aktif", "var(--warning)");
@@ -2836,34 +3424,44 @@ setTimeout(processImportChunk, 0);
             try { 
                 const scanConfig = { fps: 10, disableFlip: false, qrbox: function(viewfinderWidth, viewFinderHeight) { let boxWidth = Math.floor(viewfinderWidth * 0.95); let boxHeight = Math.floor(viewFinderHeight * 0.60); return { width: boxWidth, height: boxHeight }; }, experimentalFeatures: { useBarCodeDetectorIfSupported: true }, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ] };
                 let isScanLocked = false;
-                await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
+                                await html5QrCode.start( { facingMode: "environment" }, scanConfig, async (text) => { 
                     if (isScanLocked) return; isScanLocked = true;
-                    playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
                     
-                                        // --- INJEKSI MESIN GS1 PARSER ---
-                    if (scannedText.startsWith('01') && scannedText.length >= 16) {
-                        let gtin = scannedText.substring(2, 16);
-                        // SURGICAL FIX: Jangan hapus semua angka nol! Hapus HANYA 1 angka nol pertama (Package Indicator GTIN-14) agar nol bawaan Barcode EAN-13 tidak rusak/hilang.
-                        if (gtin.length === 14 && gtin.startsWith('0')) gtin = gtin.substring(1);
+                    // FITUR 7: AR Sniper Scanner Effect
+                    const laser = document.querySelector('.scanner-laser');
+                    const box = document.querySelector('.scanner-box');
+                    if(laser) laser.classList.add('locked');
+                    if(box) box.classList.add('locked');
+                    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    
+                    setTimeout(async () => {
+                        if(laser) laser.classList.remove('locked');
+                        if(box) box.classList.remove('locked');
                         
-                        let expMatch = scannedText.match(/17(\d{6})/);
-                        if (expMatch && (scanMode === 'input' || scanMode === 'input-grosir')) {
-                            let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = d.substring(2,4);
-                            $('i-exp').dataset.rawDate = `${y}-${m}-01`;
-                            $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
-                            tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
+                        playBeep(); await closeScanner(); let scannedText = text.trim().toUpperCase(); 
+                        
+                        // --- INJEKSI MESIN GS1 PARSER ---
+                        if (scannedText.startsWith('01') && scannedText.length >= 16) {
+                            let gtin = scannedText.substring(2, 16);
+                            if (gtin.length === 14 && gtin.startsWith('0')) gtin = gtin.substring(1);
+                            
+                            let expMatch = scannedText.match(/17(\d{6})/);
+                            if (expMatch && (scanMode === 'input' || scanMode === 'input-grosir')) {
+                                let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = d.substring(2,4);
+                                $('i-exp').dataset.rawDate = `${y}-${m}-01`;
+                                $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
+                                tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
+                            }
+                            scannedText = gtin; 
                         }
-                        scannedText = gtin; 
-                    }
-                    // --------------------------------
-                    // SURGICAL FIX: Blokir string kosong absolut agar tidak memicu Ghost Match pada barang yang belum memiliki barcode
-                    if (!scannedText || scannedText.trim() === '') {
-                        closeScanner(); return tampilkanToast("Barcode Kosong/Tidak Valid!", "var(--danger)");
-                    }
+                        if (!scannedText || scannedText.trim() === '') {
+                            closeScanner(); return tampilkanToast("Barcode Kosong/Tidak Valid!", "var(--danger)");
+                        }
 
-                    if (scanMode === 'cart') handlePhysicalScanner(scannedText);
-                    else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
-                    else if (scanMode === 'input-grosir') $('i-b2').value = scannedText; else $('i-b').value = scannedText; 
+                        if (scanMode === 'cart') handlePhysicalScanner(scannedText);
+                        else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
+                        else if (scanMode === 'input-grosir') $('i-b2').value = scannedText; else $('i-b').value = scannedText; 
+                    }, 250);
                 }); 
                 isScanning = true; isStartingScan = false; 
                                 
@@ -2998,17 +3596,13 @@ setTimeout(processImportChunk, 0);
                         finalModal = Math.round(q * (item.hpp || 0));
                     }
                     
-                    // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Perisai q > 1)
+                    // 2. Kalkulasi Subtotal & Harga Grosir (Dengan Multi-Tier & Proporsional)
                     if (cartState[id].manualPrice !== undefined) {
                         subTotal = cartState[id].manualPrice;
                     } else {
-                        if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= (iq / 2) && q > 1) {
-                            subTotal = Math.round((q * item.p2) / iq); 
-                        } else { 
-                            subTotal = Math.round(q * item.p1); 
-                        }
+                        subTotal = getCalculatedSubtotal(item, q);
                     }
-                    
+          
                     // 3. Fallback Labeling
                     printUnit = String(item.u1 || 'Pcs').trim();
 
@@ -3017,8 +3611,26 @@ setTimeout(processImportChunk, 0);
                 }
             });
 
-            let msgHTML = `<div style="text-align:center; padding:0; margin:0;"><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:6px;">Total Belanja</div><div style="font-size:28px;font-weight:900;color:var(--mono-main);font-family:'Montserrat', sans-serif;margin-bottom:14px;letter-spacing:-0.5px;">Rp ${fmt(grandTotal)}</div><input type="tel" id="input-bayar-struk" style="box-sizing:border-box;width:100%;border-color:var(--border-color);background:#000;color:var(--text-light);font-size:16px;text-align:center;padding:12px;margin:0 0 10px 0;border-radius:8px;border:1px solid #333;outline:none;font-family:'Montserrat', sans-serif;font-weight:600;" placeholder="Bayar" autocomplete="off"><div style="display:flex;justify-content:space-between;align-items:center;background:#111;padding:12px 16px;border-radius:8px;border:1px solid #333;box-sizing:border-box;margin:0;"><span id="live-label" style="font-size:10px;font-weight:800;color:#888;letter-spacing:0.5px;">KEMBALIAN:</span><span id="live-val" style="font-size:15px;font-weight:800;color:#888;">Rp 0</span></div></div>`;
+            // FITUR 5: Smart Cash Chips AI (Hyper-Local IDR Predictive Engine)
+            let chip1 = grandTotal;
+            let chip2 = Math.ceil(grandTotal / 5000) * 5000;
+            if (chip2 === grandTotal) chip2 += (grandTotal >= 50000) ? 10000 : 5000; 
             
+            let baseBesar = [10000, 20000, 50000, 100000, 150000, 200000, 300000];
+            let chip3 = baseBesar.find(n => n > grandTotal) || (Math.ceil(grandTotal / 100000) * 100000 + 50000);
+            
+            if (chip3 <= chip2) {
+                chip3 = baseBesar.find(n => n > chip2) || (chip2 + 50000);
+            }
+
+            let smartCashHtml = `<div class="smart-cash-row">
+                <div class="smart-cash-chip" onclick="document.getElementById('input-bayar-struk').value='${fmt(chip1)}'; document.getElementById('input-bayar-struk').dispatchEvent(new Event('input'));">Uang Pas</div>
+                <div class="smart-cash-chip" onclick="document.getElementById('input-bayar-struk').value='${fmt(chip2)}'; document.getElementById('input-bayar-struk').dispatchEvent(new Event('input'));">${fmt(chip2)}</div>
+                <div class="smart-cash-chip" onclick="document.getElementById('input-bayar-struk').value='${fmt(chip3)}'; document.getElementById('input-bayar-struk').dispatchEvent(new Event('input'));">${fmt(chip3)}</div>
+            </div>`;
+
+                let msgHTML = `<div style="text-align:center; padding:0; margin:0;"><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:2px;">Total Belanja</div><div style="font-size:24px;font-weight:900;color:var(--mono-main);font-family:'Montserrat', sans-serif;margin-bottom:8px;letter-spacing:-0.5px;">Rp ${fmt(grandTotal)}</div><input type="tel" id="input-bayar-struk" style="box-sizing:border-box;width:100%;border-color:var(--border-color);background:#000;color:var(--text-light);font-size:16px;text-align:center;padding:10px;margin:0 0 8px 0;border-radius:8px;border:1px solid #333;outline:none;font-family:'Montserrat', sans-serif;font-weight:600;" placeholder="Bayar" autocomplete="off">${smartCashHtml}<div style="display:flex;justify-content:space-between;align-items:center;background:#111;padding:8px 12px;border-radius:8px;border:1px solid #333;box-sizing:border-box;margin:0;"><span id="live-label" style="font-size:10px;font-weight:800;color:#888;letter-spacing:0.5px;">KEMBALIAN:</span><span id="live-val" style="font-size:15px;font-weight:800;color:#888;">Rp 0</span></div></div>`;
+
             const resetPrintModalStyle = () => {
                 $('custom-alert').style.alignItems = '';
                 $('custom-alert').style.paddingTop = '';
@@ -3053,7 +3665,7 @@ setTimeout(processImportChunk, 0);
                 btnOk.style.flex = "1";
                 btnOk.style.padding = "0 5px";
                 btnOk.style.fontSize = "10px";
-                
+
                 btnNoPrint.onclick = () => {
                     if (isProcessingPayment) return; // Kunci Absolut Event
                     
@@ -3221,25 +3833,26 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
             // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
-            let finalId = activeEditTrxId;
-            if (!finalId) {
-                let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
-                let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-                if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
-                localStorage.setItem('TRX_SEQ', seq);
-                let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
-                finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
+                        let finalId = activeEditTrxId;
+            try {
+                if (!finalId) {
+                    let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+                    let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
+                    let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+                    if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
+                    localStorage.setItem('TRX_SEQ', seq);
+                    let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
+                    finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
+                }
+            } catch (err) {
+                isPrinting = false;
+                return tampilkanToast("Memori Penuh! Gagal membuat ID Transaksi.", "var(--danger)");
             }
                         let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
             let receiptNo = finalId ? finalId.split('-').slice(0, 2).join('-') : ''; 
             let totalItemCount = 0;
 
-            // Kalkulasi padding dinamis agar Jam selalu rata kanan dengan kode TRX
-            let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
-            let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-            let padLen = Math.max(1, receiptNo.length - dDate.length - dTime.length);
-            let dateStrAligned = dDate + "&nbsp;".repeat(padLen) + dTime;
+            let dateStrAligned = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
             // 2. Render Header & Meta Standar Supermarket
             let rawHTML = `
@@ -3510,8 +4123,11 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                             <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #3CB371!important; color:#3CB371!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="waHistory('${h.id}')">
                                 WA
                             </button> 
-                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
+                                                        <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
                                 CETAK
+                            </button>
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #00BFFF!important; color:#00BFFF!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="let hx=JSON.parse(localStorage.getItem('DB_WA_HISTORY')||'[]').find(x=>x.id==='${h.id}'); if(hx) printBluetoothESCPOS(hx.total, hx.bayar, hx.items, hx.id, hx.ts);">
+                                BT
                             </button>
                         </div>
                     </div>
@@ -3787,8 +4403,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 }
                 
                 renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
-                if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
-                checkOfflineLedger(); // [SURGICAL FIX] Jembatan Penarik Data Offline Darurat
+                                if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
         }
         initApp();
@@ -3859,10 +4474,11 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             } 
         });
         
-        function closeModalById(id) {
+                function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { closeScanner(); }
-                        else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
+            else if (id === 'loading') { $('loading-modal').style.display = 'none'; checkModalOpen(); }
+            else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
             else if (id === 'alert') { 
     $('custom-alert').style.display = 'none'; checkModalOpen(); 
     // SURGICAL FIX: Bersihkan polusi CSS injeksi saat modal ditutup paksa lewat tombol Back HP
@@ -3990,15 +4606,15 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 hist.forEach(h => {
                     if(!Array.isArray(h.items)) return;
                     let ids = [...new Set(h.items.map(i => String(i.id)))];
-                    ids.forEach(id => {
-                        itemCounts[id] = (itemCounts[id] || 0) + 1;
-                        ids.forEach(id2 => {
-                            if(id !== id2) {
-                                let pair = [id, id2].sort().join('|');
-                                pairCounts[pair] = (pairCounts[pair] || 0) + 1;
-                            }
-                        });
-                    });
+                                for (let i = 0; i < ids.length; i++) {
+                let id1 = ids[i];
+                itemCounts[id1] = (itemCounts[id1] || 0) + 1;
+                for (let j = i + 1; j < ids.length; j++) {
+                    let id2 = ids[j];
+                    let pair = id1 < id2 ? id1 + '|' + id2 : id2 + '|' + id1;
+                    pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+                }
+            }
                 });
                 let rules = [];
                 for (let pair in pairCounts) {
@@ -4013,7 +4629,30 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 marketBasketRules = rules.sort((a,b) => b.conf - a.conf);
             } catch(e){}
         }
+// ==========================================
+// [ELITE QA] PENGENDALI BUKU PANDUAN UI
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const btnOpenGuide = document.getElementById('qaBtnOpenGuide');
+    const btnCloseGuide = document.getElementById('qaBtnCloseGuide');
+    const guideOverlay = document.getElementById('qaGuideOverlay');
 
+    if (btnOpenGuide && guideOverlay) {
+        btnOpenGuide.addEventListener('click', () => {
+            guideOverlay.classList.add('active');
+            // Mencegah scroll body di belakang panduan
+            document.body.style.overflow = 'hidden'; 
+        });
+    }
+
+    if (btnCloseGuide && guideOverlay) {
+        btnCloseGuide.addEventListener('click', () => {
+            guideOverlay.classList.remove('active');
+            // Mengembalikan scroll normal
+            document.body.style.overflow = ''; 
+        });
+    }
+});
     </script>
 </body>
 </html>
