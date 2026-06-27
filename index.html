@@ -1125,14 +1125,12 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
         // --- INJEKSI MULTI-TIER ENGINE ---
         function getCalculatedSubtotal(item, q) {
             let iq = Math.max(1, item.iq || 1);
-            if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
-                let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
-                let appliedPrice = item.p1 || 0;
-                for (let i = 0; i < sortedTiers.length; i++) {
-                    if (q >= sortedTiers[i].q) { appliedPrice = sortedTiers[i].p; break; }
-                }
-                return Math.round(q * appliedPrice);
+        if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
+            let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
+            for (let i = 0; i < sortedTiers.length; i++) {
+                if (q >= sortedTiers[i].q) return Math.round(q * sortedTiers[i].p);
             }
+        }
             if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
                 return Math.round((q * item.p2) / iq);
             }
@@ -2184,13 +2182,25 @@ document.addEventListener('focus', function(e) {
             } return d[b.length][a.length];
         }
 
-                function processNLPVoice(transcript) {
-            // [ELITE QA FIX] Reroute transkrip suara langsung ke Web Worker O(1) di Background Thread!
-            $('q').value = transcript; 
-            $('q-x').style.display = 'flex';
-            window.scrollTo({ top: 0, behavior: 'instant' });
-            handleSearchLogic(transcript);
-        }
+function processNLPVoice(transcript) {
+    let text = transcript.toLowerCase();
+    let isAdd = false, qty = 1;
+    let match = text.match(/^(tambah|masukkan|beli)\s+(\d+|satu|dua|tiga|empat|lima)\s+(.*)/);
+    
+    if (match) {
+        isAdd = true;
+        let mapNum = {'satu':1, 'dua':2, 'tiga':3, 'empat':4, 'lima':5};
+        qty = mapNum[match[2]] || parseInt(match[2], 10);
+        text = match[3]; 
+    }
+
+    $('q').value = text;
+    $('q-x').style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    handleSearchLogic(text);
+    
+    if (isAdd) pendingAutoAdds.set(currentSearchReqId, qty);
+}
 
         let voiceRecognition = null;
         function startVoiceSearch() {
@@ -2759,14 +2769,22 @@ try {
                 tierRows.forEach(row => {
                     let tQ = parseFloat(row.querySelector('.tier-q').value) || 0;
                     
-                    // [SURGICAL FIX] Amankan angka desimal, ganti koma menjadi titik untuk mesin JS (parseFloat)
-                    let rawP = row.querySelector('.tier-p').value;
-                    let cleanP = String(rawP).replace(/[^0-9.,]/g, '').replace(/,/g, '.');
-                    let parts = cleanP.split('.');
-                    if (parts.length > 2) { let dec = parts.pop(); cleanP = parts.join('') + '.' + dec; }
-                    let tP = parseFloat(cleanP) || 0;
+// [SURGICAL FIX] Amankan angka desimal, isolasi koma terakhir untuk mesin JS (parseFloat)
+let rawP = row.querySelector('.tier-p').value;
+let lastCommaIdx = String(rawP).lastIndexOf(',');
+let cleanP = String(rawP);
 
-                    if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
+if (lastCommaIdx !== -1) {
+    let intPart = cleanP.substring(0, lastCommaIdx).replace(/[^0-9]/g, '');
+    let decPart = cleanP.substring(lastCommaIdx + 1).replace(/[^0-9]/g, '');
+    cleanP = intPart + '.' + decPart;
+} else {
+    cleanP = cleanP.replace(/[^0-9]/g, '');
+}
+
+let tP = parseFloat(cleanP) || 0;
+
+if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 });
 
                 if (!String(nRaw).trim() || p1 === 0) { 
@@ -2987,13 +3005,14 @@ try {
             } 
         }
 
-        function optimizeData() { 
-            $('dropdown-menu').classList.add('hidden'); 
-            showConfirm("Bersihkan memori?", "Optimasi Sistem", "#FFA500", () => { 
+    function optimizeData() { 
+        $('dropdown-menu').classList.add('hidden'); 
+        if (Object.keys(cartState).length > 0) return showAlert("Harap KOSONGKAN atau selesaikan Keranjang Belanja sebelum melakukan Optimasi Sistem!", "Akses Ditolak", "var(--warning)");
+        showConfirm("Bersihkan memori?", "Optimasi Sistem", "#FFA500", () => { 
                 tampilkanToast("Mengoptimalkan...", "#FFA500"); recentSearches = []; trendingSearches = {}; localStorage.removeItem('DB_WA_RECENT'); localStorage.removeItem('DB_WA_TRENDING'); 
                 const tx = idb.transaction('items', 'readwrite'), s = tx.objectStore('items'); let c = 0; const aDb = []; 
-                                db.forEach(i => { 
-    if (i._isGhost) { 
+db.forEach(i => { 
+    if (i._isGhost || i.deleted) { 
         s.delete(i.id); c++; 
     } else { 
         aDb.push(i); 
@@ -3069,13 +3088,11 @@ try {
                             } catch(e) { resolve(); }
                         }).then(() => {
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
-                            return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
- }) }, 90000);
+                            return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
                         });
                     }
                     localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest)
- }) }, 90000);
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
@@ -3133,10 +3150,10 @@ try {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
                             // [ELITE QA FIX] Dynamic Outbox Key. Mencegah sesi putus jaringan baru menimpa antrean putus jaringan lawas.
                             tx.objectStore('sync-outbox').put({ 
-                                id: 'outbox_' + Date.now(), 
-                                data: db.filter(i => !i._isGhost).map(({_cHeight, ...rest}) => rest), 
-                                history: histBackup, 
-                                timestamp: Date.now() 
+                            id: 'outbox_' + Date.now(), 
+                           data: db.filter(i => !i._isGhost), 
+                           history: histBackup, 
+                           timestamp: Date.now() 
                             });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
@@ -4396,8 +4413,14 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
                 }
                 
-                renderCartUI(); applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
-                                if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
+                            renderCartUI(); 
+            try { updateGrandTotal(); } catch(e) { cartState = {}; localStorage.removeItem('DB_WA_CART'); }
+            if (activeEditTrxId) {
+                let titleBox = document.querySelector('.cp-title-box span:first-child');
+                if (titleBox) { titleBox.innerText = "Edit Struk"; titleBox.style.color = "var(--warning)"; }
+            }
+            applyFiltersAndRender(); processUrlParameters(); isDbReady = true; 
+                               if (pendingLaunchFile) { processQueuedFile(pendingLaunchFile); pendingLaunchFile = null; }
             } catch (e) { showAlert("DB Error: " + e.message, "Error"); } 
         }
         initApp();
@@ -4492,10 +4515,12 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
         }
 
         // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
-        let btDevice = null, btServer = null, btChar = null;
-                async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
-            try {
-                if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
+let btDevice = null, btServer = null, btChar = null, isBTConnecting = false;
+async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
+    if (isBTConnecting) return tampilkanToast("Sedang memproses Bluetooth...", "var(--warning)");
+    isBTConnecting = true;
+    try {
+        if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
                 if (!btDevice || !btDevice.gatt.connected || !btChar) {
     showLoading("Menghubungkan Printer...", "#87CEFA");
     if (btDevice && !btDevice.gatt.connected) {
@@ -4572,12 +4597,13 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
                 }
                 
-                tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
-                
-            } catch (err) {
-                hideLoading(); showAlert("Printer Gagal Terhubung: " + err.message, "Bluetooth Error", "var(--danger)");
-            }
-        }
+        tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
+        isBTConnecting = false;
+    } catch (err) {
+        isBTConnecting = false;
+        hideLoading(); showAlert("Printer Gagal Terhubung: " + err.message, "Bluetooth Error", "var(--danger)");
+    }
+}
 
         // --- INJEKSI MESIN AI APRIORI ---
         let marketBasketRules = [];
