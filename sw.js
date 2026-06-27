@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '20.1'; 
+const APP_VERSION = '1.0'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -252,22 +252,26 @@ async function processOfflineBackup() {
           return resolve();
       }
       
-            const tx = idb.transaction('sync-outbox', 'readonly');
+      const tx = idb.transaction('sync-outbox', 'readonly');
       tx.onabort = () => { idb.close(); reject(new Error("Transaksi Readonly dibatalkan OS.")); };
       tx.onerror = (e) => { idb.close(); reject(new Error("Transaksi Readonly Error.")); };
       const store = tx.objectStore('sync-outbox');
-      const getReq = store.get('pending-backup');
       
-      getReq.onsuccess = async () => {
-        if (!getReq.result) {
+      // [SURGICAL FIX] Gunakan Cursor mundur (prev) untuk LIFO. 
+      // DILARANG KERAS menggunakan getAll() karena akan memicu RAM OOM Kill jika antrean menumpuk!
+      const getReq = store.openCursor(null, 'prev'); 
+      
+      getReq.onsuccess = async (event) => {
+        const cursor = event.target.result;
+        if (!cursor) {
             idb.close();
             return resolve();
         }
         
-                  const payload = getReq.result;
-          
+        const payload = cursor.value; // Ambil snapshot TERTINGGI/TERBARU
+        const activeOutboxId = payload.id; 
           try {
-            const CLOUD_API = "https://script.google.com/macros/s/AKfycbxCHJjStg3F6RajgS3B_eu1grBgDuaH2kEYxywD2Zf55TIXOKC8-OnEcFosNmAzD4Zd/exec";
+            const CLOUD_API = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
             
                         // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
             const itemsData = await new Promise((res, rej) => {
@@ -323,11 +327,12 @@ async function processOfflineBackup() {
 
           const txDel = idb.transaction('sync-outbox', 'readwrite');
           const storeDel = txDel.objectStore('sync-outbox');
-          const verifyReq = storeDel.get('pending-backup');
+          const verifyReq = storeDel.openCursor(null, 'prev'); // Cek apakah ada antrean yang LEBIH BARU masuk saat proses upload berjalan
 
-          verifyReq.onsuccess = () => {
-              if (verifyReq.result && verifyReq.result.timestamp === payload.timestamp) {
-                  storeDel.delete('pending-backup'); 
+          verifyReq.onsuccess = (e) => {
+              const checkCursor = e.target.result;
+              if (checkCursor && checkCursor.value.timestamp === payload.timestamp) {
+                  storeDel.clear(); // [SURGICAL FIX] Bantai seluruh isi Outbox! Data terbaru sudah masuk awan, sisa antrean usang hanyalah sampah duplikat (Storage Leak).
               } else {
                   console.warn('[SW] Mutasi transaksi baru terdeteksi saat proses upload berjalan. Antrean dipertahankan.');
               }
@@ -356,7 +361,7 @@ async function processOfflineBackup() {
         reject(new Error("Gagal membaca antrean Sync IDB: " + (e.target.error?.message || "Unknown Error")));
       };
 
-     };
+      };
     req.onerror = (e) => reject(new Error("Gagal membuka database: " + (e.target.error?.message || "Access Denied/Unknown Error")));
   }).finally(() => { isSyncing = false; });
 }
