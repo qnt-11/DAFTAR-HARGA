@@ -2467,7 +2467,7 @@ try {
                         clearTiers(); // Reset Multi-Tier
             if (id) {  
                 const it = db.find(x => String(x.id) === String(id)); if(!it) return; 
-                $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(it.hpp) : ''; hppG.value = (it.hpp && it.iq > 1) ? fmt(it.hpp * it.iq) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
+                $('m-tit').innerText = "Edit Barang"; b.value = it.b || ''; b2.value = it.b2 || ''; n.value = it.n || ''; hpp.value = it.hpp ? fmt(Math.round(it.hpp)) : ''; hppG.value = (it.hpp && it.iq > 1) ? fmt(Math.round(it.hpp * it.iq)) : ''; p1.value = fmt(it.p1); p2.value = it.p2 ? fmt(it.p2) : ''; exp.dataset.rawDate = it.exp || ''; exp.value = it.exp ? formatBulanTahun(it.exp) : ''; t.value = it.t || ''; u1.value = it.u1 || ''; u2.value = it.u2 || ''; iq.value = it.iq || ''; 
                 fBtn.dataset.fav = it.f ? 'true' : 'false'; fBtn.style.color = it.f ? 'var(--danger)' : 'var(--text-muted)'; fSvg.setAttribute('fill', it.f ? 'currentColor' : 'none');
                 if (it.tiers && Array.isArray(it.tiers)) { it.tiers.forEach(tr => addTierRow(tr.q, tr.p)); }
             } else { 
@@ -2744,12 +2744,14 @@ try {
                 const b = String($('i-b').value).trim().toUpperCase().substring(0, 40);
                 const b2 = String($('i-b2').value).trim().toUpperCase().substring(0, 40); 
                 const exp = $('i-exp').dataset.rawDate || '';
-                const hpp = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 const p2 = parseInt(String($('i-p2').value).replace(/[^\d]/g, '').substring(0, 15), 10) || null;
                 const u1 = $('i-u1').value; 
                 const u2 = $('i-u2').value; 
                 let iq = parseInt($('i-iq').value) || 0;
+                let rawHppG = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
+                let rawHppE = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
+                const hpp = (rawHppG > 0 && iq > 1) ? (rawHppG / iq) : rawHppE;
 
                 // Ambil Data Multi-Tier
                 let tiers = [];
