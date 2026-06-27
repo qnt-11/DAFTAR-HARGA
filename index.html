@@ -199,10 +199,10 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 
 /* 3. SPLIT-SCREEN LANDSCAPE (Rasio 50:50 & Arsitektur Scroll Enterprise) */
 @media (orientation: landscape) and (min-width: 600px) {
-    html, body { height: 100% !important; overflow: hidden !important; }
+    /* [SURGICAL FIX] Bebaskan scroll global untuk Mode Normal. Jangan gunakan overflow: hidden di sini. */
     
-    /* [QA LEAD FIX] Ubah 100vh menjadi 100% absolut agar layar bawah tidak tertelan Navigasi OS Android */
-    body.mode-kasir { display: flex !important; flex-direction: row !important; width: 100vw !important; height: 100% !important; overflow: hidden !important; }
+    /* [QA LEAD FIX] Kunci mati scroll HANYA untuk Mode Kasir (Split-Screen) secara absolut */
+    body.mode-kasir { display: flex !important; flex-direction: row !important; width: 100vw !important; height: 100% !important; overflow: hidden !important; position: fixed !important; top: 0; left: 0; }
     body.mode-kasir .header, body.mode-kasir #tabs-bar, body.mode-kasir .fab { display: none !important; }
     
     /* Panel Keranjang (Kiri 50vw - Terkunci Permanen & Anti-Collapse) */
@@ -231,7 +231,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     /* Pemampatan Kartu POS Enterprise */
     body.mode-kasir .card { padding: 8px 10px !important; padding-right: 48px !important; min-height: auto !important; border-radius: 6px !important; margin-bottom: 6px !important; }
     body.mode-kasir .card .name { font-size: 13px !important; margin-bottom: 3px !important; }
-    body.mode-kasir .card .card-price-ecer { font-size: 12px !important; color: #FFD700 !important; }
+    body.mode-kasir .card .card-price-ecer { font-size: 12px !important; color: var(--mono-sec) !important; }
     body.mode-kasir .card .card-barcode { font-size: 10px !important; }
     body.mode-kasir .btn-add-cart { width: 34px !important; height: 34px !important; border-radius: 8px !important; font-size: 20px !important; }
 }
@@ -252,9 +252,10 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 /* 4. FITUR UI ENTERPRISE LAINNYA */
 .scanner-laser.locked { background: #3CB371; box-shadow: 0 0 15px 2px #3CB371; animation: none; top: 50%; height: 4px; border-radius: 2px; }
 .scanner-box.locked { border-color: #3CB371; }
-.ghost-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; border: 1px solid var(--border-color); color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 15px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
-.ghost-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-.ghost-toast button { background: var(--danger); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; cursor: pointer; outline: none; }
+.ghost-toast { position: fixed; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(30px) scale(0.9); background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-bottom: 2px solid var(--danger); color: #fff; padding: 10px 14px 10px 16px; border-radius: 30px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(255, 59, 48, 0.2); width: max-content; min-width: 240px; }
+.ghost-toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); pointer-events: auto; }
+.ghost-toast button { background: rgba(255, 255, 255, 0.1); color: #87CEFA; border: 1px solid rgba(135, 206, 250, 0.3); padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 11px; font-family: 'Montserrat', sans-serif; cursor: pointer; outline: none; transition: all 0.2s ease; display: flex; align-items: center; gap: 4px; }
+.ghost-toast button:active { transform: scale(0.95); background: rgba(135, 206, 250, 0.2); border-color: #87CEFA; }
 .flying-badge { position: fixed; z-index: 9999; pointer-events: none; width: 26px; height: 26px; background: var(--mono-main); color: #000; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 900; box-shadow: 0 4px 15px rgba(255,255,255,0.6); transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.45s cubic-bezier(0.4, -0.5, 0.8, 0.4), transform 0.45s ease-in, opacity 0.45s ease-in; }
 .btn-ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.6); top: 50%; left: 50%; width: 20px; height: 20px; margin-top: -10px; margin-left: -10px; pointer-events: none; transform: scale(0); animation: ripple-anim 0.4s linear; }
 @keyframes ripple-anim { to { transform: scale(4.5); opacity: 0; } }
@@ -481,7 +482,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                     <div id="q-x" class="q-clear" onclick="clearSearch()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6M9 9l6 6"></path></svg></div>
                     <div id="search-dropdown" class="search-dropdown-box hidden"><div id="sd-content"></div></div>
                 </div>
-                <button class="icon-btn" id="s-btn-search" onclick="toggleCartMode()" style="color:var(--mono-main);">
+                    <button class="icon-btn" id="s-btn-search" onclick="toggleCartMode()" style="color:var(--mono-main);">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 </button>
             </div>
@@ -844,136 +845,196 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
         </div>
     </div>
             
-      <div id="qaGuideOverlay" class="qa-guide-overlay">
+<div id="qaGuideOverlay" class="qa-guide-overlay">
     <div class="qa-guide-header">
         <h2>📖 BUKU PANDUAN KASIR</h2>
         <button id="qaBtnCloseGuide" class="qa-guide-close">&times;</button>
     </div>
     
     <div class="qa-guide-chips">
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-add').scrollIntoView({behavior: 'smooth'})">+ Tambah Barang</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-peek').scrollIntoView({behavior: 'smooth'})">Intip Modal HPP</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-del').scrollIntoView({behavior: 'smooth'})">Hapus & Undo</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-pos').scrollIntoView({behavior: 'smooth'})">Transaksi Kasir</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-pay').scrollIntoView({behavior: 'smooth'})">Bayar & Cetak</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('tut-search').scrollIntoView({behavior: 'smooth'})">Cari Pintar</button>
-        <button class="qa-guide-chip" onclick="document.getElementById('sect-tier').scrollIntoView({behavior: 'smooth'})">Harga Multi-Tier</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('bab1').scrollIntoView({behavior: 'smooth'})">Manajemen Barang</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('bab2').scrollIntoView({behavior: 'smooth'})">Transaksi Kasir</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('bab3').scrollIntoView({behavior: 'smooth'})">Riwayat & Laporan</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('bab4').scrollIntoView({behavior: 'smooth'})">Keamanan & Sync</button>
+        <button class="qa-guide-chip" onclick="document.getElementById('qa-tips').scrollIntoView({behavior: 'smooth'})">Tips Pemilik</button>
     </div>
 
     <div class="qa-guide-body">
         
-        <div class="qa-guide-card">
-            <h3 id="tut-add">1. Tambah Barang Baru</h3>
-            <ol>
-                <li>Ketuk ikon <strong>(+)</strong> di sudut kanan bawah.</li>
-                <li>Isi <strong>Nama Barang</strong>. Sistem akan otomatis membuat Akronim/Kode Cepat.</li>
-                <li>Ketuk <strong>ikon Kamera</strong> pada kolom Barcode, lalu scan barcode produk.</li>
-                <li>Isi <strong>Harga Modal (HPP)</strong> dan <strong>Harga Jual</strong>. Anda juga bisa sekadar mengetik persentase di kolom <strong>Margin %</strong>.</li>
-                <li>Pilih satuan (Pcs/Box), lalu ketuk <strong>SIMPAN</strong>.</li>
-            </ol>
-        </div>
+        <h3 id="bab1" style="color: #87CEFA; font-size: 14px; margin-top: 10px; border-bottom: 1px dashed #333; padding-bottom: 8px;">BAB 1: MANAJEMEN BARANG & HARGA</h3>
 
         <div class="qa-guide-card">
-            <h3 id="tut-peek">2. Fitur Intip Modal (HPP)</h3>
-            <p style="font-size:11px; color:#aaa; margin-top:-5px; margin-bottom:12px;">Modal disembunyikan agar aman dari pantauan pembeli.</p>
-            <ol>
-                <li>Temukan barang di daftar utama.</li>
-                <li><strong>Tekan & Tahan (Press & Hold)</strong> jari Anda pada kartu barang tersebut.</li>
-                <li>Kartu akan berubah gelap dan menampilkan <strong>Modal HPP & Profit Margin</strong>.</li>
-                <li>Lepaskan jari Anda untuk mengembalikan tampilan ke normal.</li>
-            </ol>
-        </div>
-
-        <div class="qa-guide-card">
-            <h3 id="tut-del">3. Hapus Barang & Undo</h3>
-            <ol>
-                <li><strong>Geser ke kiri (Swipe Left)</strong> pada kartu barang secara cepat.</li>
-                <li>Barang akan terhapus dan muncul notifikasi hitam di bawah layar.</li>
-                <li>Ketuk <strong>UNDO</strong> pada notifikasi (dalam 4 detik) jika Anda tidak sengaja menghapusnya.</li>
-            </ol>
-        </div>
-
-        <div class="qa-guide-card">
-            <h3 id="tut-pos">4. Transaksi & Keranjang</h3>
-            <ol>
-                <li>Ketuk tombol <strong>[+]</strong> pada ujung kanan kartu barang untuk memasukkan ke keranjang.</li>
-                <li>Buka keranjang dengan mengetuk <strong>Ikon Keranjang</strong> di menu atas/bawah.</li>
-                <li><strong>Ubah Qty:</strong> Ketuk langsung angka jumlah barang di dalam keranjang.</li>
-                <li><strong>Diskon Khusus:</strong> Ketuk nominal harga barang di keranjang untuk mengedit harga (potong harga kustom).</li>
-            </ol>
-        </div>
-
-        <div class="qa-guide-card">
-            <h3 id="tut-pay">5. Pembayaran & Cetak</h3>
-            <ol>
-                <li>Di layar keranjang, ketuk <strong>Ikon Printer</strong> di pojok kanan atas.</li>
-                <li>Gunakan <strong>Smart Cash Chips</strong> (tombol tebakan AI di bawah nominal) untuk mengisi uang bayar secara instan tanpa mengetik manual!</li>
-                <li>Ketuk <strong>PRINT</strong> (untuk printer Thermal biasa) atau <strong>BLUETOOTH</strong> (jika menggunakan printer mesin ESC/POS khusus).</li>
-            </ol>
-        </div>
-
-        <div class="qa-guide-card">
-            <h3 id="tut-search">6. Fitur Cari Pintar & Suara</h3>
+            <h3>Menambah Barang Baru</h3>
             <ul>
-                <li><strong>Pencarian Akronim:</strong> Ketik <code>mng</code>, otomatis muncul <em>Minyak Goreng</em>.</li>
-                <li><strong>Pengecualian (-):</strong> Ketik <code>Rokok -Garam</code> untuk menyembunyikan merek Garam.</li>
-                <li><strong>Filter Harga:</strong> Ketik <code>Susu <= 15000</code> untuk mencari susu di bawah 15rb.</li>
-                <li><strong>Pencarian Suara:</strong> Ketuk <strong>Ikon Mikrofon</strong> dan ucapkan: <em>"Tambah dua promag"</em>. Barang langsung masuk keranjang!</li>
+                <li><strong>Aksi:</strong> Ketuk ikon melayang <strong>(+)</strong> di sudut kanan bawah.</li>
+                <li><strong>Auto-Akronim:</strong> Cukup ketik Nama Barang (misal: "Minyak Goreng Bimoli 1L"). Sistem AI akan otomatis membuatkan kode cepat di kolom Akronim (misal: <code>mgb1</code>).</li>
+                <li><strong>Scan Barcode:</strong> Ketuk ikon Kamera di dalam kolom Barcode. Arahkan ke produk. <em>(Fitur Pro: Jika Anda memindai barcode standar pabrik/GS1 yang mengandung data expired, sistem akan otomatis mengisi kolom Expired Date!)</em>.</li>
+                <li><strong>HPP (Modal) & Margin:</strong> Masukkan Modal 1 Pcs. Ketik Persentase (misal: 10) di kolom Margin, maka Harga Jual akan otomatis dihitung. Margin akan berwarna <strong style="color: #32CD32;">Hijau</strong> (Untung besar), <strong style="color: #FFD700;">Kuning</strong> (Sedang), atau <strong style="color: #FF4C4C;">Merah</strong> (Tipis/Rugi).</li>
             </ul>
         </div>
 
-                <div class="qa-guide-card">
-            <h3 id="sect-tier">7. Cara Input Multi-Tier (Grosir Kompleks)</h3>
-            <p style="font-size: 11px; margin-bottom: 12px; color: #ccc;"><strong>Studi Kasus: Obat Promag (4 Level Kemasan)</strong><br>
-            • <strong>Modal (Supplier):</strong> 1 Pack = Rp 91.000 (Isi 4 Dus).<br>
-            • <strong>Rincian Isi:</strong> 1 Dus = 3 Strip. 1 Strip = 10 Butir.<br>
-            • <strong>Target Jual:</strong> Eceran <strong>Rp 1.000</strong>/btr. Beli 5 btr <strong>Rp 4.500</strong>. Beli 1 Strip (10 btr) <strong>Rp 8.500</strong>. Beli 1 Dus (30 btr) <strong>Rp 24.500</strong>.</p>
-            
-            <div style="background:#0a0a0a; padding:12px 12px 15px 12px; border-radius:8px; font-size:12px; margin-bottom:15px; border:1px solid #333; line-height: 1.7;">
-                <strong style="color: #87CEFA; letter-spacing: 0.5px;">LANGKAH PENGISIAN FORM BARANG:</strong>
-                <ol style="padding-left: 18px; margin-top: 8px; margin-bottom: 0;">
-                    <li><strong>HPP Grosir (Modal Terbesar):</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">91000</code>.</li>
-                    <li><strong>Satuan Grosir:</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">Pack</code>. Muncul kotak baru <strong>Isi /...</strong>, Anda harus menghitung total butir dalam 1 Pack (4 Dus × 3 Strip × 10 Butir). Ketik angkanya: <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">120</code>.<br><em style="font-size: 10px; color: #888;">(Sistem AI akan otomatis mengetahui bahwa Modal Asli Anda adalah Rp 758 /butir).</em></li>
-                    <li><strong>Harga Satuan:</strong> Ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">1000</code> dan kotak Satuan isi <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">Butir</code>.</li>
-                    <li><strong>Harga Grosir:</strong> <strong>KOSONGKAN!</strong> <br><em style="font-size: 10px; color: #ff3b30;">(PENTING: Karena barang ini punya 3 level grosir yang berbeda, biarkan Harga Grosir utama kosong. Kita atur semuanya di Multi-Tier).</em></li>
-                    <li>Gulir ke bawah ke bagian <strong>Multi-Tier</strong>, ketuk tombol <strong style="color:#FFD700; border:1px solid #FFD700; padding:2px 6px; border-radius:4px; font-size:10px;">+ TAMBAH</strong> sebanyak 3 kali untuk memunculkan 3 baris.</li>
-                    <li><strong>Baris 1 (Promo 5 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">5</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">900</code> <em>(Dari Rp 4.500 dibagi 5)</em>.</li>
-                    <li><strong>Baris 2 (Level 1 Strip / 10 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">10</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">850</code> <em>(Dari Rp 8.500 dibagi 10)</em>.</li>
-                    <li><strong>Baris 3 (Level 1 Dus / 30 Btr):</strong> Kotak Qty ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">30</code>, Harga/Pcs ketik <code style="color:#FFD700; background:#222; padding:2px 6px; border-radius:4px;">816.67</code> <em>(Dari Rp 24.500 dibagi 30)</em>.</li>
-                    <li>Ketuk <strong>SIMPAN</strong>. Selesai!</li>
-                </ol>
-            </div>
+        <div class="qa-guide-card">
+            <h3>Fitur Intip Modal (HPP)</h3>
+            <ul>
+                <li><strong>Fungsi:</strong> Melihat modal tanpa ketahuan pembeli.</li>
+                <li><strong>Aksi:</strong> Di layar daftar barang utama, <strong>Tekan & Tahan</strong> (<em>Press & Hold</em>) jari Anda pada salah satu barang selama setengah detik. Layar akan meredup dan menampilkan Modal HPP, Laba, dan Margin. Lepaskan jari untuk kembali normal.</li>
+            </ul>
+        </div>
 
-            <p style="font-size: 11px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; color: #888;">Simulasi Otomatis Saat Kasir Transaksi:</p>
-            <table class="qa-tier-table">
-                <tr>
-                    <th>Kasir Ketik Qty</th>
-                    <th>Deteksi AI Harga Oleh Sistem</th>
-                </tr>
-                <tr>
-                    <td><strong>3 Btr</strong></td>
-                    <td>Gagal diskon. Kena harga Ecer Rp 1.000 <br><strong>(Total Rp 3.000)</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>6 Btr</strong></td>
-                    <td class="qa-text-blue">Lolos Tier-1 (≥ 5). Harga disunat jadi Rp 900 <br><strong>(Total Rp 5.400)</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>12 Btr</strong><br><small>(1 Strip + 2 Btr)</small></td>
-                    <td class="qa-text-gold">Lolos Tier-2 (≥ 10). Harga disunat jadi Rp 850 <br><strong>(Total Rp 10.200)</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>35 Btr</strong><br><small>(1 Dus + 5 Btr)</small></td>
-                    <td class="qa-text-green">Lolos Tier-3 (≥ 30). Harga disunat jadi Rp 816.67 <br><strong>(Total Rp 28.583)</strong></td>
-                </tr>
-            </table>
+        <div class="qa-guide-card">
+            <h3>Panduan Multi-Tier</h3>
+            <ul>
+                <li><strong>Kondisi:</strong> Ingin membuat harga "Beli 1 Rp1.000, Beli 5 Rp900/pcs, Beli 1 Dus Rp800/pcs".</li>
+                <li><strong>Aksi:</strong>
+                    <ol>
+                        <li>Isi Harga Satuan (Rp1.000). <strong>KOSONGKAN</strong> Harga Grosir utama.</li>
+                        <li>Gulir ke bawah ke bagian <strong>Multi-Tier</strong>.</li>
+                        <li>Ketuk <strong>+ TAMBAH</strong>. Isi Qty <code>5</code> dan Harga/Pcs <code>900</code>.</li>
+                        <li>Ketuk <strong>+ TAMBAH</strong> lagi. Isi Qty <code>30</code> (1 Dus) dan Harga/Pcs <code>800</code>.</li>
+                        <li>Saat di Kasir, pembeli yang mengambil 6 pcs otomatis dihitung dengan harga Rp900/pcs.</li>
+                    </ol>
+                </li>
+            </ul>
+        </div>
 
-            <div class="qa-info-card" style="margin-top: 15px;">
-                <strong>💡 KUNCI EFISIENSI ENTERPRISE:</strong><br>
-                Dengan mengosongkan <strong>Harga Grosir</strong> dan murni menggunakan <strong>Multi-Tier</strong>, satu kode barang (Barcode Promag) bisa memuat puluhan harga berbeda secara dinamis. Kasir hanya perlu men-scan 1 kali, ketik total Qty (misal: 35), dan mesin akan mencarikan potongan harga paling murah secara otomatis!
+        <div class="qa-guide-card">
+            <h3>Hapus, Edit, dan Favorit</h3>
+            <ul>
+                <li><strong>Edit:</strong> Ketuk ikon <strong>Pensil</strong> di kartu barang.</li>
+                <li><strong>Favorit:</strong> Ketuk ikon <strong>Bintang</strong> (saat mode Edit) untuk memasukkan barang ke Tab Favorit.</li>
+                <li><strong>Hapus Cepat (Swipe):</strong> Geser kartu barang ke arah KIRI secara cepat. Akan muncul notifikasi hitam di bawah layar. Anda punya waktu <strong>4 detik untuk mengetuk UNDO</strong> jika tidak sengaja terhapus.</li>
+            </ul>
+        </div>
+
+        <h3 id="bab2" style="color: #87CEFA; font-size: 14px; margin-top: 30px; border-bottom: 1px dashed #333; padding-bottom: 8px;">BAB 2: TRANSAKSI KASIR (POINT OF SALE)</h3>
+
+        <div class="qa-guide-card">
+            <h3>Mode Kasir (Split-Screen)</h3>
+            <ul>
+                <li>Ketuk ikon <strong>Keranjang Belanja</strong> di menu bawah.</li>
+                <li><em>Tips Layar Lebar:</em> Jika Anda memiringkan HP (Landscape) atau memakai Tablet, layar akan terbelah dua. Kiri untuk keranjang, Kanan untuk daftar barang, mempermudah transaksi super cepat.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Pencarian Cerdas & Suara</h3>
+            <ul>
+                <li><strong>Singkatan:</strong> Ketik <code>pmg</code>, otomatis muncul Promag.</li>
+                <li><strong>Pengecualian (-):</strong> Ketik <code>Rokok -Garam</code> (Sistem akan menampilkan semua rokok kecuali merek Gudang Garam).</li>
+                <li><strong>Filter Harga:</strong> Ketik <code>Susu <= 15000</code> (Menampilkan susu dengan harga Rp15.000 ke bawah).</li>
+                <li><strong>Voice Command:</strong> Ketuk ikon <strong>Mikrofon</strong> dan ucapkan: <em>"Tambah dua indomie goreng"</em>. Barang otomatis masuk keranjang dengan Qty 2.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Mengelola Keranjang Belanja</h3>
+            <ul>
+                <li><strong>Ubah Jumlah (Qty):</strong> Ketuk nominal angka Qty di dalam keranjang, ketik angka baru.</li>
+                <li><strong>Diskon Manual / Nego:</strong> Ketuk nominal Harga di dalam keranjang. Anda bisa mengubah harga secara manual (misal dari Rp12.000 diketik menjadi Rp10.000).</li>
+                <li><strong>AI Rekomendasi:</strong> Jika muncul kotak biru <em>"AI PREDIKSI: SERING DIBELI BERSAMA"</em>, itu adalah sistem yang mempelajari kebiasaan pembeli dan merekomendasikan barang pasangan.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Pembayaran & Smart Cash</h3>
+            <ul>
+                <li>Ketuk ikon <strong>Printer</strong> di pojok kanan atas keranjang.</li>
+                <li>Tidak perlu mengetik uang bayar manual! Sistem akan menampilkan 3 tebakan <strong>Smart Cash Chips</strong> (Uang Pas, Pembulatan Uang Pecahan terdekat, dan Lembaran 50rb/100rb terdekat). Cukup ketuk salah satu chip.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Cetak Struk</h3>
+            <ul>
+                <li><strong>PRINT:</strong> Mencetak menggunakan printer standar via sistem bawaan Android/Browser.</li>
+                <li><strong>BT (Bluetooth):</strong> Mencetak langsung ke mesin printer kasir portabel (ESC/POS) tanpa <em>delay</em>.</li>
+                <li><strong>SIMPAN:</strong> Menyimpan transaksi tanpa mencetak kertas.</li>
+            </ul>
+        </div>
+
+        <h3 id="bab3" style="color: #87CEFA; font-size: 14px; margin-top: 30px; border-bottom: 1px dashed #333; padding-bottom: 8px;">BAB 3: RIWAYAT, LAPORAN & EXCEL</h3>
+
+        <div class="qa-guide-card">
+            <h3>Cek Omzet & Riwayat Transaksi</h3>
+            <ul>
+                <li>Ketuk ikon <strong>Jam Pasir/Riwayat</strong> di menu atas Mode Kasir.</li>
+                <li>Anda bisa melihat <strong>Omzet</strong> dan <strong>Laba Bersih</strong> hari ini.</li>
+                <li>Ketuk panah pada salah satu transaksi untuk melihat rincian barang yang dibeli.</li>
+                <li><strong>Aksi pada Struk Lama:</strong>
+                    <ul style="margin-top: 6px;">
+                        <li><strong>EDIT:</strong> Menarik kembali struk lama ke keranjang belanja jika ada revisi dari pembeli. <em>(Pastikan keranjang kosong sebelum melakukan ini!)</em>.</li>
+                        <li><strong>WA:</strong> Mengirim struk digital berbentuk teks rapi ke WhatsApp pelanggan.</li>
+                        <li><strong>CETAK / BT:</strong> Mencetak ulang (Reprint) struk yang hilang/rusak.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Top 10 Barang Terlaris</h3>
+            <ul>
+                <li>Di dalam menu Riwayat, ketuk ikon <strong>Trophy (Piala)</strong> di sebelah tulisan "RIWAYAT". Layar akan menampilkan 10 produk paling laku (berdasarkan kuantitas fisik yang terjual hari ini).</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Export & Import Excel</h3>
+            <ul>
+                <li>Ketuk ikon <strong>Kebab (Titik Tiga)</strong> di kanan atas layar utama.</li>
+                <li><strong>Save Excel:</strong> Mengunduh seluruh database harga ke file <code>.xlsx</code>.</li>
+                <li><strong>Load Excel:</strong> Memasukkan data dari file Excel. <em>Catatan: Sistem cerdas ini akan otomatis mendeteksi kolom yang mengandung unsur kata "Nama" dan "Harga", format kolom bebas asalkan satu baris sejajar.</em></li>
+            </ul>
+        </div>
+
+        <h3 id="bab4" style="color: #87CEFA; font-size: 14px; margin-top: 30px; border-bottom: 1px dashed #333; padding-bottom: 8px;">BAB 4: KEAMANAN & SINKRONISASI CLOUD</h3>
+
+        <div class="qa-guide-card">
+            <h3>Sistem Offline-First</h3>
+            <p style="margin-top: 0; padding-left: 20px;">Aplikasi ini 100% bisa digunakan meski paket data habis/internet mati (Wifi putus). Transaksi dan data barang akan diamankan di dalam memori HP secara lokal.</p>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Backup ke Cloud</h3>
+            <ul>
+                <li><strong>Upload Data:</strong> Jika internet sudah menyala, ketuk ikon <strong>Awan Biru (Upload)</strong> di kiri atas. Sistem akan mengirim data barang dan riwayat transaksi ke Cloud.</li>
+                <li><em>Proteksi Gagal Kirim:</em> Jika sinyal terputus di tengah jalan saat transaksi, data tidak akan hilang. Sistem akan menaruhnya di "Antrean Offline" dan memintanya di-upload nanti.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Load Data Cloud</h3>
+            <ul>
+                <li>Ketuk menu Kebab -> <strong>Sinkronisasi Cloud</strong>.</li>
+                <li><strong>Load Pembaruan (Delta):</strong> Menarik harga baru dari server tanpa menghapus data lokal yang belum di-upload (Aman).</li>
+                <li><strong>Load Semua Data (Force):</strong> Menimpa mutlak seluruh isi HP dengan data dari Cloud <strong style="color: var(--danger);">(Peringatan: Data di HP yang belum di-upload akan musnah!)</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="qa-guide-card">
+            <h3>Bersihkan Memori & Hapus Data</h3>
+            <ul>
+                <li><strong>Bersihkan Cache:</strong> (Menu Kebab) Melakukan defragmentasi database HP untuk mempercepat pencarian jika aplikasi mulai terasa lambat.</li>
+                <li><strong>Hapus Semua Data:</strong> Mereset HP ke posisi nol (Membutuhkan <strong style="color:var(--danger);">PIN: 170823</strong>).</li>
+            </ul>
+        </div>
+
+        <div class="qa-info-card" id="qa-tips" style="margin-top: 25px;">
+            <strong style="color: #FFD700; font-size: 12.5px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg> 
+                TRIK RAHASIA
+            </strong>
+            <div style="margin-top: 10px; color: #e0e0e0; line-height: 1.6; font-size: 12px;">
+                Saat mendaftarkan barang, <b style="color:#FFD700;">KOSONGKAN kolom 'Harga Grosir'</b>, lalu masukkan seluruh tingkatan harga partai Anda ke fitur <b>Multi-Tier</b> di bawah.
+                <ul style="margin: 8px 0 0 0; padding-left: 18px; color: #ccc;">
+                    <li style="margin-bottom: 6px;"><b style="color:#fff;">Anti-Ribet di Kasir:</b> Kasir cukup scan barang 1x lalu ketik jumlahnya (misal: 150 pcs). Tidak perlu mencari kode barang dus/pack secara terpisah.</li>
+                    <li style="margin-bottom: 6px;"><b style="color:#fff;">Diskon Otomatis:</b> Aplikasi langsung menerapkan harga grosir yang paling pas sesuai jumlah ketikan kasir.</li>
+                    <li><b style="color:#fff;">Laba Bersih Jujur:</b> Sistem menghitung modal (HPP) per butir secara presisi, sehingga laporan keuntungan harian Anda 100% akurat.</li>
+                </ul>
             </div>
         </div>
+
     </div>
+</div>
 
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
@@ -1085,10 +1146,13 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             if (isNaN(parsed) || !isFinite(parsed) || parsed <= 0) parsed = 1;
             parsed = Math.min(parsed, 99999);
 
+            let oldQ = cartState[id].q || 1;
             cartState[id].q = parsed;
-            delete cartState[id].manualPrice; 
+            if (cartState[id].manualPrice !== undefined && oldQ > 0 && oldQ !== parsed) {
+                cartState[id].manualPrice = Math.round((cartState[id].manualPrice / oldQ) * parsed);
+            }
             saveCartMem();
-            
+
             updateRowVisuals(id);
             updateGrandTotal();
         }
@@ -1132,7 +1196,9 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             }
         }
             if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
-                return Math.round((q * item.p2) / iq);
+                let qtyGrosir = Math.floor(q / iq);
+                let qtyEcer = q % iq;
+                return Math.round((qtyGrosir * item.p2) + (qtyEcer * item.p1));
             }
             return Math.round(q * (item.p1 || 0));
         }
@@ -1510,7 +1576,7 @@ saveCartMem();
             card.style.transition = 'none';
 
             // FITUR 1: Hold-to-Peek Trigger (Dengan Spatial UX Jempol)
-            if (!isCartMode && tab === 'all') {
+            if (!isCartMode && (tab === 'all' || tab === 'fav')) {
                 peekTimer = setTimeout(() => {
                     
                     // --- INJEKSI SPATIAL UX (Deteksi Zona Sentuhan) ---
@@ -1552,16 +1618,24 @@ saveCartMem();
             }
 
             if (diffY > diffX && diffY > 10) return;
-            if (diffX > 30 && diffX < 90) {
+            // [SURGICAL FIX] Isolasi Sumbu-X: Hanya izinkan kartu digeser jika berada di tab HARGA ('all')
+            if (tab === 'all' && diffX > 30 && diffX < 90) {
                 isMainSwiping = true; 
                 card.style.transform = `translateX(-${diffX}px)`;
             }
         }
 
-            function handleMainTouchEnd(e, card) {
+        function handleMainTouchEnd(e, card) {
             if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
             card.classList.remove('peek-active');
             card.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+
+            // [SURGICAL FIX] Kunci Mutlak Favorit: Paksa kartu kembali ke titik nol & hentikan fungsi
+            if (tab !== 'all') {
+                card.style.transform = 'translateX(0px)';
+                return;
+            }
+
 const diffX = touchStartX - touchCurrentX;
 const diffY = Math.abs(touchStartY - e.changedTouches[0].clientY);
 if (diffY > 40) {
@@ -1597,13 +1671,12 @@ if (diffY > 40) {
             }
         }
         
-// [INJEKSI QA LEAD] Smart Scroll Auto-Focus Natural
+// [INJEKSI QA LEAD] Smart Scroll Auto-Focus Natural (Anti-Phantom Jitter)
 document.addEventListener('focus', function(e) {
     const el = e.target;
     if (el && (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') && el.closest('.modal-box')) {
-        // Beri jeda 400ms agar animasi native keyboard HP selesai
         setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (el.offsetParent !== null) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 400);
     }
 }, true);
@@ -2162,26 +2235,6 @@ document.addEventListener('focus', function(e) {
         } // [SURGICAL FIX] INJEKSI PENUTUP IF UTAMA YANG HILANG
         };
 
-                // --- INJEKSI KASIR TANPA SENTUH 2.0 (NLP VOICE ENGINE) ---
-        function indoPhoneticMain(str) {
-            if(!str) return "";
-            return str.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/gh/g, 'g').replace(/sh/g, 's')
-                .replace(/([a-z])\1+/g, '$1').replace(/[fvw]/g, 'p').replace(/[z]/g, 'j').replace(/[cq]/g, 'k').replace(/[aeiouy]/g, '');
-        }
-        
-        function levenshteinMain(a, b, limit = 99) {
-            if(Math.abs(a.length - b.length) > limit) return 99;
-            if(a.length === 0) return b.length; if(b.length === 0) return a.length;
-            let d = []; for(let i=0; i<=b.length; i++){ d[i] = [i]; } for(let j=0; j<=a.length; j++){ d[0][j] = j; }
-            for(let i=1; i<=b.length; i++){
-                for(let j=1; j<=a.length; j++){
-                    let cost = (b.charAt(i-1) === a.charAt(j-1)) ? 0 : 1;
-                    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
-                    if(i > 1 && j > 1 && b.charAt(i-1) === a.charAt(j-2) && b.charAt(i-2) === a.charAt(j-1)) d[i][j] = Math.min(d[i][j], d[i-2][j-2] + cost);
-                }
-            } return d[b.length][a.length];
-        }
-
 function processNLPVoice(transcript) {
     let text = transcript.toLowerCase();
     let isAdd = false, qty = 1;
@@ -2190,7 +2243,7 @@ function processNLPVoice(transcript) {
     if (match) {
         isAdd = true;
         let mapNum = {'satu':1, 'dua':2, 'tiga':3, 'empat':4, 'lima':5};
-        qty = mapNum[match[2]] || parseInt(match[2], 10);
+        qty = mapNum[match[2]] || parseInt(match[2], 10) || 1;
         text = match[3]; 
     }
 
@@ -2667,13 +2720,14 @@ try {
                 } else {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
-                        swipeAttributes = tab === 'all' ? `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"` : '';
+                        // [SURGICAL FIX] Tab Favorit mengizinkan sentuhan (Peek), tapi memblokir atribut Swipe & Trash!
+                        swipeAttributes = (tab === 'all' || tab === 'fav') ? `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"` : '';
                         trashBgHtml = tab === 'all' ? `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>` : '';
                         let editBtnHtml = tab === 'all' ? `<button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : '';
                         rightSideUI = `<div class="action-btns-absolute">${editBtnHtml}</div>`;
                     } else rightSideUI = `<div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: auto;"><button class="btn-add-cart calc-add" data-id="${it.id}">+</button></div>`;
 
-                                        // FITUR 2: Margin Color-Bar
+                    // FITUR 2: Margin Color-Bar
                     let marginClass = '';
                     let marginPct = 0;
                     let marginColorHex = '#4dff4d'; // Default hijau
@@ -2847,14 +2901,15 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                                 const ts = Date.now();
                 const isFav = $('mod-fav-btn').dataset.fav === 'true';
                 
-                                if (activeId) {
+                if (activeId) {
                     const idx = db.findIndex(x => String(x.id) === String(activeId)); 
                     if (idx === -1) throw new Error("Barang tidak ditemukan di database!");
                     
-                    db[idx] = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, f: isFav, exp, t, u1, u2, iq, tiers, updatedAt: Math.max(ts, (db[idx].updatedAt || 0) + 1) };
-                    delete db[idx]._isGhost; // SURGICAL FIX: Cabut kutukan Ghost secara permanen jika data sengaja disimpan ulang
-                    await saveItemToIDB(db[idx]); 
-                    
+                    let tempUpdatedItem = { ...db[idx], b, b2, n: cleanName, hpp, p1, p2, f: isFav, exp, t, u1, u2, iq, tiers, updatedAt: Math.max(ts, (db[idx].updatedAt || 0) + 1) };
+                    delete tempUpdatedItem._isGhost;
+                    await saveItemToIDB(tempUpdatedItem); 
+                    db[idx] = tempUpdatedItem; // Berhasil masuk Disk, baru izinkan mutasi Memori
+
                     if (worker) worker.postMessage({ type: 'update', item: db[idx] }); 
                 } else {
                     let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
@@ -2937,7 +2992,7 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 gToast = document.createElement('div');
                 gToast.id = 'ghost-toast-ui';
                 gToast.className = 'ghost-toast';
-                gToast.innerHTML = `<span>1 Barang Dihapus</span> <button id="btn-undo-ghost">UNDO</button>`;
+                gToast.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span style="letter-spacing:0.5px;">Barang dihapus</span></div> <button id="btn-undo-ghost"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg> UNDO</button>`;
                 document.body.appendChild(gToast);
             }
             gToast.classList.add('show');
@@ -3150,7 +3205,7 @@ db.forEach(i => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
                             // [ELITE QA FIX] Dynamic Outbox Key. Mencegah sesi putus jaringan baru menimpa antrean putus jaringan lawas.
                             tx.objectStore('sync-outbox').put({ 
-                            id: 'outbox_' + Date.now(), 
+                            id: 'pending_sync_master', 
                            data: db.filter(i => !i._isGhost), 
                            history: histBackup, 
                            timestamp: Date.now() 
@@ -3622,17 +3677,20 @@ setTimeout(processImportChunk, 0);
                 }
             });
 
-            // FITUR 5: Smart Cash Chips AI (Hyper-Local IDR Predictive Engine)
+                        // FITUR 5: Smart Cash Chips AI (Hyper-Local IDR Predictive Engine)
             let chip1 = grandTotal;
             let chip2 = Math.ceil(grandTotal / 5000) * 5000;
-            if (chip2 === grandTotal) chip2 += (grandTotal >= 50000) ? 10000 : 5000; 
             
-            let baseBesar = [10000, 20000, 50000, 100000, 150000, 200000, 300000];
-            let chip3 = baseBesar.find(n => n > grandTotal) || (Math.ceil(grandTotal / 100000) * 100000 + 50000);
-            
-            if (chip3 <= chip2) {
-                chip3 = baseBesar.find(n => n > chip2) || (chip2 + 50000);
+            // [SURGICAL FIX] Logika Prediksi Uang Pecahan Rupiah yang Akurat
+            if (chip2 === grandTotal) {
+                // Jika ekor angka adalah 00.000 (contoh: 110.000), naik ke 120.000. Jika 5.000 (contoh: 115.000), naik ke 120.000.
+                chip2 += (grandTotal % 10000 === 0) ? 10000 : 5000;
             }
+            
+            // Prediksi lembar uang besar berikutnya (Kelipatan 50k atau 100k)
+            let sisa50 = grandTotal % 50000;
+            let chip3 = grandTotal - sisa50 + 50000;
+            if (chip3 <= chip2) chip3 += 50000;
 
             let smartCashHtml = `<div class="smart-cash-row">
                 <div class="smart-cash-chip" onclick="document.getElementById('input-bayar-struk').value='${fmt(chip1)}'; document.getElementById('input-bayar-struk').dispatchEvent(new Event('input'));">Uang Pas</div>
@@ -3863,7 +3921,11 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             let receiptNo = finalId ? finalId.split('-').slice(0, 2).join('-') : ''; 
             let totalItemCount = 0;
 
-            let dateStrAligned = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            let dateOnly = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
+            let timeOnly = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            
+            // Injeksi 4 spasi absolut (&nbsp;) agar total string menjadi 17 karakter (Sejajar dengan ID TRX)
+            let dateStrAligned = `${dateOnly}&nbsp;&nbsp;&nbsp;&nbsp;${timeOnly}`;
 
             // 2. Render Header & Meta Standar Supermarket
             let rawHTML = `
@@ -3875,17 +3937,16 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 </div>
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
                 <table style="width: 100%; border-collapse: collapse; font-family: inherit; font-size: inherit;">
-                    <tr><td style="text-align:left; width: 40px;">No</td><td style="text-align:left;">: ${receiptNo}</td></tr>
+                    <tr><td style="text-align:left; width: 40px;">No ID</td><td style="text-align:left;">: ${receiptNo}</td></tr>
                     <tr><td style="text-align:left;">Tgl</td><td style="text-align:left; white-space: nowrap;">: ${dateStrAligned}</td></tr>
-                    <tr><td style="text-align:left;">Kasir</td><td style="text-align:left;">: Dona${isReprint ? ' [R]' : ''}</td></tr>
+                    <tr><td style="text-align:left;">Kasir</td><td style="text-align:left;">: Barla${isReprint ? ' [R]' : ''}</td></tr>
                 </table>
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
             `;
-
             // 3. Render Daftar Barang dengan Indentasi Ritel
             items.forEach(i => {
                 let safeN = escapeHTML(i.n).toUpperCase(); // Nama selalu kapital di struk ritel
-                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
+                let hrgSatuan = i.q > 0 ? Number((i.sub / i.q).toFixed(2)) : i.sub;
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                 
@@ -4523,14 +4584,13 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
         if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
                 if (!btDevice || !btDevice.gatt.connected || !btChar) {
     showLoading("Menghubungkan Printer...", "#87CEFA");
-    if (btDevice && !btDevice.gatt.connected) {
-        try { await btDevice.gatt.connect(); } catch(e) { btDevice = null; }
-    }
-    if (!btDevice) {
-        btDevice = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
-        });
+    if (!btDevice || (btDevice && !btDevice.gatt.connected)) {
+        if (!btDevice) {
+            btDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
+            });
+        }
     }
     
     // [SURGICAL FIX] Web Bluetooth GATT Timeout Protector (Anti-Infinite Hang)
