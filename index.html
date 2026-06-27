@@ -626,17 +626,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             </div>
         </div>
     </div>
-    <div id="offline-ledger-modal" class="modal">        <div class="modal-box" style="border-color: var(--warning);">
-            <h3 style="margin-top:0; font-size:15px; color: var(--warning); text-transform:uppercase;">Catatan Darurat Offline</h3>
-            <p style="font-size:11px; color:#888; margin-bottom:12px;">Salin data ini ke kasir utama, lalu hapus jika sudah selesai.</p>
-            <textarea id="offline-ledger-view" readonly style="height:150px; margin-bottom:10px; background:#000; color:var(--text-light); border:1px solid #333;"></textarea>
-            <div class="modal-btns">
-                <button class="btn-main btn-cancel" onclick="closeOfflineLedger()">TUTUP</button>
-                <button class="btn-main" style="border:1px solid var(--danger)!important; color:var(--danger)!important; background:transparent!important;" onclick="clearOfflineLedger()">HAPUS CATATAN</button>
-            </div>
-        </div>
-    </div>
-
+    
     <div id="sync-modal" class="modal">
         <div class="modal-box" id="sync-modal-box" style="text-align: center; max-width: 310px; padding: 25px 20px; border: 2px solid var(--border-color); transition: border-color 0.3s ease; overflow: visible;">
             <h3 id="sync-modal-title" style="margin-top:0; color: #87CEFA; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Montserrat', sans-serif; transition: color 0.3s ease;">
@@ -2393,8 +2383,8 @@ try {
                 <div style="flex: 1;">
                     <input type="number" class="tier-q" placeholder="Qty" value="${qty}" style="margin:0; padding:8px; font-size:12px; background:#111; color:#FFD700; border-color:#FFD700;">
                 </div>
-                <div style="flex: 2;">
-                    <input type="tel" class="tier-p" placeholder="Harga/Pcs" value="${price ? fmt(price) : ''}" oninput="formatRp(this);" style="margin:0; padding:8px; font-size:12px; background:#111;">
+                                <div style="flex: 2;">
+                    <input type="text" inputmode="decimal" class="tier-p" placeholder="Harga/Pcs" value="${price ? String(price).replace('.', ',') : ''}" oninput="this.value = this.value.replace(/[^0-9.,]/g, '');" style="margin:0; padding:8px; font-size:12px; background:#111;">
                 </div>
                 <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); border-radius:4px; height:32px; width:32px; display:flex; justify-content:center; align-items:center; cursor:pointer; outline:none; padding:0; transition: transform 0.2s;">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -2766,7 +2756,14 @@ try {
                 const tierRows = document.querySelectorAll('#tier-container .tier-row');
                 tierRows.forEach(row => {
                     let tQ = parseFloat(row.querySelector('.tier-q').value) || 0;
-                    let tP = parseInt(String(row.querySelector('.tier-p').value).replace(/\D/g, ''), 10) || 0;
+                    
+                    // [SURGICAL FIX] Amankan angka desimal, ganti koma menjadi titik untuk mesin JS (parseFloat)
+                    let rawP = row.querySelector('.tier-p').value;
+                    let cleanP = String(rawP).replace(/[^0-9.,]/g, '').replace(/,/g, '.');
+                    let parts = cleanP.split('.');
+                    if (parts.length > 2) { let dec = parts.pop(); cleanP = parts.join('') + '.' + dec; }
+                    let tP = parseFloat(cleanP) || 0;
+
                     if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 });
 
@@ -3485,12 +3482,7 @@ setTimeout(processImportChunk, 0);
             if (action || linkData) { window.history.replaceState({}, document.title, window.location.pathname); }
         }
 
-        function showOfflineLedger(text) { $('offline-ledger-view').value = text; $('offline-ledger-modal').style.display = 'flex'; document.body.classList.add('modal-open'); trackModal('offline'); }
-        function closeOfflineLedger() { untrackModal('offline'); $('offline-ledger-modal').style.display = 'none'; checkModalOpen(); }
-        function clearOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (!dbOff.objectStoreNames.contains('CatatanDarurat')) return closeOfflineLedger(); const tx = dbOff.transaction('CatatanDarurat', 'readwrite'); tx.objectStore('CatatanDarurat').delete(1); tx.oncomplete = () => { closeOfflineLedger(); tampilkanToast("Catatan dihapus!", "var(--danger)"); }; }; } catch(err){} }
-        function checkOfflineLedger() { try { const req = indexedDB.open('KasirOfflineDB', 1); req.onsuccess = (e) => { const dbOff = e.target.result; if (dbOff.objectStoreNames.contains('CatatanDarurat')) { const tx = dbOff.transaction('CatatanDarurat', 'readonly'); const store = tx.objectStore('CatatanDarurat'); const getReq = store.get(1); getReq.onsuccess = () => { if (getReq.result && getReq.result.text && getReq.result.text.trim().length > 0) { showConfirm("Terdapat catatan transaksi saat offline yang belum direkap.", "Info Offline", "var(--warning)", () => { showOfflineLedger(getReq.result.text); }, "LIHAT CATATAN"); } }; } }; } catch(err) {} }
-
-        function updateHistDateDisplay(val) {
+                function updateHistDateDisplay(val) {
             if(!val) return;
             let parts = val.split('-');
             let d = new Date(parts[0], parts[1]-1, parts[2]);
@@ -4502,7 +4494,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
             try {
                 if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
-                                if (!btDevice || !btDevice.gatt.connected) {
+                if (!btDevice || !btDevice.gatt.connected || !btChar) {
     showLoading("Menghubungkan Printer...", "#87CEFA");
     if (btDevice && !btDevice.gatt.connected) {
         try { await btDevice.gatt.connect(); } catch(e) { btDevice = null; }
