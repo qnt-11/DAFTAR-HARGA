@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '1.2'; 
+const APP_VERSION = '1.3'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -127,10 +127,10 @@ self.addEventListener('fetch', event => {
           }
         } catch (err) { console.error('[SW] Cache API Crash!', err); }
 
-        let timeoutId;
+                let timeoutId;
         const fetchPromise = Promise.race([
           pFetch.finally(() => clearTimeout(timeoutId)),
-          new Promise((_, reject) => timeoutId = setTimeout(() => reject(new Error('Timeout')), 4000))
+          ...(cachedRes ? [new Promise((_, reject) => timeoutId = setTimeout(() => reject(new Error('Timeout')), 4000))] : [])
         ]).catch(() => null);
 
         const networkRes = await fetchPromise;
@@ -268,35 +268,38 @@ async function processOfflineBackup() {
             return resolve();
         }
         
-        const payload = cursor.value; // Ambil snapshot TERTINGGI/TERBARU
+        const payload = cursor.value; 
+        const payloadKey = cursor.primaryKey; // [ELITE QA FIX] Tangkap Kunci Primer Absolut
           try {
             const CLOUD_API = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
             
                         // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
-            const itemsData = await new Promise((res, rej) => {
+                        // [ELITE QA FIX] Streaming String Serialization (OOM-Proof Memory Compression)
+            const backupPayloadStr = await new Promise((res, rej) => {
                 const txItems = idb.transaction('items', 'readonly');
                 const store = txItems.objectStore('items');
                 const req = store.openCursor();
-                const cleanItems = [];
+                let jsonStream = '{"action":"backup","data":[';
+                let isFirst = true;
                 
                 req.onsuccess = (e) => {
                     const cursor = e.target.result;
                     if (cursor) {
-                        if (!cursor.value._isGhost) {
-                            delete cursor.value._cHeight; // Mutasi langsung (Zero-Copy) cegah Memory Bloat
-                            cleanItems.push(cursor.value);
+                        let item = cursor.value;
+                        if (!item._isGhost) {
+                            delete item._cHeight; 
+                            if (!isFirst) jsonStream += ',';
+                            jsonStream += JSON.stringify(item);
+                            isFirst = false;
                         }
                         cursor.continue();
                     } else {
-                        res(cleanItems);
+                        jsonStream += ']}';
+                        res(jsonStream); // Kirim string rakitan akhir, RAM aman dari penumpukan Array
                     }
                 };
-                req.onerror = () => rej(new Error("Gagal membaca store items"));
+                req.onerror = () => rej(new Error("Gagal merakit stream store items"));
             });
-
-            // Amankan String Payload, lalu bantai array dari RAM sebelum I/O Fetch menahan thread
-            const backupPayloadStr = JSON.stringify({ action: 'backup', data: itemsData });
-            itemsData.length = 0; 
 
             const resData = await fetch(CLOUD_API, {
               method: 'POST', body: backupPayloadStr
@@ -330,11 +333,12 @@ async function processOfflineBackup() {
 
           verifyReq.onsuccess = (e) => {
               const checkCursor = e.target.result;
-              if (checkCursor && checkCursor.value.timestamp === payload.timestamp) {
-                  storeDel.clear(); // [SURGICAL FIX] Bantai seluruh isi Outbox! Data terbaru sudah masuk awan, sisa antrean usang hanyalah sampah duplikat (Storage Leak).
-              } else {
-                  console.warn('[SW] Mutasi transaksi baru terdeteksi saat proses upload berjalan. Antrean dipertahankan.');
-              }
+          if (checkCursor && checkCursor.value.timestamp === payload.timestamp) {
+              storeDel.clear(); 
+          } else {
+              storeDel.delete(payloadKey); // [ELITE QA FIX] Gunakan Kunci Primer Absolut, BUKAN payload.id yang berisiko undefined
+              console.warn('[SW] Mutasi transaksi baru terdeteksi saat proses upload berjalan. Antrean dipertahankan.');
+          }
           };
 
           txDel.oncomplete = () => { 
