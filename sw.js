@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '1.4'; 
+const APP_VERSION = '1.5'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -271,7 +271,7 @@ async function processOfflineBackup() {
         const payload = cursor.value; 
         const payloadKey = cursor.primaryKey; // [ELITE QA FIX] Tangkap Kunci Primer Absolut
           try {
-            const CLOUD_API = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
+            const CLOUD_API = "https://script.google.com/macros/s/AKfycbyCXVmNZkntttxcEcyIl0yuWWkT0oRP9znyS5mF_EbpIr5hoywK4fUYib_YDtptDyn6/exec";
             
                         // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
                         // [ELITE QA FIX] Streaming String Serialization (OOM-Proof Memory Compression)
@@ -332,13 +332,12 @@ async function processOfflineBackup() {
           const verifyReq = storeDel.openCursor(null, 'prev'); // Cek apakah ada antrean yang LEBIH BARU masuk saat proses upload berjalan
 
           verifyReq.onsuccess = (e) => {
+              storeDel.delete(payloadKey); // Hapus SECARA SPESIFIK HANYA transaksi yang berhasil di-upload
+              
               const checkCursor = e.target.result;
-          if (checkCursor && checkCursor.value.timestamp === payload.timestamp) {
-              storeDel.clear(); 
-          } else {
-              storeDel.delete(payloadKey); // [ELITE QA FIX] Gunakan Kunci Primer Absolut, BUKAN payload.id yang berisiko undefined
-              console.warn('[SW] Mutasi transaksi baru terdeteksi saat proses upload berjalan. Antrean dipertahankan.');
-          }
+              if (checkCursor && checkCursor.value.timestamp !== payload.timestamp) {
+                  console.warn('[SW] Mutasi sisa antrean offline terdeteksi. Menunggu siklus sync berlanjut.');
+              }
           };
 
           txDel.oncomplete = () => { 
