@@ -13,7 +13,7 @@
   ],
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "dir": "ltr",
   "lang": "id-ID",
   "prefer_related_applications": false,
