@@ -9,7 +9,7 @@
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#000000">
     <title>DAFTAR HARGA</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyCXVmNZkntttxcEcyIl0yuWWkT0oRP9znyS5mF_EbpIr5hoywK4fUYib_YDtptDyn6/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -1149,7 +1149,8 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             let oldQ = cartState[id].q || 1;
             cartState[id].q = parsed;
             if (cartState[id].manualPrice !== undefined && oldQ > 0 && oldQ !== parsed) {
-                cartState[id].manualPrice = Math.round((cartState[id].manualPrice / oldQ) * parsed);
+                if (cartState[id].baseManualPrice === undefined) cartState[id].baseManualPrice = cartState[id].manualPrice / oldQ;
+                cartState[id].manualPrice = Math.round(cartState[id].baseManualPrice * parsed);
             }
             saveCartMem();
 
@@ -1189,17 +1190,26 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
         // --- INJEKSI MULTI-TIER ENGINE ---
         function getCalculatedSubtotal(item, q) {
             let iq = Math.max(1, item.iq || 1);
-        if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
-            let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
-            for (let i = 0; i < sortedTiers.length; i++) {
-                if (q >= sortedTiers[i].q) return Math.round(q * sortedTiers[i].p);
+            
+            // 1. [Prioritas Mutlak] Multi-Tier Manual
+            // (Jika Anda membuat aturan bertingkat khusus di menu edit barang)
+            if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
+                let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
+                for (let i = 0; i < sortedTiers.length; i++) {
+                    if (q >= sortedTiers[i].q) return Math.round(q * sortedTiers[i].p);
+                }
             }
-        }
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
-                let qtyGrosir = Math.floor(q / iq);
-                let qtyEcer = q % iq;
-                return Math.round((qtyGrosir * item.p2) + (qtyEcer * item.p1));
+            
+            // 2. [Auto-Discount Engine] Logika Separuh Grosir
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                let threshold = Math.ceil(iq / 2); // Separuh grosir dibulatkan ke atas (Isi 40 -> 20, Isi 5 -> 3)
+                
+                if (q >= threshold) {
+                    return Math.round((q * item.p2) / iq); // Mencegah IEEE-754 precision loss dengan perkalian lebih awal
+                }
             }
+            
+            // 3. Fallback: Harga Eceran Normal (Jika pembelian di bawah separuh)
             return Math.round(q * (item.p1 || 0));
         }
 
@@ -1217,8 +1227,10 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 
                 if (val === defaultSub) {
                     delete cartState[id].manualPrice;
+                    delete cartState[id].baseManualPrice;
                 } else {
                     cartState[id].manualPrice = val; 
+                    cartState[id].baseManualPrice = val / q;
                 }
                 saveCartMem();
                 el.value = fmt(val);
@@ -1353,7 +1365,8 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                     let oldQ = cartState[id].q;
                     cartState[id].q = parseFloat((oldQ + qty).toFixed(4));
                     if (cartState[id].manualPrice !== undefined && oldQ > 0) {
-                        cartState[id].manualPrice = Math.round((cartState[id].manualPrice / oldQ) * cartState[id].q);
+                        if (cartState[id].baseManualPrice === undefined) cartState[id].baseManualPrice = cartState[id].manualPrice / oldQ;
+                        cartState[id].manualPrice = Math.round(cartState[id].baseManualPrice * cartState[id].q);
                     }
                     if (cartState[id].q <= 0) delete cartState[id];
                 }
@@ -2766,8 +2779,8 @@ try {
         }
 
                 let scrollTimeoutLock;
-        const handleVirtualScroll = () => { 
-            if (isMainSwiping) return; 
+            const handleVirtualScroll = () => { 
+            // [SURGICAL REMOVAL] Biarkan native scroll dan virtual renderer bekerja simultan
             let isLandscapePOS = document.body.classList.contains('mode-kasir') && window.innerWidth >= 600 && window.matchMedia("(orientation: landscape)").matches;
             let sy = isLandscapePOS ? $('list').scrollTop : window.scrollY; 
             
@@ -2947,7 +2960,8 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                     if (activeId) {
                         let wIdx = workerResult.findIndex(x => String(x.id) === String(activeId));
                         if (wIdx !== -1) workerResult[wIdx] = savedItem;
-                    } else {
+                    } else if ($('q').value.trim() === '') {
+                        // [SURGICAL FIX] Cegah Phantom Injection pada query pencarian aktif
                         workerResult.unshift(savedItem); 
                     }
                 }
@@ -3002,6 +3016,8 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 if (pendingGhostItem && pendingGhostItem._isPendingDelete) {
                     pendingGhostItem.deleted = true; pendingGhostItem.updatedAt = Date.now(); saveItemToIDB(pendingGhostItem);
                     if(worker) worker.postMessage({ type: 'remove', id: String(pendingGhostItem.id) });
+                    // [SURGICAL FIX] Bersihkan hantu dari keranjang secara absolut
+                    if (cartState[pendingGhostItem.id]) { delete cartState[pendingGhostItem.id]; saveCartMem(); renderCartUI(); } 
                 }
             }
             pendingGhostItem = itemToDel;
@@ -4559,11 +4575,11 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
             else if (id === 'alert') { 
     $('custom-alert').style.display = 'none'; checkModalOpen(); 
-    // SURGICAL FIX: Bersihkan polusi CSS injeksi saat modal ditutup paksa lewat tombol Back HP
+    // [SURGICAL FIX] Sinkronisasi Absolut Pembersihan Polusi CSS 
     $('custom-alert').style.alignItems = ''; $('custom-alert').style.paddingTop = ''; 
-    $('alert-box').style.marginTop = ''; $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase;'; 
+    $('alert-box').style.marginTop = ''; $('alert-box').style.alignSelf = ''; $('alert-box').style.borderColor = "var(--border-color)";
+    $('alert-title').style.cssText = 'margin-top:0; font-size:15px; text-transform:uppercase; color:var(--text-light);'; 
     $('alert-msg').style.cssText = 'font-size:13px; color:#ccc; line-height:1.5; margin-bottom:20px;'; 
-    $('alert-box').style.alignSelf = ''; // Tambahkan pembersihan ini
 }
             else if (id === 'pin') { $('pin-modal').style.display = 'none'; checkModalOpen(); }
             else if (id === 'sync') { $('sync-modal').style.display = 'none'; checkModalOpen(); }
