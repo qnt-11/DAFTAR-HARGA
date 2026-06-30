@@ -74,12 +74,12 @@
     </script>
     <style>
         :root { --wa-bg: #000000; --wa-card: #151515; --wa-header: #000000; --text-light: #ffffff; --text-muted: #a0a0a0; --border-color: #333333; --danger: #ff3b30; --warning: #FFD700; --highlight-bg: rgba(255, 255, 255, 0.2); --mono-main: #ffffff; --mono-sec: #aaaaaa; --cart-h: 40vh; }
-html { overscroll-behavior: none; background-color: #000000; box-shadow: inset 0 30px 0 0 #000000; } /* [SURGICAL FIX] Kunci warna root WebView agar tidak bocor terang */
+html { overscroll-behavior: none; background-color: #000000; } 
      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 input, textarea { -webkit-user-select: auto !important; user-select: auto !important; }
 body { margin: 0; background: var(--wa-bg); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-weight: 500; overflow-x: hidden; width: 100%; min-height: 100vh; position: relative; color-scheme: dark; }
-/* [SURGICAL FIX] Perisai Vakum Absolut: Menutup celah Sub-Pixel OS di area Status Bar */
-body::before { content: ""; position: fixed; top: -50px; left: -20px; right: -20px; height: 50px; background-color: #000000 !important; box-shadow: 0 0 15px 3px #000000 !important; z-index: 999999; pointer-events: none; }
+/* [SURGICAL FIX] Physical Overlap: Menelan mentah-mentah batas layar dengan memaksa perisai turun 2px (height: 52px) ke dalam viewport */
+body::before { content: ""; position: fixed; top: -50px; left: -20px; right: -20px; height: 52px; background-color: #000000 !important; z-index: 999999; pointer-events: none; border: none !important; outline: none !important; }
 .hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
                 body.modal-open { overflow: hidden !important; }
@@ -188,7 +188,8 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 /* INJEKSI MASTER: 5 FITUR ENTERPRISE CSS (RESTORASI TOTAL & ANTI-BUG) */
 
 /* 1. PERISAI ATAP (Mencegah Kartu Tembus Pandang) */
-.header, #sticky-roof-group, #search-area-box { background: #050505 !important; z-index: 100 !important; }
+/* [SURGICAL FIX] Ubah warna dari #050505 (abu gelap) ke #000000 (hitam mutlak) agar menyatu sempurna dengan Status Bar tanpa batas visual */
+.header, #sticky-roof-group, #search-area-box { background: #000000 !important; z-index: 100 !important; border-top: none !important; }
 
 /* 2. FITUR PEEK OVERLAY & MARGIN COLOR */
 .peek-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; border-radius: 12px; }
