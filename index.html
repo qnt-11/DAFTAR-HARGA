@@ -78,9 +78,9 @@ html { overscroll-behavior: none; background-color: #000000; box-shadow: inset 0
      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 input, textarea { -webkit-user-select: auto !important; user-select: auto !important; }
 body { margin: 0; background: var(--wa-bg); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-weight: 500; overflow-x: hidden; width: 100%; min-height: 100vh; position: relative; color-scheme: dark; }
-/* [SURGICAL FIX] Ultimate Sub-Pixel Bleed Shield: Perluas margin negatif absolut untuk melibas celah pergeseran rotasi Landscape */
-body::before { content: ""; position: fixed; top: -30px; left: -30px; right: -30px; height: 32px; background-color: #000000; box-shadow: 0 0 10px #000000; z-index: 999999; pointer-events: none; }
-        .hidden { display: none !important; }
+/* [SURGICAL FIX] Perisai Vakum Absolut: Menutup celah Sub-Pixel OS di area Status Bar */
+body::before { content: ""; position: fixed; top: -50px; left: -20px; right: -20px; height: 50px; background-color: #000000 !important; box-shadow: 0 0 15px 3px #000000 !important; z-index: 999999; pointer-events: none; }
+.hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
                 body.modal-open { overflow: hidden !important; }
         .sticky-roof-group { z-index: 900; } .sticky-roof-group::after { z-index: 901; } .header { z-index: 1000; } .dropdown-content { z-index: 2000; } .search-dropdown-box { z-index: 2000; } .scanner-overlay { z-index: 3510; } .scan-stop, .btn-torch{ z-index: 3520; } .modal { z-index: 4000; } #sync-custom-options { z-index: 4100; } #scanner-wrap { z-index: 4500; } #loading-modal { z-index: 5500; } #toast-notification { z-index: 6000; }
