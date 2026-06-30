@@ -74,11 +74,12 @@
     </script>
     <style>
         :root { --wa-bg: #000000; --wa-card: #151515; --wa-header: #000000; --text-light: #ffffff; --text-muted: #a0a0a0; --border-color: #333333; --danger: #ff3b30; --warning: #FFD700; --highlight-bg: rgba(255, 255, 255, 0.2); --mono-main: #ffffff; --mono-sec: #aaaaaa; --cart-h: 40vh; }
-        html { overscroll-behavior: none; background-color: #000000; }
-             * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
-        input, textarea { -webkit-user-select: auto !important; user-select: auto !important; }
-        body { margin: 0; background: var(--wa-bg); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-weight: 500; overflow-x: hidden; width: 100%; min-height: 100vh; position: relative; color-scheme: dark; }
-        body::before { content: ""; position: fixed; top: -2px; left: 0; right: 0; height: 4px; background-color: #000000; z-index: 999999; pointer-events: none; }
+html { overscroll-behavior: none; background-color: #000000; box-shadow: inset 0 30px 0 0 #000000; } /* [SURGICAL FIX] Kunci warna root WebView agar tidak bocor terang */
+     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: auto !important; user-select: auto !important; }
+body { margin: 0; background: var(--wa-bg); color: var(--text-light); font-family: 'Montserrat', sans-serif; font-weight: 500; overflow-x: hidden; width: 100%; min-height: 100vh; position: relative; color-scheme: dark; }
+/* [SURGICAL FIX] Ultimate Sub-Pixel Bleed Shield: Perluas margin negatif absolut untuk melibas celah pergeseran rotasi Landscape */
+body::before { content: ""; position: fixed; top: -30px; left: -30px; right: -30px; height: 32px; background-color: #000000; box-shadow: 0 0 10px #000000; z-index: 999999; pointer-events: none; }
         .hidden { display: none !important; }
         .audiowide-regular { font-family: "Audiowide", sans-serif !important; font-weight: 400 !important; }
                 body.modal-open { overflow: hidden !important; }
@@ -1073,8 +1074,8 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
         const searchDropdown = $('search-dropdown');
         const sdContent = $('sd-content');
         
-        let isMainSwiping = false, swipedCardElem = null, touchStartX = 0, touchCurrentX = 0;
-                        let isCartMode = false;
+        let swipedCardElem = null, touchStartX = 0, touchCurrentX = 0;
+        let isCartMode = false;
         let isApiLoading = false; 
         
         // SURGICAL FIX: Persistent Edit State (Anti-Amnesia Memory)
@@ -1104,10 +1105,11 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 e.preventDefault();
                 if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
                 let val = searchInput.value.trim();
-                            if (val !== '') {
+            if (val !== '') {
                 if (handleSearchInput.cancel) handleSearchInput.cancel();
                 handleSearchLogic(val);
                 pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
+                searchInput.value = ''; // [SURGICAL FIX] Synchronous Wipe: Amankan buffer dari hardware scanner berikutnya
             }
             }
         });
@@ -1582,7 +1584,6 @@ saveCartMem();
             if (e.touches.length > 1) return;
             const card = e.target.closest('.card') || e.target.closest('.cp-item-front');
             if (!card) return;
-            isMainSwiping = false;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             touchCurrentX = touchStartX;
@@ -1633,7 +1634,6 @@ saveCartMem();
             if (diffY > diffX && diffY > 10) return;
             // [SURGICAL FIX] Isolasi Sumbu-X: Hanya izinkan kartu digeser jika berada di tab HARGA ('all')
             if (tab === 'all' && diffX > 30 && diffX < 90) {
-                isMainSwiping = true; 
                 card.style.transform = `translateX(-${diffX}px)`;
             }
         }
@@ -1668,7 +1668,6 @@ if (diffY > 40) {
                 card.style.transform = `translateX(0px)`;
                 if (swipedCardElem === card) swipedCardElem = null;
             }
-            setTimeout(() => { isMainSwiping = false; }, 100);
         }
             
         function saveCartMem() { 
@@ -1843,7 +1842,8 @@ document.addEventListener('focus', function(e) {
                 
             if (!isAcronymUsed(tryAcr, excludeId, tempSet)) return tryAcr; 
             let c = 2; 
-            while (isAcronymUsed(tryAcr + c, excludeId, tempSet)) c++; 
+            while (isAcronymUsed(tryAcr + c, excludeId, tempSet) && c < 999) c++; 
+            if (c >= 999) return tryAcr + Math.random().toString(36).substring(2, 6); // SURGICAL FIX: Batasan Chaos & Fallback Hash
             return tryAcr + c; 
         }
 
@@ -3014,10 +3014,12 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
             if(ghostUndoTimer) {
                 clearTimeout(ghostUndoTimer);
                 if (pendingGhostItem && pendingGhostItem._isPendingDelete) {
-                    pendingGhostItem.deleted = true; pendingGhostItem.updatedAt = Date.now(); saveItemToIDB(pendingGhostItem);
+                    pendingGhostItem.deleted = true; pendingGhostItem.updatedAt = Date.now();
+                    delete pendingGhostItem._isPendingDelete; // SURGICAL FIX: Hapus state siluman di RAM
+                    saveItemToIDB(pendingGhostItem).catch(()=>{}); // SURGICAL FIX: Tangkap unhandled rejection
                     if(worker) worker.postMessage({ type: 'remove', id: String(pendingGhostItem.id) });
-                    // [SURGICAL FIX] Bersihkan hantu dari keranjang secara absolut
-                    if (cartState[pendingGhostItem.id]) { delete cartState[pendingGhostItem.id]; saveCartMem(); renderCartUI(); } 
+                    if (cartState[pendingGhostItem.id]) { delete cartState[pendingGhostItem.id]; saveCartMem(); renderCartUI(); }
+                    updateMaps(); // SURGICAL FIX: Sinkronisasi peta memori secara instan
                 }
             }
             pendingGhostItem = itemToDel;
@@ -3052,6 +3054,7 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 let idx = 0;
                 function putDeleteChunk() {
                     if (idx >= toDelete.length) {
+                        db = db.filter(i => i._isGhost); // SURGICAL FIX: Buang sampah memori, selamatkan hanya history aktif
                         if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; clearEditMode(); saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)");
                         return;
                     }
