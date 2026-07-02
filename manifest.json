@@ -1,5 +1,5 @@
 {
-  "id": "/daftar-harga-app",
+  "id": "daftar-harga-app",
   "name": "Daftar Harga Barang",
   "short_name": "Harga",
   "description": "Aplikasi pencatatan daftar harga eceran dan grosir",
@@ -8,12 +8,11 @@
   "display": "fullscreen",
   "display_override": [
     "fullscreen",
-    "standalone",
-    "window-controls-overlay"
+    "standalone"
   ],
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "any",
+  "orientation": "natural",
   "dir": "ltr",
   "lang": "id-ID",
   "prefer_related_applications": false,
