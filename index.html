@@ -3825,9 +3825,27 @@ setTimeout(processImportChunk, 0);
                     if (!finalId) {
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                        let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-                        if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
-                        localStorage.setItem('TRX_SEQ', seq);
+                        let seq = 1;
+try {
+    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+    if (todayTrx.length > 0) {
+        let maxSeq = 0;
+        todayTrx.forEach(x => {
+            let parts = x.id.split('-');
+            if (parts[1] && parts[1].length >= 13) {
+                let sNum = parseInt(parts[1].substring(10, 13), 10);
+                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+            }
+        });
+        seq = maxSeq + 1;
+    } else {
+        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
+    }
+} catch(e) {}
+localStorage.setItem('TRX_DATE', dKey);
+localStorage.setItem('TRX_SEQ', seq);
                         let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
 finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
@@ -3881,9 +3899,27 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     if (!finalId) {
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                                                let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-                        if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
-                        localStorage.setItem('TRX_SEQ', seq);
+     let seq = 1;
+try {
+    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+    if (todayTrx.length > 0) {
+        let maxSeq = 0;
+        todayTrx.forEach(x => {
+            let parts = x.id.split('-');
+            if (parts[1] && parts[1].length >= 13) {
+                let sNum = parseInt(parts[1].substring(10, 13), 10);
+                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+            }
+        });
+        seq = maxSeq + 1;
+    } else {
+        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
+    }
+} catch(e) {}
+localStorage.setItem('TRX_DATE', dKey);
+localStorage.setItem('TRX_SEQ', seq);
                         let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
                         finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
@@ -3972,9 +4008,27 @@ let d = timestamp ? new Date(timestamp) : new Date();
                 if (!finalId) {
                     let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                     let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                    let seq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-                    if (localStorage.getItem('TRX_DATE') !== dKey) { seq = 1; localStorage.setItem('TRX_DATE', dKey); } else { seq++; }
-                    localStorage.setItem('TRX_SEQ', seq);
+let seq = 1;
+try {
+    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+    if (todayTrx.length > 0) {
+        let maxSeq = 0;
+        todayTrx.forEach(x => {
+            let parts = x.id.split('-');
+            if (parts[1] && parts[1].length >= 13) {
+                let sNum = parseInt(parts[1].substring(10, 13), 10);
+                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+            }
+        });
+        seq = maxSeq + 1;
+    } else {
+        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
+        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
+    }
+} catch(e) {}
+localStorage.setItem('TRX_DATE', dKey);
+localStorage.setItem('TRX_SEQ', seq);
                     let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
                     finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 }
