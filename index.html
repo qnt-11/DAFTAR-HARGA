@@ -1986,10 +1986,16 @@ document.addEventListener('focus', function(e) {
             let rawDel = rawObj.deleted !== undefined ? rawObj.deleted : findVal(['DELETED'], ['HAPUS']);
             norm.deleted = String(rawDel).trim().toUpperCase() === 'TRUE' || rawDel === true;
             
-            norm.tiers = Array.isArray(rawObj.tiers) ? rawObj.tiers : [];
+            let rawTiers = rawObj.tiers !== undefined ? rawObj.tiers : findVal(['TIERS', 'MULTITIER', 'MULTI TIER']);
+            if (typeof rawTiers === 'string') {
+                try { norm.tiers = JSON.parse(rawTiers); } catch(e) { norm.tiers = []; }
+            } else {
+                norm.tiers = Array.isArray(rawTiers) ? rawTiers : [];
+            }
+            
             norm.updatedAt = rawObj.updatedAt || Date.now();
             return norm;
-        }
+       }
 
         function fmt(n) { return n ? new Intl.NumberFormat('id-ID').format(n) : "0"; }
         function escapeHTML(str) { return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
@@ -2460,9 +2466,9 @@ try {
                 <div style="flex: 1;">
                     <input type="number" class="tier-q" placeholder="Qty" value="${qty}" style="margin:0; padding:8px; font-size:12px; background:#111; color:#FFD700; border-color:#FFD700;">
                 </div>
-                                <div style="flex: 2;">
-                    <input type="text" inputmode="decimal" class="tier-p" placeholder="Harga/Pcs" value="${price ? String(price).replace('.', ',') : ''}" oninput="this.value = this.value.replace(/[^0-9.,]/g, '');" style="margin:0; padding:8px; font-size:12px; background:#111;">
-                </div>
+<div style="flex: 2;">
+    <input type="text" inputmode="decimal" class="tier-p" placeholder="Harga/Pcs" value="${price ? String(price).replace('.', ',') : ''}" oninput="let v=this.value.replace(/[^0-9,]/g,'').split(','); let b=v[0]?new Intl.NumberFormat('id-ID').format(parseInt(v[0].replace(/\./g,''),10)):''; this.value=v.length>1?b+','+v.slice(1).join('').substring(0,2):b;" style="margin:0; padding:8px; font-size:12px; background:#111;">
+</div>
                 <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); border-radius:4px; height:32px; width:32px; display:flex; justify-content:center; align-items:center; cursor:pointer; outline:none; padding:0; transition: transform 0.2s;">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
@@ -2615,7 +2621,7 @@ try {
                         function applyFiltersAndRender() {
             if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete);
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
-            let base = exact ? [exact] : (workerResult !== null && q !== '' ? workerResult : active); const today = Date.now();
+            let base = exact ? [exact] : (workerResult !== null && q !== '' ? workerResult.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) : active); const today = Date.now();
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
 
             if (!q || tab === 'exp') { 
@@ -2843,18 +2849,7 @@ try {
                     
 // [SURGICAL FIX] Amankan angka desimal, isolasi koma terakhir untuk mesin JS (parseFloat)
 let rawP = row.querySelector('.tier-p').value;
-let lastCommaIdx = String(rawP).lastIndexOf(',');
-let cleanP = String(rawP);
-
-if (lastCommaIdx !== -1) {
-    let intPart = cleanP.substring(0, lastCommaIdx).replace(/[^0-9]/g, '');
-    let decPart = cleanP.substring(lastCommaIdx + 1).replace(/[^0-9]/g, '');
-    cleanP = intPart + '.' + decPart;
-} else {
-    cleanP = cleanP.replace(/[^0-9]/g, '');
-}
-
-let tP = parseFloat(cleanP) || 0;
+let tP = parseFloat(String(rawP).replace(/\./g, '').replace(',', '.')) || 0;
 
 if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 });
@@ -3151,6 +3146,12 @@ db.forEach(i => {
                             itemCloud.b2 = String(itemCloud.b2 || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase(); 
                             if (itemCloud.b2 === '-' || itemCloud.b2 === '0') itemCloud.b2 = '';
                             
+                            if (typeof itemCloud.tiers === 'string') {
+                                try { itemCloud.tiers = JSON.parse(itemCloud.tiers); } catch(e) { itemCloud.tiers = []; }
+                            } else if (!Array.isArray(itemCloud.tiers)) {
+                                itemCloud.tiers = [];
+                            }
+                            
                             const existing = tempMap.get(String(itemCloud.id));
                             if (existing) { 
                                 if ((itemCloud.updatedAt || 0) >= (existing.updatedAt || 0)) { 
@@ -3340,7 +3341,7 @@ db.forEach(i => {
             $('dropdown-menu').classList.add('hidden'); // SURGICAL FIX: Bunuh Zombie Menu
             try {
                 if (typeof XLSX === 'undefined') throw new Error("Sistem Excel belum termuat. Pastikan internet menyala untuk fitur ini.");
-                const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "" })); 
+                const data = db.filter(i => !i.deleted && !i._isGhost).map(i => ({ "ID BARANG": i.id, "BARCODE SATUAN": i.b || "", "BARCODE GROSIR": i.b2 || "", "NAMA BARANG": i.n, "HARGA MODAL (HPP)": i.hpp || 0, "HARGA SATUAN": i.p1, "SATUAN ECER": i.u1 || "", "HARGA GROSIR": i.p2 || "", "SATUAN GROSIR": i.u2 || "", "ISI GROSIR": i.iq || "", "SINGKATAN": i.t || "", "FAVORIT": i.f ? "TRUE" : "FALSE", "KEDALUWARSA": i.exp || "", "MULTI TIER": (i.tiers && i.tiers.length > 0) ? JSON.stringify(i.tiers) : "" })); 
                 const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Data"); XLSX.writeFile(wb, "Data_Harga.xlsx"); 
             } catch (err) { showAlert(err.message, "Gagal Export", "var(--danger)"); }
         }
