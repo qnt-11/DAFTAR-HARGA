@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '1.8'; 
+const APP_VERSION = '1.9'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -174,7 +174,7 @@ self.addEventListener('fetch', event => {
                 return fetch(fetchReq).then(async res => {
           const contentType = res.headers.get('content-type') || '';
           
-          if (res && (res.ok || res.type === 'opaque') && res.type !== 'error' && !contentType.includes('text/html')) {
+          if (res && res.ok && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -271,38 +271,43 @@ async function processOfflineBackup() {
         const payload = cursor.value; 
         const payloadKey = cursor.primaryKey; // [ELITE QA FIX] Tangkap Kunci Primer Absolut
           try {
-            const CLOUD_API = "https://script.google.com/macros/s/AKfycbyCXVmNZkntttxcEcyIl0yuWWkT0oRP9znyS5mF_EbpIr5hoywK4fUYib_YDtptDyn6/exec";
+            const CLOUD_API = "https://script.google.com/macros/s/AKfycbwOpDwzAOzaPjyx1w7WF-6f2aEO0Yr6wsHndm1ktryTgJPWl_1eCU1yX-Baf0pxq9UN/exec";
             
                         // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
                         // [ELITE QA FIX] Streaming String Serialization (OOM-Proof Memory Compression)
-            const backupPayloadStr = await new Promise((res, rej) => {
+            const backupPayloadBlob = await new Promise((res, rej) => {
                 const txItems = idb.transaction('items', 'readonly');
                 const store = txItems.objectStore('items');
                 const req = store.openCursor();
-                let jsonStream = '{"action":"backup","data":[';
+                let blobParts = ['{"action":"backup","data":['];
                 let isFirst = true;
                 
-                req.onsuccess = (e) => {
+            req.onsuccess = (e) => {
+                try {
                     const cursor = e.target.result;
                     if (cursor) {
                         let item = cursor.value;
                         if (!item._isGhost) {
                             delete item._cHeight; 
-                            if (!isFirst) jsonStream += ',';
-                            jsonStream += JSON.stringify(item);
+                            if (!isFirst) blobParts.push(',');
+                            blobParts.push(JSON.stringify(item));
                             isFirst = false;
                         }
                         cursor.continue();
                     } else {
-                        jsonStream += ']}';
-                        res(jsonStream); // Kirim string rakitan akhir, RAM aman dari penumpukan Array
+                        blobParts.push(']}');
+                        res(new Blob(blobParts, { type: 'application/json' }));
                     }
-                };
+                } catch (fatalErr) {
+                    rej(new Error("JSON Stream Crash: " + fatalErr.message));
+                }
+            };
+
                 req.onerror = () => rej(new Error("Gagal merakit stream store items"));
             });
 
             const resData = await fetch(CLOUD_API, {
-              method: 'POST', body: backupPayloadStr
+              method: 'POST', body: backupPayloadBlob
             });
             if (!resData.ok) throw new Error("Network Error"); 
           
@@ -332,11 +337,14 @@ async function processOfflineBackup() {
           const verifyReq = storeDel.openCursor(null, 'prev'); // Cek apakah ada antrean yang LEBIH BARU masuk saat proses upload berjalan
 
           verifyReq.onsuccess = (e) => {
-              storeDel.delete(payloadKey); // Hapus SECARA SPESIFIK HANYA transaksi yang berhasil di-upload
-              
               const checkCursor = e.target.result;
-              if (checkCursor && checkCursor.value.timestamp !== payload.timestamp) {
-                  console.warn('[SW] Mutasi sisa antrean offline terdeteksi. Menunggu siklus sync berlanjut.');
+              // SURGICAL FIX: Cegah Race Condition Flaky Internet. Jangan hapus jika antrean sudah ditimpa data baru oleh UI!
+              if (checkCursor) {
+                  if (checkCursor.value.timestamp === payload.timestamp) {
+                      storeDel.delete(payloadKey);
+                  } else {
+                      console.warn('[SW] Mutasi data baru terdeteksi saat upload. Mencegah penghapusan antrean.');
+                  }
               }
           };
 
