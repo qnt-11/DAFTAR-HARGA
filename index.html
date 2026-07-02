@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbyCXVmNZkntttxcEcyIl0yuWWkT0oRP9znyS5mF_EbpIr5hoywK4fUYib_YDtptDyn6/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbwOpDwzAOzaPjyx1w7WF-6f2aEO0Yr6wsHndm1ktryTgJPWl_1eCU1yX-Baf0pxq9UN/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -248,9 +248,8 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     .smart-cash-row { margin-bottom: 5px !important; gap: 4px !important; }
     .smart-cash-chip { padding: 4px 0 !important; font-size: 10px !important; border-radius: 4px !important; }
     #custom-alert div[style*="padding: 8px 12px"] { padding: 6px 10px !important; }
-    .slide-to-pay-container { height: 36px !important; margin-top: 5px !important; }
-}
-
+    }
+    
 /* 4. FITUR UI ENTERPRISE LAINNYA */
 .scanner-laser.locked { background: #3CB371; box-shadow: 0 0 15px 2px #3CB371; animation: none; top: 50%; height: 4px; border-radius: 2px; }
 .scanner-box.locked { border-color: #3CB371; }
@@ -414,7 +413,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
         </div>
         <div class="top-btns">
             <button class="icon-btn" onclick="openScanner('search')">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="white" stroke-width="1.5"></rect><line class="laser-beam-header" x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2" stroke-linecap="round"></line></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="white" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2" stroke-linecap="round"></line></svg>
             </button>
             <button class="icon-btn header-upload-btn" onclick="backupToCloud()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#87CEFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="glow-cloud"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><path d="M12 16V8"></path><path d="M9 11l3-3 3 3"></path></svg>
@@ -534,11 +533,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 </div>
             </div>
             
-                                                <div style="display:flex; gap:10px;">
+                <div style="display:flex; gap:10px;">
                 <div style="flex:1; min-width:0;">
                     <label>Barcode Satuan</label>
                     <div style="position:relative; width:100%;">
-                        <input type="text" id="i-b" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
+                        <input type="text" id="i-b" autocomplete="off" maxlength="40" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
                         <button type="button" onclick="openScanner('input')" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; padding:0; background:transparent!important; border:none!important; display:flex; align-items:center; justify-content:center; z-index:10; outline:none;">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="#888" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
                         </button>
@@ -547,7 +546,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 <div style="flex:1; min-width:0;">
                     <label>Barcode Grosir</label>
                     <div style="position:relative; width:100%;">
-                        <input type="text" id="i-b2" placeholder="Opsional" autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
+                        <input type="text" id="i-b2" placeholder="Opsional" autocomplete="off" maxlength="40" oninput="this.value = this.value.replace(/[^a-zA-Z0-9\-\s.,+*/%@_]/g, '').toUpperCase()" style="padding-right: 40px;">
                         <button type="button" onclick="openScanner('input-grosir')" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; padding:0; background:transparent!important; border:none!important; display:flex; align-items:center; justify-content:center; z-index:10; outline:none;">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke="#888" stroke-width="1.5"></rect><line x1="5" y1="12" x2="19" y2="12" stroke="red" stroke-width="2"></line></svg>
                         </button>
@@ -567,20 +566,20 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
             </div>
             <div style="font-size: 9.5px; color: #87CEFA; margin-bottom: 14px; margin-top: 6px; font-weight: 600;">*Isi harga dari supplier, Satuan akan terisi otomatis.</div>
 
-            <div class="form-grid">
-                <div style="flex: 39;">
-                    <label>Harga Satuan</label>
-                    <input type="tel" id="i-p1" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p1');">
-                </div>
-                <div style="flex: 23;">
-                    <label style="white-space: nowrap;">Margin %</label>
-                    <input type="number" id="i-m1" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p1');" style="font-weight: 800; transition: color 0.3s, border-color 0.3s; padding: 12px 8px; text-align: center;">
-                </div>
-                <div style="flex: 38;">
-                    <label>Satuan</label>
-                    <input type="text" id="i-u1" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1)">
-                </div>
-            </div>
+<div class="form-grid">
+    <div style="flex: 39;">
+        <label>Harga Satuan</label>
+        <input type="tel" id="i-p1" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p1');">
+    </div>
+    <div style="flex: 23;">
+        <label style="white-space: nowrap;">Margin %</label>
+        <input type="number" id="i-m1" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p1');" style="font-weight: 800; transition: color 0.3s, border-color 0.3s; padding: 12px 8px; text-align: center;">
+    </div>
+    <div style="flex: 38;">
+        <label>Satuan</label>
+        <input type="text" id="i-u1" placeholder="" autocomplete="off" style="text-transform: capitalize;">
+    </div>
+</div>
             <div class="quick-chip-row" id="chip-row-u1">
                 <div class="q-chip" onclick="document.getElementById('i-u1').value='Pcs'">Pcs</div>
                 <div class="q-chip" onclick="document.getElementById('i-u1').value='Bks'">Bks</div>
@@ -588,20 +587,20 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
                 <div class="q-chip q-chip-del" onclick="document.getElementById('i-u1').value=''">Kosong</div>
             </div>
             
-            <div class="form-grid">
-                <div style="flex: 39;">
-                    <label>Harga Grosir</label>
-                   <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
-                </div>
-                <div style="flex: 23;">
-                    <label style="white-space: nowrap;">Margin %</label>
-                    <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
-                </div>
-                <div style="flex: 38;">
-                    <label>Satuan Grosir</label>
-                    <input type="text" id="i-u2" placeholder="" autocomplete="off" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1); toggleIsiGrosir();">
-                </div>
-            </div>
+<div class="form-grid">
+    <div style="flex: 39;">
+        <label>Harga Grosir</label>
+       <input type="tel" id="i-p2" pattern="[0-9]*" placeholder="0" oninput="formatRp(this); calcMargin('p2');">
+    </div>
+    <div style="flex: 23;">
+        <label style="white-space: nowrap;">Margin %</label>
+        <input type="number" id="i-m2" placeholder="0" autocomplete="off" oninput="calcPriceFromMargin('p2');" style="font-weight: 800; text-align: center;">
+    </div>
+    <div style="flex: 38;">
+        <label>Satuan Grosir</label>
+        <input type="text" id="i-u2" placeholder="" autocomplete="off" style="text-transform: capitalize;" oninput="toggleIsiGrosir();">
+    </div>
+</div>
             
             <div class="quick-chip-row" id="chip-row-u2" style="margin-bottom: 10px;">
                 <div class="q-chip" onclick="document.getElementById('i-u2').value='Slop'; toggleIsiGrosir();">Slop</div>
@@ -1041,7 +1040,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     <div id="toast-notification" class="hidden"><span id="toast-message"></span></div>
     <script>
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyWtdUUo_LVB8oy362zyLUlnNxAdtcCmsSu_lGYY6vjtW2IPI__MISi0WpFHaaoe86X/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwOpDwzAOzaPjyx1w7WF-6f2aEO0Yr6wsHndm1ktryTgJPWl_1eCU1yX-Baf0pxq9UN/exec";
                         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", 
             "Peringatan": "var(--warning)", "Info": "var(--mono-main)" 
@@ -1059,12 +1058,11 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
         let lastStartIndex = -1, lastEndIndex = -1, currentSearchReqId = 0;
         let acronymMap = new Map();
         
-        let currentInjectedQty = 1;
-        let currentCleanQuery = '';
-        let pendingAutoAdds = new Map();
+       let currentInjectedQty = 1;
+       let pendingAutoAdds = new Map();
         
         let tab = 'all', activeId = null, html5QrCode = null, isScanning = false, isStartingScan = false, sortAZ = false, scanMode = 'search'; 
-        let toastTimeoutHide, toastTimeoutRemove, isSaving = false, scrollLetterTimeout;
+        let toastTimeoutHide, toastTimeoutRemove, toastTimeoutShow, isSaving = false, scrollLetterTimeout;
                 const Picker = { targetId: '', tempYear: new Date().getFullYear(), tempMonth: new Date().getMonth() };
                 let recentSearches = [];
         try { recentSearches = JSON.parse(localStorage.getItem('DB_WA_RECENT')) || []; } catch(e) { localStorage.removeItem('DB_WA_RECENT'); }
@@ -1086,20 +1084,20 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
         let cartState = {};
         try { cartState = JSON.parse(localStorage.getItem('DB_WA_CART')) || {}; } catch(e) { localStorage.removeItem('DB_WA_CART'); }
 
-                function handleSearchLogic(val) {
-            currentSearchReqId++;
-            currentInjectedQty = 1;
-            // SURGICAL FIX: Basmi Karakter Kontrol ASCII tersembunyi dari Hardware Scanner
-            currentCleanQuery = val.replace(/[\x00-\x1F\x7F]/g, '').trim();
+function handleSearchLogic(val) {
+    currentSearchReqId++;
+    currentInjectedQty = 1;
+    
+    let localizedCleanQuery = val.replace(/[\x00-\x1F\x7F]/g, '').trim();
 
-            const qtyMatch = currentCleanQuery.match(/^(\d{1,4})[x\*]\s*(.*)/i);
-            if (qtyMatch) {
-                currentInjectedQty = parseInt(qtyMatch[1], 10);
-                currentCleanQuery = qtyMatch[2].trim(); 
-            }
-            
-            if (worker) worker.postMessage({ type: 'search', query: currentCleanQuery, reqId: currentSearchReqId });
-        }
+    const qtyMatch = localizedCleanQuery.match(/^(\d{1,4})[x\*]\s*(.*)/i);
+    if (qtyMatch) {
+        currentInjectedQty = parseInt(qtyMatch[1], 10);
+        localizedCleanQuery = qtyMatch[2].trim(); 
+    }
+    
+    if (worker) worker.postMessage({ type: 'search', query: localizedCleanQuery, reqId: currentSearchReqId });
+}
 
                        searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && isCartMode) {
@@ -1247,7 +1245,7 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             
                         const q = cartState[id].q || 1;
             const iq = Math.max(1, item.iq || 1);
-            let subTotal = getCalculatedSubtotal(item, q);
+            let subTotal = cartState[id].manualPrice !== undefined ? cartState[id].manualPrice : getCalculatedSubtotal(item, q);
             
             let priceInput = document.getElementById('price-input-' + id);
             if(priceInput) priceInput.value = fmt(subTotal);
@@ -1276,8 +1274,7 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                 }
             });
 
-                                    if (needsSave) {
-                if (Object.keys(cartState).length === 0) clearEditMode(); // [SURGICAL FIX] Lepas kunci transaksi
+            if (needsSave) {
                 saveCartMem();
                 if (isCartMode) renderCartUI();
             }
@@ -1318,7 +1315,7 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                         <div class="cp-trash-bg" onclick="modifyCartItem('${item.id}', -9999)">
                             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </div>
-                            <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="cp-item-front" ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)" ontouchcancel="handleMainTouchEnd(event, this)" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--wa-bg); border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <div class="cpi-info" style="flex: 1; min-width: 0; padding: 0;">
                                 <div class="cpi-name" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(item.n)}</div>
                                 <div id="unit-text-${item.id}" style="font-size: 11px; color: #888; font-weight: 600;">${formatQtyBreakdown(q, iq, item.u1, item.u2)}</div>
@@ -1374,7 +1371,6 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                     if (cartState[id].q <= 0) delete cartState[id];
                 }
 
-            if (Object.keys(cartState).length === 0) clearEditMode();
             saveCartMem();
             renderCartUI(); // DOM keranjang diperbarui di sini
             
@@ -1404,9 +1400,10 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
         }
 
                 // [INJEKSI MESIN ELASTIC CART TOGGLE]
-        function toggleCartExpand() {
-            if (!document.body.classList.contains('mode-kasir')) return;
-            if (Object.keys(cartState).length === 0) return tampilkanToast("Keranjang kosong!", "var(--warning)");
+function toggleCartExpand() {
+    if (!document.body.classList.contains('mode-kasir')) return;
+    // Pengecualian mutlak: Izinkan penutupan layar meskipun keranjang kosong
+    if (Object.keys(cartState).length === 0 && !document.body.classList.contains('cart-expanded')) return tampilkanToast("Keranjang kosong!", "var(--warning)");
             
                         document.body.classList.toggle('cart-expanded');
             if (document.body.classList.contains('cart-expanded')) {
@@ -1436,9 +1433,9 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
             if (titleBox) { titleBox.innerText = "TOTAL BELANJA"; titleBox.style.color = "#888"; }
         }
 
-        function resetCart() {
-            if (Object.keys(cartState).length === 0) return;
-            showConfirm("Kosongkan keranjang belanja?", "Reset", "var(--danger)", () => {
+function resetCart() {
+    if (Object.keys(cartState).length === 0 && !activeEditTrxId) return;
+    showConfirm("Kosongkan keranjang belanja?", "Reset", "var(--danger)", () => {
                 cartState = {};
                 saveCartMem();
                 renderCartUI();
@@ -1476,8 +1473,12 @@ let activeEditTrxTs = localStorage.getItem('DB_WA_EDIT_TS') ? parseInt(localStor
                     
                     // [GHOST ITEM INJECTION]: Lindungi barang yang sudah dihapus dari DB utama agar tidak lenyap dari Struk lama
                     if (!dbItem) {
-                        dbItem = { id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true };
-                        db.push(dbItem);
+                        // FIX: Cegah duplikasi mutlak jika siluman sudah berkeliaran di memori RAM
+                        dbItem = db.find(x => String(x.id) === String(it.id) && x._isGhost);
+                        if (!dbItem) {
+                            dbItem = { id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true };
+                            db.push(dbItem);
+                        }
                     }
 
                                         if (dbItem) {
@@ -1568,7 +1569,7 @@ saveCartMem();
         }
 
         function handlePhysicalScanner(scannedText) {
-            const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText));
+            const ex = db.find(i => !i.deleted && !i._isGhost && (String(i.b) === scannedText || String(i.b2) === scannedText));
             if (ex) {
                 let addQty = 1;
                 if (String(ex.b2) === scannedText && ex.iq > 1) addQty = ex.iq;
@@ -1738,8 +1739,9 @@ document.addEventListener('focus', function(e) {
             t.style.borderBottomColor = color; 
             clearTimeout(toastTimeoutHide); 
             clearTimeout(toastTimeoutRemove); 
+            clearTimeout(toastTimeoutShow); 
             t.classList.remove('hidden'); 
-            setTimeout(() => t.classList.add('show'), 10); 
+            toastTimeoutShow = setTimeout(() => t.classList.add('show'), 10); 
             toastTimeoutHide = setTimeout(() => { 
                 t.classList.remove('show'); 
                 toastTimeoutRemove = setTimeout(() => t.classList.add('hidden'), 400); 
@@ -1805,8 +1807,8 @@ document.addEventListener('focus', function(e) {
         function updateMaps() { 
             acronymMap.clear(); 
             db.forEach(item => { 
-                if (!item.deleted) { 
-                    if (item.t) acronymMap.set(String(item.t).trim().toLowerCase(), item); 
+                if (!item.deleted && !item._isGhost) { 
+                    if (item.t) acronymMap.set(String(item.t).trim().toLowerCase(), item.id); 
                 } 
             }); 
         }
@@ -1826,9 +1828,9 @@ document.addEventListener('focus', function(e) {
 
         function isAcronymUsed(acr, excludeId, tempSet = null) { 
             if (tempSet && tempSet.has(acr)) return true; 
-            const existing = acronymMap.get(String(acr)); 
-            if (!existing) return false; 
-            return excludeId && String(existing.id) === String(excludeId) ? false : true; 
+            const existingId = acronymMap.get(String(acr)); 
+            if (!existingId) return false; 
+            return excludeId && String(existingId) === String(excludeId) ? false : true; 
         }
 
         function generateSmartAcronym(name, excludeId = null, tempSet = null) { 
@@ -1984,6 +1986,7 @@ document.addEventListener('focus', function(e) {
             let rawDel = rawObj.deleted !== undefined ? rawObj.deleted : findVal(['DELETED'], ['HAPUS']);
             norm.deleted = String(rawDel).trim().toUpperCase() === 'TRUE' || rawDel === true;
             
+            norm.tiers = Array.isArray(rawObj.tiers) ? rawObj.tiers : [];
             norm.updatedAt = rawObj.updatedAt || Date.now();
             return norm;
         }
@@ -1993,13 +1996,13 @@ document.addEventListener('focus', function(e) {
         function prop(s) { return !s ? "" : String(s).trim().split(/([\s\-\/&()+,])/).map(w => w && !/[\s\-\/&()+,]/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : w).join('').replace(/\s+/g, ' '); }
         
         function highlightMatch(text, term) { 
-            let str = text || "";
+            let str = String(text || "").replace(/\uE000/g, "");
             if (!term || String(term).trim() === '') return escapeHTML(str);
             const terms = String(term).trim().split(/\s+/).filter(Boolean);
             if (terms.length === 0) return escapeHTML(str);
             const regexStr = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
             const regex = new RegExp(`(${regexStr})`, 'gi');
-                        const DELIM = "\uE000"; // Karakter Private Use Area Unicode (Mustahil diketik manusia)
+            const DELIM = "\uE000"; 
             return str.replace(regex, DELIM + "$1" + DELIM).split(DELIM)
                       .map((p, i) => i % 2 === 1 ? `<span class="highlight">${escapeHTML(p)}</span>` : escapeHTML(p))
                       .join('');
@@ -2155,7 +2158,13 @@ document.addEventListener('focus', function(e) {
                         isMatch = n.includes(cleanTag) || t.includes(cleanTag);
                         score = isMatch ? 1000 : 0;
                     } else if (terms.length > 0) {
-                        isMatch = terms.every(term => n.includes(term) || t.includes(term));
+                        // FIX: Deteksi mutlak barcode alfanumerik sebelum pencocokan kata
+                        if (b === textQuery || b2 === textQuery) {
+                            hasil.push({ item: item, score: 1500 });
+                            continue;
+                        }
+                        // FIX: Sertakan b dan b2 ke dalam iterasi fuzzy matching
+                        isMatch = terms.every(term => n.includes(term) || t.includes(term) || b.includes(term) || b2.includes(term));
                         if (isMatch) {
                             if (n === textQuery || t === textQuery) score = 100;
                             else if (n.startsWith(textQuery) || t.startsWith(textQuery)) score = 80;
@@ -2235,15 +2244,6 @@ document.addEventListener('focus', function(e) {
                     workerResult = e.data.data;
 
                 window.scrollTo({ top: 0, behavior: 'instant' }); 
-                if(workerResult.length === 0 && e.data.query.trim() !== '') {
-                    try {
-                        let missed = JSON.parse(localStorage.getItem('DB_WA_ANALYTICS_MISS') || '{}');
-                        let qL = e.data.query.trim().toLowerCase();
-                        missed[qL] = (missed[qL] || 0) + 1;
-                        if(Object.keys(missed).length > 100) delete missed[Object.keys(missed)[0]]; 
-                        localStorage.setItem('DB_WA_ANALYTICS_MISS', JSON.stringify(missed));
-                    } catch(err) {}
-                }
                 applyFiltersAndRender(); 
             }
         } // [SURGICAL FIX] INJEKSI PENUTUP IF UTAMA YANG HILANG
@@ -2506,11 +2506,12 @@ try {
             let margin = parseFloat(elMargin.value);
             
                         // Perbaikan: Izinkan margin negatif agar kasir bisa menghitung harga Cuci Gudang
-            if (hpp > 0 && !isNaN(margin) && margin < 100) { // SURGICAL FIX: Cabut blokir margin 0% agar bisa set Harga Jual = Harga Modal
+            if (hpp > 0 && !isNaN(margin) && margin < 99.99) { 
                 let hargaJual = hpp / (1 - (margin / 100));
-                elJual.value = fmt(Math.ceil(hargaJual / 100) * 100);
+                elJual.value = fmt(Math.round(hargaJual));
                 updateWarnaMargin(elMargin, margin);
             } else {
+                elJual.value = "";
                 elMargin.style.color = "var(--text-light)"; 
                 elMargin.style.borderColor = "var(--border-color)";
             }
@@ -2735,7 +2736,7 @@ try {
                     let exH = it.exp ? `<div class="card-exp ${diff < 0 ? 'danger' : (diff <= 90 ? 'warning' : '')}"><span>${diff < 0 ? '🚨' : (diff <= 90 ? '⚠️' : '📅')}</span> ${diff < 0 ? 'Expired!' : (diff <= 90 ? `Exp dalam ${diff} hari` : `Exp: ${expT}`)}</div>` : '', rightSideUI = '', swipeAttributes = '', trashBgHtml = '';
                     if (!isCartMode) {
                         // [SURGICAL FIX] Tab Favorit mengizinkan sentuhan (Peek), tapi memblokir atribut Swipe & Trash!
-                        swipeAttributes = (tab === 'all' || tab === 'fav') ? `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)"` : '';
+                        swipeAttributes = (tab === 'all' || tab === 'fav') ? `ontouchstart="handleMainTouchStart(event)" ontouchmove="handleMainTouchMove(event, this)" ontouchend="handleMainTouchEnd(event, this)" ontouchcancel="handleMainTouchEnd(event, this)"` : '';
                         trashBgHtml = tab === 'all' ? `<div class="trash-trigger" onclick="del('${it.id}')" style="position:absolute; right:0; top:0; bottom:0; width:80px; background:transparent; display:flex; justify-content:center; align-items:center; color:var(--danger); z-index:1; cursor:pointer;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>` : '';
                         let editBtnHtml = tab === 'all' ? `<button class="card-action-btn btn-edit-icon action-edit" data-id="${it.id}"><svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : '';
                         rightSideUI = `<div class="action-btns-absolute">${editBtnHtml}</div>`;
@@ -2810,7 +2811,10 @@ try {
         document.getElementById('list').addEventListener('scroll', handleVirtualScroll, { passive: true });
 
         async function save(bypassAnomaly = false) {
-            if (isSaving) return;
+            if (isSaving || isApiLoading) {
+                if (isApiLoading) tampilkanToast("Menunggu sinkronisasi selesai...", "var(--warning)");
+                return;
+            }
             isSaving = true;
             const btnSave = $('btn-save-item');
             const btnCancel = $('btn-cancel-item'); 
@@ -2889,7 +2893,7 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 if (b2 !== '') {
                     if (iq < 2) return showAlert("Isi Per ... wajib diisi jika Barcode Grosir diisi!", "Gagal"); 
                     if (b2 === b) return showAlert("Barcode Grosir tidak boleh sama persis dengan Barcode Satuan!", "Gagal"); 
-                    const exB2 = db.find(x => !x.deleted && (String(x.b) === b2 || String(x.b2) === b2) && String(x.id) !== String(activeId)); 
+                    const exB2 = db.find(x => !x.deleted && !x._isGhost && (String(x.b) === b2 || String(x.b2) === b2) && String(x.id) !== String(activeId));
                     if (exB2) return showAlert("Barcode Grosir sudah dipakai pada barang lain!", "Gagal"); 
                 }
 
@@ -2898,11 +2902,11 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 } 
 
                 const cleanName = prop(nRaw);
-                const exName = db.find(x => !x.deleted && String(x.n || "").toLowerCase() === cleanName.toLowerCase() && String(x.id) !== String(activeId)); 
+                const exName = db.find(x => !x.deleted && !x._isGhost && String(x.n || "").toLowerCase() === cleanName.toLowerCase() && String(x.id) !== String(activeId)); 
                 if (exName) return showAlert("Nama barang ini sudah terdaftar!", "Gagal"); 
                 
                 if (b !== '') { 
-                    const exB = db.find(x => !x.deleted && (String(x.b) === b || String(x.b2) === b) && String(x.id) !== String(activeId)); 
+                    const exB = db.find(x => !x.deleted && !x._isGhost && (String(x.b) === b || String(x.b2) === b) && String(x.id) !== String(activeId)); 
                     if (exB) return showAlert("Barcode Satuan bentrok / sudah dipakai barang lain!", "Gagal"); 
                 }
                 
@@ -3000,6 +3004,7 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
             
             const itemToDel = db[idx];
             itemToDel._isPendingDelete = true;
+            if (workerResult) { let wIdx = workerResult.findIndex(x => String(x.id) === String(id)); if (wIdx !== -1) workerResult[wIdx]._isPendingDelete = true; }
             applyFiltersAndRender();
             
             let gToast = document.getElementById('ghost-toast-ui');
@@ -3046,6 +3051,8 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
 
                 // [QA LEAD FIX] Chunking IDB Put untuk 36.000+ data agar HP tidak freeze/crash saat Hapus Semua Data
         async function executeDeleteAll() { 
+            if (isApiLoading) return tampilkanToast("Sistem sibuk!", "var(--warning)");
+            isApiLoading = true;
             closePinModal(); tampilkanToast("Menghapus...", "var(--danger)"); $('list').style.pointerEvents = 'none'; 
             try { 
                 const ts = Date.now();
@@ -3055,8 +3062,9 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 let idx = 0;
                 function putDeleteChunk() {
                     if (idx >= toDelete.length) {
-                        db = db.filter(i => i._isGhost); // SURGICAL FIX: Buang sampah memori, selamatkan hanya history aktif
-                        if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; clearEditMode(); saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; tampilkanToast("Bersih!", "var(--danger)");
+                        // KUNCI ABSOLUT: Tetap tahan di RAM dengan status deleted agar Cloud Sync tahu data ini wajib dihanguskan dari Server!
+                        db.forEach(i => { if (!i._isGhost) i.deleted = true; }); 
+                        if(worker) worker.postMessage({ type: 'init', db: [] }); updateMaps(); cartState = {}; clearEditMode(); saveCartMem(); renderCartUI(); applyFiltersAndRender(); $('list').style.pointerEvents = 'auto'; isApiLoading = false; tampilkanToast("Bersih!", "var(--danger)");
                         return;
                     }
                     let tx = idb.transaction('items', 'readwrite');
@@ -3065,18 +3073,19 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                     for (let i = idx; i < end; i++) s.put(toDelete[i]);
                     idx = end;
                     tx.oncomplete = putDeleteChunk;
-                    tx.onerror = () => { $('list').style.pointerEvents = 'auto'; showAlert("Gagal menghapus sebagian data (Memori penuh).", "Error"); };
+                    tx.onerror = () => { isApiLoading = false; $('list').style.pointerEvents = 'auto'; showAlert("Gagal menghapus sebagian data (Memori penuh). Sistem akan di-restart untuk mencegah kerusakan data.", "Error"); setTimeout(() => window.location.reload(), 2500); };
                 }
                 putDeleteChunk();
-            } catch(e) { $('list').style.pointerEvents = 'auto'; showAlert("Gagal.", "Error"); } 
+            } catch(e) { isApiLoading = false; $('list').style.pointerEvents = 'auto'; showAlert("Gagal.", "Error"); } 
         }
         
         async function toggleFav(id, btn) { 
             const idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) { 
                 db[idx].f = !db[idx].f; db[idx].updatedAt = Date.now(); await saveItemToIDB(db[idx]); 
                 if (worker) worker.postMessage({ type: 'update', item: db[idx] });
+                if (workerResult) { let wIdx = workerResult.findIndex(x => String(x.id) === String(id)); if (wIdx !== -1) workerResult[wIdx].f = db[idx].f; }
                 if (btn) { btn.style.color = db[idx].f ? 'var(--mono-main)' : 'var(--text-muted)'; btn.innerHTML = `<svg pointer-events="none" viewBox="0 0 24 24" width="18" height="18" fill="${db[idx].f?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`; } 
-                if (tab === 'fav') applyFiltersAndRender(); 
+                applyFiltersAndRender(); 
             } 
         }
 
@@ -3102,6 +3111,18 @@ db.forEach(i => {
         
         function backupToCloud() { 
             if (db.length === 0 || isApiLoading) return;
+            
+            // [INJEKSI PROTEKSI] Payload Size Limiter (Maksimal 10MB)
+            try {
+                let payloadBytes = new Blob([JSON.stringify(db.filter(i => !i._isGhost))]).size;
+                let payloadMB = payloadBytes / (1024 * 1024);
+                if (payloadMB > 10) {
+                    return showAlert(`Batas Kapasitas Cloud Terlampaui!<br><br>Ukuran data Anda (${payloadMB.toFixed(2)} MB) melebihi limit server Google (10 MB).<br><br>Silakan gunakan menu "Save Excel" untuk mencadangkan (Backup) seluruh data Anda.`, "Payload Too Large", "var(--danger)");
+                }
+            } catch (e) {
+                return showAlert("Gagal mengalokasikan memori untuk kalkulasi Cloud. RAM HP penuh.", "OOM Error", "var(--danger)");
+            }
+
             showConfirm("Upload data Harga dan Riwayat Transaksi", "Upload Cloud", "#87CEFA", () => { 
                 isApiLoading = true; 
                 showLoading("Upload Data...<br>Mohon Tunggu sebentar.", "#87CEFA"); 
@@ -3283,7 +3304,7 @@ db.forEach(i => {
                         chunk.forEach(rawItem => { 
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
-                            if (!norm.id) norm.id = generateUniqueId();
+                            if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent((norm.n || 'UNK') + "_" + (norm.b || '')))).replace(/[^a-zA-Z0-9]/g, '');
                             if (forceSync) {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
                             } else {
@@ -3294,7 +3315,19 @@ db.forEach(i => {
                         tx.oncomplete = () => { 
                             currentIndex += chunkSize; setTimeout(processNextChunk, 0); 
                         }; 
-                        tx.onerror = () => { isApiLoading = false; hideLoading(); showAlert("Gagal menyimpan ke memori HP. Data Anda sebelumnya tetap aman. Silakan coba lagi.", "Error"); };
+                        tx.onerror = () => { 
+                            isApiLoading = false; hideLoading(); 
+                            if (forceSync) {
+                                try {
+                                    let rTx = idb.transaction('items', 'readwrite');
+                                    rTx.objectStore('items').clear();
+                                    db.forEach(item => rTx.objectStore('items').put(item));
+                                } catch(e){}
+                                showAlert("Memori HP Penuh / Crash I/O! Proses dibatalkan.\n\nSistem berhasil melakukan Rollback. Data lokal Anda telah dipulihkan secara otomatis.", "Error Bencana", "var(--danger)");
+                            } else {
+                                showAlert("Gagal menyimpan ke memori HP. Silakan coba lagi.", "Error");
+                            }
+                        };
                     } catch (error) {
                         isApiLoading = false; hideLoading(); showAlert("Gagal memproses data sinkronisasi. Harap coba lagi.", "Error");
                     }
@@ -3538,10 +3571,14 @@ setTimeout(processImportChunk, 0);
                             
                             let expMatch = scannedText.match(/17(\d{6})/);
                             if (expMatch && (scanMode === 'input' || scanMode === 'input-grosir')) {
-                                let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = d.substring(2,4);
-                                $('i-exp').dataset.rawDate = `${y}-${m}-01`;
-                                $('i-exp').value = `${NamaBln[parseInt(m)-1]} ${y}`;
-                                tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
+                                let d = expMatch[1]; let y = "20" + d.substring(0,2); let m = parseInt(d.substring(2,4), 10);
+                                if (m >= 1 && m <= 12) {
+                                    $('i-exp').dataset.rawDate = `${y}-${String(m).padStart(2,'0')}-01`;
+                                    $('i-exp').value = `${NamaBln[m-1]} ${y}`;
+                                    tampilkanToast(`GS1 Terbaca: Barcode & EXP Disinkronkan!`, "#87CEFA");
+                                } else {
+                                    tampilkanToast(`Format Bulan GS1 Tidak Valid!`, "var(--warning)");
+                                }
                             }
                             scannedText = gtin; 
                         }
@@ -3550,7 +3587,7 @@ setTimeout(processImportChunk, 0);
                         }
 
                         if (scanMode === 'cart') handlePhysicalScanner(scannedText);
-                        else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
+                        else if (scanMode === 'search') { const ex = db.find(i => !i.deleted && !i._isGhost && (String(i.b) === scannedText || String(i.b2) === scannedText)); if (ex) { $('q').value = scannedText; $('q-x').style.display = 'flex'; window.scrollTo({ top: 0, behavior: 'instant' }); handleSearchLogic(scannedText); } else { showMod(); $('i-b').value = scannedText; } } 
                         else if (scanMode === 'input-grosir') $('i-b2').value = scannedText; else $('i-b').value = scannedText; 
                     }, 250);
                 }); 
@@ -3572,7 +3609,15 @@ setTimeout(processImportChunk, 0);
             const urlParams = new URLSearchParams(window.location.search); const action = urlParams.get('action'); 
             if (action === 'scan') { setTimeout(() => openScanner('search'), 500); } else if (action === 'cart' && !isCartMode) { toggleCartMode(); } else if (action === 'add_item') { setTimeout(() => showMod(), 500); }
             const linkData = urlParams.get('link'); 
-            if (linkData) { let cleanData = decodeURIComponent(linkData); if (cleanData.startsWith('web+harga://')) { cleanData = cleanData.replace('web+harga://', ''); } $('q').value = cleanData; $('q-x').style.display = 'flex'; handleSearchLogic(cleanData); } 
+            if (linkData) { 
+                try {
+                    let cleanData = decodeURIComponent(linkData); 
+                    if (cleanData.startsWith('web+harga://')) { cleanData = cleanData.replace('web+harga://', ''); } 
+                    $('q').value = cleanData; $('q-x').style.display = 'flex'; handleSearchLogic(cleanData); 
+                } catch (e) {
+                    console.warn("Sistem mengabaikan URI beracun.");
+                }
+            } 
             if (action || linkData) { window.history.replaceState({}, document.title, window.location.pathname); }
         }
 
@@ -3841,7 +3886,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                         let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
                         finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
-                    printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId, finalTs); // Tembak ke Hardware
+                    printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId, finalTs, false); // Tembak ke Hardware
                     resetPrintModalStyle();
                 };
 
@@ -3914,14 +3959,13 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             isPrinting = true;
             
             let safeBayar = bayar !== undefined && !isNaN(bayar) ? bayar : total;
-            let kembali = safeBayar - total;
-            let labelKembali = kembali < 0 ? "KURANG" : "KEMBALIAN";
-            let valKembali = fmt(Math.abs(kembali));
+let kembali = safeBayar - total;
+let labelKembali = kembali < 0 ? "KURANG" : "KEMBALIAN";
+let valKembali = fmt(Math.abs(kembali));
 
-            let d = timestamp ? new Date(timestamp) : new Date();
-            let dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+let d = timestamp ? new Date(timestamp) : new Date();
 
-            // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
+// SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
                         let finalId = activeEditTrxId;
             try {
                 if (!finalId) {
@@ -4045,13 +4089,13 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
             }
 
             let printFrame = document.getElementById('receipt-spooler-frame');
-            if (!printFrame) {
-                printFrame = document.createElement('iframe');
-                printFrame.id = 'receipt-spooler-frame';
-                printFrame.style.position = 'fixed'; printFrame.style.right = '0'; printFrame.style.bottom = '0';
-                printFrame.style.width = '0'; printFrame.style.height = '0'; printFrame.style.border = '0';
-                document.body.appendChild(printFrame);
-            }
+            if (printFrame) printFrame.remove(); // KUNCI ABSOLUT: Hancurkan frame lama agar antrean OS Print Spooler tidak bocor!
+            
+            printFrame = document.createElement('iframe');
+            printFrame.id = 'receipt-spooler-frame';
+            printFrame.style.position = 'fixed'; printFrame.style.right = '0'; printFrame.style.bottom = '0';
+            printFrame.style.width = '0'; printFrame.style.height = '0'; printFrame.style.border = '0';
+            document.body.appendChild(printFrame);
             
             let doc = printFrame.contentWindow.document;
             doc.open();
@@ -4176,9 +4220,10 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 }
                 totalFisik = Math.round(totalFisik * 1000) / 1000;
 
-                                                let splitJam = timeStr.split(' '); 
+                let splitJam = timeStr.split(' '); 
                 if (!h.id) { h.id = 'CORRUPT-' + Math.random().toString(36).substring(2, 8); }
                 let shortId = h.id.split('-')[1] || h.id.replace(/^TRX-/, ''); 
+                let labaStruk = h.total - (h.modal || 0);
 
                 // [SURGICAL FIX] INJEKSI SMART ACCORDION UI - GAYA STRUK PROFESIONAL
                 html += `
@@ -4197,7 +4242,10 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                                 <span style="font-size:11px; font-weight:700; color:#fff;">${totalMacam} Jenis <span style="color:#555;">|</span> ${totalFisik} Item</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:15px; font-weight:900; color:#3CB371;">Rp ${fmt(h.total)}</span>
+                                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                                    <span style="font-size:14px; font-weight:900; color:#fff;">Rp ${fmt(h.total)}</span>
+                                    <span style="font-size:10px; font-weight:800; color:#3CB371;">Laba: Rp ${fmt(labaStruk)}</span>
+                                </div>
                                 <svg id="icn-${h.id}" style="transition: transform 0.2s ease; color:#666;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </div>
                         </div>
@@ -4218,7 +4266,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                                                         <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
                                 CETAK
                             </button>
-                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #00BFFF!important; color:#00BFFF!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="let hx=JSON.parse(localStorage.getItem('DB_WA_HISTORY')||'[]').find(x=>x.id==='${h.id}'); if(hx) printBluetoothESCPOS(hx.total, hx.bayar, hx.items, hx.id, hx.ts);">
+                           <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #00BFFF!important; color:#00BFFF!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="let hx=JSON.parse(localStorage.getItem('DB_WA_HISTORY')||'[]').find(x=>x.id==='${h.id}'); if(hx) { let itemsArr = Array.isArray(hx.items) ? hx.items : [{ n: 'Item Historis', q: hx.items, u: 'Item', sub: hx.total }]; printBluetoothESCPOS(hx.total, hx.bayar, itemsArr, hx.id, hx.ts, true); }">
                                 BT
                             </button>
                         </div>
@@ -4291,20 +4339,16 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 let dDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).substring(2)}`;
                 let dTime = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
-                                      // 1. Ekstraksi ID & Total Item
+                // 1. Ekstraksi ID & Total Item
                 let receiptNo = hData.id ? hData.id.split('-').slice(0, 2).join('-') : 'LAMA';
                 let totalItemCount = 0;
 
-                // Kalkulasi spasi dinamis
-                let padLen = Math.max(1, receiptNo.length - dDate.length - dTime.length);
-                let dateStrAligned = dDate + " ".repeat(padLen) + dTime;
-
-                // 2. Render Header Standar Ritel
-                let text = "```\n";
-                text += `TOKO KELONTONG\nPs. Sunggingan Lt. 2\n========================\n`;
-                text += `No   : ${receiptNo}\n`;
-                text += `Tgl  : ${dateStrAligned}\n`;
-                text += `========================\n`;
+                // 2. Render Header Standar WA (Kloning Format Print Tanpa No Telp)
+                let text = `*TOKO KELONTONG*\nPs. Sunggingan Lt. 2\n-------------------------------\n`;
+                text += `No ID : ${receiptNo}\n`;
+                text += `Tgl      : ${dDate}            ${dTime}\n`;
+                text += `Kasir  : famBARLA\n`;
+                text += `-------------------------------\n\n`;
                 
                 // Normalisasi Data Historis Lawas menjadi Array (Bypass Ghost Item Bug)
                 let itemsArray = Array.isArray(hData.items) ? hData.items : [{ n: "Item Historis", q: parseFloat(hData.items) || 1, u1: "Item", sub: hData.total }];
@@ -4312,11 +4356,12 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 itemsArray.forEach(i => {
                     let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub;
                     let itemName = i.n || "Item Tidak Diketahui";
-                    let safeN = itemName.length > 20 ? itemName.substring(0, 19).toUpperCase() + '…' : itemName.toUpperCase();
+                    // WA menggunakan font reguler, batas potong nama dilebarkan
+                    let safeN = itemName.length > 30 ? itemName.substring(0, 29).toUpperCase() + '…' : itemName.toUpperCase();
                     let iqNum = Math.max(1, parseInt(i.iq) || 1);
                     let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                     
-                    // [SURGICAL FIX] Sinkronisasi jumlah fisik dan format satuan WA dengan Keranjang Utama
+                    // Sinkronisasi jumlah fisik
                     let eU_check = formatShortUnit(i.u1) || 'Satuan';
                     let gU_check = formatShortUnit(i.u2) || 'Grosir';
                     if (i.iq !== undefined && iqNum > 1 && nQ >= iqNum && eU_check.toLowerCase() !== gU_check.toLowerCase()) {
@@ -4328,30 +4373,30 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     // Hapus label "(Grosir)" agar teks WA tetap rapi
                     let unitString = formatQtyBreakdown(i.q, i.iq, i.u1, i.u2).replace(" (Grosir)", "");
                     
-                    // Menggabungkan Qty, Satuan, dan Harga Satuan
-                    let qtyText = `${unitString} x ${fmt(hrgSatuan)}`;
+                    // Menggabungkan Qty, Satuan, Harga Satuan, dan Subtotal (Indentasi spasi ala Print)
+                    let qtyText = `  ${unitString} x ${fmt(hrgSatuan)} = Rp ${fmt(i.sub)}`;
                     
                     if (text.length < 1300) {
-                        text += `${safeN}\n  ${qtyText} = ${fmt(i.sub)}\n`;
+                        text += `*${safeN}*\n${qtyText}\n\n`;
                     } else if (text.length >= 1300 && text.indexOf('(... item lainnya)') === -1) {
-                        text += `\n*(... item lainnya dirangkum)*\n`;
+                        text += `_*(... item lainnya dirangkum)*_\n\n`;
                     }
                 });
 
-                // 3. Render Footer & PPN
+                // 3. Render Footer (Kloning Format Print)
                 let safeBayar = hData.bayar !== undefined ? hData.bayar : hData.total;
                 let kembali = safeBayar - hData.total;
-                let labelKembali = kembali < 0 ? "KURANG   " : "KEMBALIAN";
+                let labelKembali = kembali < 0 ? "KURANG       " : "KEMBALIAN    ";
                 
-                text += `------------------------\n`;
-                text += `Total Item : ${Math.round(totalItemCount * 1000) / 1000}\n`;
-                text += `------------------------\n`;
-                text += `TOTAL      Rp ${fmt(hData.total)}\n`;
-                text += `TUNAI      Rp ${fmt(hData.bayar)}\n`;
-                text += `${labelKembali}  Rp ${fmt(Math.abs(kembali))}\n`;
-                text += `========================\n`;             
-                text += `Simpan struk sebagai bukti\n\n`;
-                text += `Terima Kasih\nSelamat Belanja Kembali\n\`\`\``;
+                text += `-------------------------------\n`;
+                text += `Total Item: ${Math.round(totalItemCount * 1000) / 1000}\n`;
+                text += `-------------------------------\n`;
+                text += `Total Belanja  : *Rp ${fmt(hData.total)}*\n`;
+                text += `Tunai                  : Rp ${fmt(hData.bayar)}\n`;
+                text += `${labelKembali}: Rp ${fmt(Math.abs(kembali))}\n`;
+                text += `-------------------------------\n`;             
+                text += `_Simpan struk sebagai bukti beli_\n\n`;
+                text += `Terima Kasih\nSelamat Belanja Kembali`;
 
                 let intentUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
                 let a = document.createElement('a');
@@ -4478,8 +4523,8 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 const t = new Date(); $('current-date-location').innerText = `Boyolali, ${t.getDate()} ${NamaBln[t.getMonth()]} ${t.getFullYear()}`;
                 await initDB(); db = await loadAllFromIDB(); 
                 runMarketBasketAI(); // <--- INJEKSI PELATUK AI LOKAL
-                                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted), pop: buildPopularityData() }); 
-                updateMaps(); 
+                if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost), pop: buildPopularityData() }); 
+               updateMaps(); 
                 
                 // SURGICAL FIX: Rehidrasi Ghost Item dari History pasca Force-Close
                 if (activeEditTrxId) {
@@ -4597,7 +4642,7 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
 
         // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
 let btDevice = null, btServer = null, btChar = null, isBTConnecting = false;
-async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
+async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null, isReprint = false) {
     if (isBTConnecting) return tampilkanToast("Sedang memproses Bluetooth...", "var(--warning)");
     isBTConnecting = true;
     try {
@@ -4633,9 +4678,9 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
                 let displayTrxId = trxId ? trxId.split('-').slice(0, 2).join('-') : '';
                 let bodyStr = `No  : ${displayTrxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
                 
-                items.forEach(i => {
-                    // [SURGICAL FIX] Sterilisasi Unicode/Emoji agar tidak merusak Hardware Buffer ESC/POS
-                    let n = String(i.n).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '').substring(0, 32); 
+items.forEach(i => {
+    // [SURGICAL FIX] Sterilisasi Total ke ASCII agar Buffer Mesin Printer tidak jebol
+    let n = String(i.n).replace(/[^\x00-\x7F]/g, '').substring(0, 32); 
                     let sub = fmt(i.sub);
                     let qU = `${i.q}x${fmt(i.q > 0 ? Math.round(i.sub / i.q) : i.sub)}`;
                     let pad = 32 - qU.length - sub.length;
@@ -4654,22 +4699,24 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
                 payload.set(bodyData, offset); offset += bodyData.length;
                 payload.set(cut, offset);
                 
-                               // Simpan transaksi offline ke Database SEBELUM cetak perangkat keras untuk mitigasi Data Loss
-                let finalTs = trxTs ? trxTs : Date.now();
-                let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
-                try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
-                
-                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                if (activeEditTrxId) {
-                    let hIdx = hist.findIndex(x => x.id === trxId);
-                    if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
-                } else { 
-                    hist.unshift(newTrx); 
-                }
-                try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
+                // Simpan transaksi offline ke Database SEBELUM cetak perangkat keras untuk mitigasi Data Loss
+                if (!isReprint) {
+                    let finalTs = trxTs ? trxTs : Date.now();
+                    let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
+                    try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
+                    
+                    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                    if (activeEditTrxId) {
+                        let hIdx = hist.findIndex(x => x.id === trxId);
+                        if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
+                    } else { 
+                        hist.unshift(newTrx); 
+                    }
+                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
 
-                                // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
-                cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+                     // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
+                    cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+                }
 
                 // MTU Chunking (Max 256 bytes dengan Jeda Hardware 20ms)
                 for (let i = 0; i < payload.length; i += 256) {
@@ -4726,9 +4773,10 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null) {
                         if (confB > 0.3) rules.push({ trigger: b, rec: a, conf: confB });
                     }
                 }
-                marketBasketRules = rules.sort((a,b) => b.conf - a.conf);
+                marketBasketRules = rules.sort((a,b) => b.conf - a.conf).slice(0, 50);
             } catch(e){}
         }
+
 // ==========================================
 // [ELITE QA] PENGENDALI BUKU PANDUAN UI
 // ==========================================
@@ -4751,6 +4799,27 @@ document.addEventListener('DOMContentLoaded', () => {
             // Mengembalikan scroll normal
             document.body.style.overflow = ''; 
         });
+    }
+});
+// [SURGICAL INJECTION] Pencegat Kematian Aplikasi (Phantom State Fix)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && ghostUndoTimer && pendingGhostItem && pendingGhostItem._isPendingDelete) {
+        clearTimeout(ghostUndoTimer);
+        pendingGhostItem.deleted = true; 
+        pendingGhostItem.updatedAt = Date.now();
+        delete pendingGhostItem._isPendingDelete;
+        
+        // Eksekusi mutlak sebelum thread dibunuh
+        if (idb) {
+            try {
+                const tx = idb.transaction('items', 'readwrite');
+                tx.objectStore('items').put(pendingGhostItem);
+            } catch(e) {}
+        }
+        // [SURGICAL INJECTION] Sterilisasi Mutlak State RAM
+        if(worker) worker.postMessage({ type: 'remove', id: String(pendingGhostItem.id) });
+        if (cartState[pendingGhostItem.id]) { delete cartState[pendingGhostItem.id]; saveCartMem(); renderCartUI(); }
+        updateMaps();
     }
 });
     </script>
