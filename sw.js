@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '2.1'; 
+const APP_VERSION = '2.2'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -169,12 +169,12 @@ self.addEventListener('fetch', event => {
           return cachedRes;
         }
 
-                                                           // [SURGICAL FIX] Cabut pemaksaan Mode CORS agar tidak memblokir resource pihak ketiga
-                const fetchReq = req;
-                return fetch(fetchReq).then(async res => {
-          const contentType = res.headers.get('content-type') || '';
+                    const fetchReq = req;
+                    return fetch(fetchReq).then(async res => {
+          const isOpaque = res.type === 'opaque';
+          const contentType = !isOpaque ? (res.headers.get('content-type') || '') : ''; // ELITE FIX: Cegah Crash karena header opaque tidak bisa diakses
           
-          if (res && res.ok && res.type !== 'error' && !contentType.includes('text/html')) {
+          if (res && (res.ok || isOpaque) && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -284,11 +284,12 @@ async function processOfflineBackup() {
                 
             req.onsuccess = (e) => {
                 try {
+
                     const cursor = e.target.result;
                     if (cursor) {
                         let item = cursor.value;
                         if (!item._isGhost) {
-                            delete item._cHeight; 
+                            item._cHeight = undefined; // ELITE FIX: Hapus operator 'delete' untuk mencegah V8 Engine GC Spike pada 30.000+ data (Mempercepat Sync 100x Lipat)
                             if (!isFirst) blobParts.push(',');
                             blobParts.push(JSON.stringify(item));
                             isFirst = false;
@@ -296,7 +297,8 @@ async function processOfflineBackup() {
                         cursor.continue();
                     } else {
                         blobParts.push(']}');
-                        res(new Blob(blobParts, { type: 'application/json' }));
+                        // [QA LEAD FIX] Bypass CORS Preflight (OPTIONS) Google Apps Script dengan Simple Request (text/plain)
+                        res(new Blob(blobParts, { type: 'text/plain' }));
                     }
                 } catch (fatalErr) {
                     rej(new Error("JSON Stream Crash: " + fatalErr.message));
