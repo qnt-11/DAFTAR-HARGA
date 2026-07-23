@@ -1102,14 +1102,35 @@ function handleSearchLogic(val) {
                        searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && isCartMode) {
                 e.preventDefault();
-                if (e.repeat) return; // [SURGICAL FIX] Mutex Penahan Hardware Spam
-                let val = searchInput.value.trim();
-            if (val !== '') {
-                if (handleSearchInput.cancel) handleSearchInput.cancel();
-                handleSearchLogic(val);
-                pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
-                searchInput.value = ''; // [SURGICAL FIX] Synchronous Wipe: Amankan buffer dari hardware scanner berikutnya
-            }
+                if (e.repeat) return;
+                let val = searchInput.value ? searchInput.value.trim() : '';
+                if (val !== '') {
+                    if (handleSearchInput && typeof handleSearchInput.cancel === 'function') handleSearchInput.cancel();
+                    
+                    // [QA ELITE BRIDGE]: Cek Barcode Sinkron O(1) di RAM sebelum melempar ke Thread Worker untuk memotong Latensi Event Loop
+                    let inputL = val.toLowerCase().replace(/[\x00-\x1F\x7F]/g, '').trim();
+                    let qtyInjected = 1;
+                    const qMatch = inputL.match(/^(\d{1,4})[x\*]\s*(.*)/i);
+                    if (qMatch) {
+                        qtyInjected = parseInt(qMatch[1], 10) || 1;
+                        inputL = qMatch[2].trim();
+                    }
+                    
+                    const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.b).toLowerCase() === inputL || String(i.b2).toLowerCase() === inputL));
+                    if (fastMatch) {
+                        let finalQty = qtyInjected;
+                        if (String(fastMatch.b2).toLowerCase() === inputL && fastMatch.iq > 1) finalQty = fastMatch.iq * qtyInjected;
+                        searchInput.value = '';
+                        modifyCartItem(fastMatch.id, finalQty);
+                        tampilkanToast(`+${finalQty} ${fastMatch.n}`, "var(--mono-main)");
+                        return;
+                    }
+
+                    // Fallback ke Web Worker jika bukan exact barcode match
+                    handleSearchLogic(val);
+                    pendingAutoAdds.set(currentSearchReqId, currentInjectedQty); 
+                    searchInput.value = '';
+                }
             }
         });
 
@@ -2060,21 +2081,24 @@ document.addEventListener('focus', function(e) {
         }
 
         function levenshtein(a, b, limit = 99) {
-            if(Math.abs(a.length - b.length) > limit) return 99;
-            if(a.length === 0) return b.length; if(b.length === 0) return a.length;
-            let d = [];
-            for(let i=0; i<=b.length; i++){ d[i] = [i]; }
-            for(let j=0; j<=a.length; j++){ d[0][j] = j; }
-            for(let i=1; i<=b.length; i++){
-                for(let j=1; j<=a.length; j++){
-                    let cost = (b.charAt(i-1) === a.charAt(j-1)) ? 0 : 1;
-                    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
-                    if(i > 1 && j > 1 && b.charAt(i-1) === a.charAt(j-2) && b.charAt(i-2) === a.charAt(j-1)) {
-                        d[i][j] = Math.min(d[i][j], d[i-2][j-2] + cost);
+            if (Math.abs(a.length - b.length) > limit) return 99;
+            if (a.length === 0) return b.length; if (b.length === 0) return a.length;
+            let d2 = new Uint8Array(a.length + 1);
+            let d1 = new Uint8Array(a.length + 1);
+            let d0 = new Uint8Array(a.length + 1);
+            for (let j = 0; j <= a.length; j++) d1[j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                d0[0] = i;
+                for (let j = 1; j <= a.length; j++) {
+                    let cost = (b.charAt(i - 1) === a.charAt(j - 1)) ? 0 : 1;
+                    d0[j] = Math.min(d1[j] + 1, d0[j - 1] + 1, d1[j - 1] + cost);
+                    if (i > 1 && j > 1 && b.charAt(i - 1) === a.charAt(j - 2) && b.charAt(i - 2) === a.charAt(j - 1)) {
+                        d0[j] = Math.min(d0[j], d2[j - 2] + cost);
                     }
                 }
+                let temp = d2; d2 = d1; d1 = d0; d0 = temp;
             }
-            return d[b.length][a.length];
+            return d1[a.length];
         }
 
         self.onmessage = function(e) { 
@@ -2995,13 +3019,10 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                     updateGrandTotal();
                 }
 
-                // 4. [PERISAI ANTI-GHOST OVERWRITE] Sinkronisasi ulang Web Worker
-                if (searchInput.value.trim() !== '') {
-                    currentSearchReqId++; 
-                    handleSearchLogic(searchInput.value.trim()); 
-                }
-
                 tampilkanToast("Barang Tersimpan!");
+                
+                // [INJEKSI AUTO-SYNC]
+                if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
 
             } catch (err) { 
                 showAlert("Proses Gagal: " + err.message, "Error");
@@ -3312,17 +3333,34 @@ db.forEach(i => {
                 function processNextChunk() {
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
-                                                        if (chunk.length === 0) {
-                                    // SURGICAL FIX: Amankan Ghost Item dari pemusnahan massal saat Sync Cloud/Excel berjalan di tengah proses Edit Struk
-                                    let ghostItems = db.filter(i => i._isGhost);
-                                    db = Array.from(tempMap.values()).concat(ghostItems); updateMaps(); 
-                                    if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost) }); 
-                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); currentSearchReqId++; $('q').value = ''; workerResult = null; $('q-x').style.display = 'none'; pendingAutoAdds.clear();
-                            if (isCartMode) renderCartUI(); window.scrollTo({ top: 0, behavior: 'instant' }); applyFiltersAndRender(); isApiLoading = false; hideLoading(); 
-                            if (rejectedCloudCount > 0) { showAlert(`Update Selesai!<br><br><span style="color:var(--warning);">⚠️ ${rejectedCloudCount} data ditolak dari Cloud (Format rusak).</span>`, "Peringatan Sinkronisasi", "var(--warning)"); } else { tampilkanToast(forceSync ? "Berhasil memuat ulang semua data!" : `Berhasil update ${dataCloud.length} data!`, "var(--mono-main)"); }
+                        if (chunk.length === 0) {
+                            let ghostItems = db.filter(i => i._isGhost);
+                            db = Array.from(tempMap.values()).concat(ghostItems); 
+                            updateMaps(); 
+                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost) }); 
+                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
+                            currentSearchReqId++; 
+                            $('q').value = ''; 
+                            workerResult = null; 
+                            $('q-x').style.display = 'none'; 
+                            pendingAutoAdds.clear();
+                            if (isCartMode) renderCartUI(); 
+                            window.scrollTo({ top: 0, behavior: 'instant' }); 
+                            applyFiltersAndRender(); 
+                            isApiLoading = false; 
+                            hideLoading(); 
+                            if (rejectedCloudCount > 0) { 
+                                showAlert(`Update Selesai!<br><br><span style="color:var(--warning);">⚠️ ${rejectedCloudCount} data ditolak dari Cloud (Format rusak).</span>`, "Peringatan Sinkronisasi", "var(--warning)"); 
+                            } else { 
+                                tampilkanToast(forceSync ? "Berhasil memuat ulang semua data!" : `Berhasil update ${dataCloud.length} data!`, "var(--mono-main)"); 
+                            }
                             return;
                         }
-                        const tx = idb.transaction('items', 'readwrite'); const store = tx.objectStore('items'); if (forceSync && currentIndex === 0) store.clear(); 
+                        
+                        const tx = idb.transaction('items', 'readwrite'); 
+                        const store = tx.objectStore('items'); 
+                        if (forceSync && currentIndex === 0) store.clear(); 
+                        
                         chunk.forEach(rawItem => { 
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
@@ -3331,14 +3369,27 @@ db.forEach(i => {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
                             } else {
                                 const existing = tempMap.get(String(norm.id));
-                                if (existing) { if ((norm.updatedAt || 0) >= (existing.updatedAt || 0)) { if (norm.deleted) { store.delete(norm.id); tempMap.delete(String(norm.id)); } else { tempMap.set(String(norm.id), norm); store.put(norm); } } } else if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); } 
+                                if (existing) { 
+                                    if ((norm.updatedAt || 0) >= (existing.updatedAt || 0)) { 
+                                        if (norm.deleted) { store.delete(norm.id); tempMap.delete(String(norm.id)); } 
+                                        else { tempMap.set(String(norm.id), norm); store.put(norm); } 
+                                    } 
+                                } else if (!norm.deleted) { 
+                                    tempMap.set(String(norm.id), norm); store.put(norm); 
+                                } 
                             }
                         }); 
+                        
                         tx.oncomplete = () => { 
-                            currentIndex += chunkSize; setTimeout(processNextChunk, 0); 
+                            currentIndex += chunkSize; 
+                            // [CRITICAL ELITE QA FIX]: Gunakan requestAnimationFrame / sekuensial murni untuk mengosongkan call-stack engine browser sebelum mengeksekusi I/O berikutnya
+                            requestAnimationFrame(() => {
+                                setTimeout(processNextChunk, 0);
+                            });
                         }; 
                         tx.onerror = () => { 
-                            isApiLoading = false; hideLoading(); 
+                            isApiLoading = false; 
+                            hideLoading(); 
                             if (forceSync) {
                                 try {
                                     let rTx = idb.transaction('items', 'readwrite');
@@ -3351,7 +3402,9 @@ db.forEach(i => {
                             }
                         };
                     } catch (error) {
-                        isApiLoading = false; hideLoading(); showAlert("Gagal memproses data sinkronisasi. Harap coba lagi.", "Error");
+                        isApiLoading = false; 
+                        hideLoading(); 
+                        showAlert("Gagal memproses data sinkronisasi. Harap coba lagi.", "Error");
                     }
                 }
                 processNextChunk();
@@ -4155,14 +4208,11 @@ localStorage.setItem('TRX_SEQ', seq);
                     if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
                 } else { hist.unshift(newTrx); }
 
-                try {
-                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50)));
-                } catch (e) {
-                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 10))); } catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); }
-                }
-
                 cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
-                clearEditMode(); // <--- TAMBAHKAN DI SINI
+                clearEditMode(); 
+                
+                // [INJEKSI AUTO-SYNC] Picu sinkronisasi gaib setelah transaksi berhasil dicetak/disimpan
+                if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
             }
 
             let printFrame = document.getElementById('receipt-spooler-frame');
@@ -4793,9 +4843,10 @@ items.forEach(i => {
 
                      // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
                     cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+                    
+                    // [INJEKSI AUTO-SYNC]
+                    if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
                 }
-
-                // MTU Chunking (Max 256 bytes dengan Jeda Hardware 20ms)
                 for (let i = 0; i < payload.length; i += 256) {
                     await btChar.writeValue(payload.slice(i, i + 256));
                     await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
@@ -4853,6 +4904,125 @@ items.forEach(i => {
                 marketBasketRules = rules.sort((a,b) => b.conf - a.conf).slice(0, 50);
             } catch(e){}
         }
+
+// ==========================================
+// [ELITE ARCHITECTURE] STEALTH AUTO-SYNC ENGINE
+// ==========================================
+const AutoSyncEngine = {
+    needsSync: false,
+    syncTimer: null,
+    isSyncing: false,
+    
+    // 1. Pelatuk Cerdas (Debounce 15 Detik)
+    trigger: function() {
+        this.needsSync = true;
+        this.updateUIStatus('Menunggu Jeda...');
+        
+        if (this.syncTimer) clearTimeout(this.syncTimer);
+        
+        // Eksekusi ditunda 15 detik. Jika ada transaksi baru, timer di-reset (Debounce)
+        this.syncTimer = setTimeout(() => {
+            this.executeSilentSync();
+        }, 15000); 
+    },
+    
+    // 2. Eksekutor Siluman
+    executeSilentSync: function() {
+        // Cek Mutex Lock: Blokir jika sedang offline, tidak ada perubahan, atau sedang upload manual
+        if (!navigator.onLine || !this.needsSync || this.isSyncing || isApiLoading || typeof db === 'undefined' || db.length === 0) return;
+        
+        // Pengecekan Batas Payload 10MB
+        try {
+            let payloadMB = new Blob([JSON.stringify(db.filter(i => !i._isGhost))]).size / (1024 * 1024);
+            if (payloadMB > 10) {
+                this.updateUIStatus('Gagal: Ukuran Data > 10MB');
+                return; // Auto-Sync dibatalkan mutlak untuk mencegah OOM Crash
+            }
+        } catch(e) { return; }
+
+        this.isSyncing = true;
+        this.updateUIStatus('Syncing...', '#FFA500');
+
+        // [SURGICAL FIX] Request Idle Callback untuk mencegah Main Thread Freeze saat JSON.stringify
+        const runSync = () => {
+            const serverTime = Date.now();
+            
+            fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 60000)
+            .then(r => r.json())
+            .then(backupRes => {
+                if (backupRes.status !== 'success') throw new Error();
+                
+                // Tarik History secara asinkron dari IndexedDB (Limit 1500 transaksi terbaru untuk menghindari Payload membengkak)
+                return new Promise((resolve) => {
+                    try {
+                        const store = idb.transaction('history', 'readonly').objectStore('history');
+                        const req = store.index('ts_idx').openCursor(null, 'prev');
+                        const results = [];
+                        req.onsuccess = (e) => {
+                            const cursor = e.target.result;
+                            if (cursor && results.length < 1500) {
+                                results.push(cursor.value);
+                                cursor.continue();
+                            } else { resolve(results); }
+                        };
+                        req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
+                    } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
+                }).then(historyData => {
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backupHistory', data: historyData }) }, 60000);
+                });
+            })
+            .then(r => r.json())
+            .then(historyRes => {
+                if (historyRes.status !== 'success') throw new Error();
+                
+                // Pembersihan Ghost Item pasca berhasil
+                try {
+                    const tx = idb.transaction('items', 'readwrite');
+                    const s = tx.objectStore('items');
+                    db = db.filter(i => { if (i.deleted || i._isGhost) { s.delete(i.id); return false; } return true; });
+                    updateMaps();
+                } catch(e) {}
+                
+                this.isSyncing = false;
+                this.needsSync = false;
+                localStorage.setItem('DB_LAST_SYNC', serverTime.toString());
+                this.updateUIStatus('Auto-Sync Aktif ✅', '#3CB371');
+                
+                // Kembalikan status ke normal setelah 5 detik
+                setTimeout(() => this.updateUIStatus('[Sistem Status: Optimal | Local Storage: Aktif]', 'var(--mono-main)'), 5000);
+            })
+            .catch(() => {
+                // Siluman gagal. Tidur. Coba lagi nanti tanpa mengganggu kasir.
+                this.isSyncing = false;
+                this.updateUIStatus('Auto-Sync Tertunda (Offline)', 'var(--warning)');
+            });
+        };
+
+        // Hindari memblokir UI saat parsing
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(runSync, { timeout: 2000 });
+        } else {
+            setTimeout(runSync, 500);
+        }
+    },
+    
+    // 3. Modifikasi UI About Modal agar kasir tahu status sinkronisasinya
+    updateUIStatus: function(msg, color) {
+        const statusEl = document.querySelector('#about-modal .modal-box > div[style*="background: rgba(255,255,255,0.05)"]');
+        if (statusEl) {
+            statusEl.innerText = msg;
+            if (color) statusEl.style.color = color;
+        }
+    }
+};
+
+// 4. Deteksi Online Kembal (Pelatuk Lingkungan)
+window.addEventListener('online', () => {
+    if (AutoSyncEngine.needsSync) {
+        AutoSyncEngine.updateUIStatus('Sinyal kembali, memulai sync...', '#87CEFA');
+        setTimeout(() => AutoSyncEngine.executeSilentSync(), 3000);
+    }
+});
 
 // ==========================================
 // [ELITE QA] PENGENDALI BUKU PANDUAN UI
