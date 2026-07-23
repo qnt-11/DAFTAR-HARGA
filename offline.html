@@ -146,22 +146,29 @@
         const STORE_NAME = 'CatatanDarurat'; 
         let db;
         
-        const requestDB = indexedDB.open(DB_NAME, 1);
-        requestDB.onupgradeneeded = (e) => { 
-            let d = e.target.result;
-            if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
-        };
-        requestDB.onsuccess = (e) => { 
-    db = e.target.result; 
-    db.onversionchange = () => db.close();
-    loadLedger(); 
-};
-        requestDB.onerror = function() { 
+        function fallbackLedgerOpen() {
             const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
             if (t && ledger.value === '') ledger.value = t; 
             ledger.disabled = false;
             ledger.placeholder = "Catat pesanan pelanggan di sini. Data tersimpan permanen di memori HP...";
-        };
+        }
+
+        try {
+            const requestDB = indexedDB.open(DB_NAME, 1);
+            requestDB.onupgradeneeded = (e) => { 
+                let d = e.target.result;
+                if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
+            };
+            requestDB.onsuccess = (e) => { 
+        db = e.target.result; 
+        db.onversionchange = () => db.close();
+        loadLedger(); 
+    };
+            requestDB.onerror = fallbackLedgerOpen;
+        } catch (fatalErr) {
+            // ELITE FIX: Cegah Javascript Engine Crash Total jika Browser (Incognito/Private) memblokir akses objek IndexedDB secara sinkron.
+            fallbackLedgerOpen();
+        }
 
         function loadLedger() {
             try {
@@ -183,11 +190,13 @@
                     unlockLedger();
                 };
 
-                                                req.onsuccess = function() { 
+     req.onsuccess = function() { 
     const localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER');
     if (req.result && typeof req.result.text === 'string') { 
         if (localText && localText !== req.result.text) {
-            if (ledger.value === '') ledger.value = localText;
+            // ELITE FIX: Jangan menimpa IDB secara buta! Gunakan heuristik panjang string untuk menyelamatkan data terbanyak.
+            const safestText = localText.length > req.result.text.length ? localText : req.result.text;
+            if (ledger.value === '') ledger.value = safestText;
             saveLedger(); 
         } else {
                             if (ledger.value === '') ledger.value = req.result.text; 
