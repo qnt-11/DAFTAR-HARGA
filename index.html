@@ -1455,7 +1455,7 @@ function resetCart() {
                                     // [SURGICAL FIX] Blokir injeksi SYS-TRUNC agar tidak merusak database keranjang
                     if (hData.items.some(x => x.id === "SYS-TRUNC")) return showAlert("Struk ini terlalu besar dan telah diarsipkan oleh sistem. Tidak dapat diedit ulang.", "Ditolak", "var(--danger)");
                     
-                    if (Object.keys(cartState).length > 0 && activeEditTrxId !== hData.id) {
+                    if (Object.keys(cartState).length > 0) {
                         return showAlert("Mohon KOSONGKAN atau selesaikan Keranjang Belanja saat ini sebelum mengedit struk lama!", "Keranjang Terisi", "var(--warning)");
                     }
                     
@@ -2239,9 +2239,24 @@ document.addEventListener('focus', function(e) {
                         }
                         modifyCartItem(topItem.id, addQty);
                         tampilkanToast(`+${addQty} ${topItem.n}`, "var(--mono-main)");
-                        if (e.data.reqId === currentSearchReqId) clearSearch();
+                        
+                        // [QA LEAD FIX] Cegah Race Condition & Truncation pada Hardware Scanner Spamming
+                        if (e.data.reqId === currentSearchReqId && searchInput.value === '') {
+                            workerResult = null;
+                            $('q-x').style.display = 'none';
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                            applyFiltersAndRender();
+                        }
                     } else {
                         tampilkanToast("Barang tidak ditemukan!", "var(--warning)");
+                        
+                        // [QA LEAD FIX] Amankan buffer ketikan scanner berikutnya dari sapuan fungsi clearSearch
+                        if (e.data.reqId === currentSearchReqId && searchInput.value === '') {
+                            workerResult = null;
+                            $('q-x').style.display = 'none';
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                            applyFiltersAndRender();
+                        }
                     }
                     return; 
                 }
@@ -2252,8 +2267,8 @@ document.addEventListener('focus', function(e) {
                 window.scrollTo({ top: 0, behavior: 'instant' }); 
                 applyFiltersAndRender(); 
             }
-        } // [SURGICAL FIX] INJEKSI PENUTUP IF UTAMA YANG HILANG
-        };
+        } 
+     };
 
 function processNLPVoice(transcript) {
     let text = transcript.toLowerCase();
@@ -2614,7 +2629,13 @@ try {
             
             // [SURGICAL FIX] Potong ruang kosong bawah menjadi 15px (Mepet Layar) khusus saat Mode Kasir Landscape
             let isLandscapePOS = document.body.classList.contains('mode-kasir') && window.innerWidth >= 600 && window.matchMedia("(orientation: landscape)").matches;
-            $('list').style.height = (cur + (isLandscapePOS ? 15 : 150)) + 'px'; 
+            if (isLandscapePOS) {
+                $('list').style.height = '100%'; 
+                $('render-container').style.height = (cur + 15) + 'px'; // ELITE FIX: Regangkan perut kontainer internal agar native scrollbar aktif di Landscape
+            } else {
+                $('render-container').style.height = 'auto'; // Reset bersih untuk Portrait
+                $('list').style.height = (cur + 150) + 'px'; 
+            }
         }
         function getDVSStartIndex(st) { let l = 0, h = listOffsets.length - 1; while (l <= h) { let m = Math.floor((l + h) / 2); if (listOffsets[m] === st) return m; if (listOffsets[m] < st) l = m + 1; else h = m - 1; } return h > 0 ? h : 0; }
         
@@ -4062,10 +4083,11 @@ localStorage.setItem('TRX_SEQ', seq);
                 </table>
                 <div style="border-bottom: 2px dashed #000; margin: 4px 0;"></div>
             `;
+
             // 3. Render Daftar Barang dengan Indentasi Ritel
             items.forEach(i => {
                 let safeN = escapeHTML(i.n).toUpperCase(); // Nama selalu kapital di struk ritel
-                let hrgSatuan = i.q > 0 ? Number((i.sub / i.q).toFixed(2)) : i.sub;
+                let hrgSatuan = i.q > 0 ? Math.round(i.sub / i.q) : i.sub; // ELITE FIX: Hapus kebocoran desimal, bulatkan murni sesuai standar Rupiah Kelontong
                 let iqNum = Math.max(1, parseInt(i.iq) || 1);
                 let nQ = parseFloat(String(i.q).replace(',', '.')) || 0;
                 
