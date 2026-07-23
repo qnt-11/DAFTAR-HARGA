@@ -147,8 +147,10 @@
         let db;
         
         function fallbackLedgerOpen() {
-            const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-            if (t && ledger.value === '') ledger.value = t; 
+            try {
+                const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
+                if (t && ledger.value === '') ledger.value = t; 
+            } catch(e) {}
             ledger.disabled = false;
             ledger.placeholder = "Catat pesanan pelanggan di sini. Data tersimpan permanen di memori HP...";
         }
@@ -182,16 +184,19 @@
                 };
 
                 const fallbackLoader = () => {
-                    const fallbackText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-                    if (fallbackText && ledger.value === '') {
-                        ledger.value = fallbackText;
-                        saveLedger(); 
-                    }
+                    try {
+                        const fallbackText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
+                        if (fallbackText && ledger.value === '') {
+                            ledger.value = fallbackText;
+                            saveLedger(); 
+                        }
+                    } catch(e) {}
                     unlockLedger();
                 };
 
      req.onsuccess = function() { 
-    const localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER');
+    let localText = null;
+    try { localText = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); } catch(e) {}
     if (req.result && typeof req.result.text === 'string') { 
         if (localText && localText !== req.result.text) {
             // ELITE FIX: Jangan menimpa IDB secara buta! Gunakan heuristik panjang string untuk menyelamatkan data terbanyak.
@@ -213,8 +218,10 @@
                 req.onerror = fallbackLoader; 
 
             } catch (error) {
-                const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
-                if (t && ledger.value === '') ledger.value = t; 
+                try {
+                    const t = localStorage.getItem('DB_WA_OFFLINE_LEDGER'); 
+                    if (t && ledger.value === '') ledger.value = t; 
+                } catch(e) {}
                 ledger.disabled = false;
                 ledger.placeholder = "Catat pesanan pelanggan di sini. Data tersimpan permanen di memori HP...";
             }
@@ -326,7 +333,11 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (document.activeElement.tagName === 'TEXTAREA') return;
+            const activeEl = document.activeElement;
+            if (activeEl.tagName === 'TEXTAREA') return;
+            
+            // [QA LEAD FIX] Lepaskan kaitan jika tombol OS utama difokuskan agar tetap berfungsi normal via Enter/Spasi
+            if (activeEl.tagName === 'BUTTON' && activeEl.id === 'retry-btn' && (e.key === 'Enter' || e.key === ' ')) return;
 
             const key = e.key;
             if (/^[0-9]$/.test(key)) {
