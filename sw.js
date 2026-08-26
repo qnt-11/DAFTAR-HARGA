@@ -2,7 +2,7 @@
 // SERVICE WORKER (PWA KASIR ENTERPRISE)
 // ====================================
 
-const APP_VERSION = '2.3'; 
+const APP_VERSION = '2.4'; 
 const CACHE_CORE = 'core-v' + APP_VERSION; 
 const CACHE_DYNAMIC = 'dyn-v' + APP_VERSION;
 const CACHE_CDN = 'cdn-v1'; 
@@ -101,18 +101,19 @@ self.addEventListener('fetch', event => {
         const pwaRoot = new URL('./', self.location).href;
         const isCore = cleanReqUrl === pwaRoot || cleanReqUrl === pwaRoot + 'index.html' || cleanReqUrl.endsWith(OFFLINE_URL);
         const targetCacheName = isCore ? CACHE_CORE : CACHE_DYNAMIC;
-        
-        // [QA LEAD FIX] Lempar operasi disk (tulis cache/trim) ke thread background terisolasi tanpa await!
-        caches.open(targetCacheName).then(async cache => {
-          await cache.put(cleanReqUrl, resToCache); 
-          if (!isCore) await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS);
-        }).catch(() => {});
-      }
-      return res; // Murni me-return respons ke layar UI SECEPAT KILAT
-    });
+            
+            // [QA LEAD FIX] Operasi disk harus ditautkan ke waitUntil agar SW tidak dibunuh paksa oleh browser saat OS sedang menulis Cache!
+            const cachePromise = caches.open(targetCacheName).then(async cache => {
+              await cache.put(cleanReqUrl, resToCache); 
+              if (!isCore) await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS);
+            }).catch(() => {});
+            event.waitUntil(cachePromise);
+          }
+          return res; // Murni me-return respons ke layar UI SECEPAT KILAT
+        });
 
-    // [QA LEAD FIX] Daftarkan waitUntil secara SINKRON pada First-Tick (Mencegah InvalidStateError)
-    event.waitUntil(pFetch.catch(() => {}));
+        // [QA LEAD FIX] Daftarkan waitUntil secara SINKRON pada First-Tick (Mencegah InvalidStateError)
+        event.waitUntil(pFetch.catch(() => {}));
 
     event.respondWith(
       (async () => {
@@ -174,7 +175,8 @@ self.addEventListener('fetch', event => {
           const isOpaque = res.type === 'opaque';
           const contentType = !isOpaque ? (res.headers.get('content-type') || '') : ''; // ELITE FIX: Cegah Crash karena header opaque tidak bisa diakses
           
-          if (res && (res.ok || isOpaque) && res.type !== 'error' && !contentType.includes('text/html')) {
+          // [SURGICAL FIX] Opaque Quota Bomb Defender. DILARANG keras melakukan caching pada Opaque Response karena 1 file 2KB akan di-padding menjadi 7MB oleh Storage OS!
+          if (res && res.ok && !isOpaque && res.type !== 'error' && !contentType.includes('text/html')) {
             const resToCache = res.clone();
             caches.open(CACHE_CDN).then(async cache => {
               await cache.put(req.url, resToCache); // SURGICAL FIX: Gunakan req.url agar tidak memicu "Body already used" TypeError
@@ -202,11 +204,13 @@ self.addEventListener('fetch', event => {
       const contentType = networkRes.headers.get('content-type') || '';
       if (!contentType.includes('text/html')) {
         const resToCache = networkRes.clone();
-        // [QA LEAD FIX] Tulis cache dinamis di luar pipeline rendering utama
-        caches.open(CACHE_DYNAMIC).then(async cache => {
+
+        // [QA LEAD FIX] Tulis cache dinamis di luar pipeline rendering utama (Tautkan ke waitUntil)
+        const cacheDynPromise = caches.open(CACHE_DYNAMIC).then(async cache => {
           await cache.put(req.url, resToCache); 
           await trimCache(CACHE_DYNAMIC, MAX_DYNAMIC_ITEMS); 
         }).catch(() => {});
+        event.waitUntil(cacheDynPromise);
       }
     }
     return networkRes; // Langsung lepaskan objek ke layar browser
@@ -273,10 +277,15 @@ async function processOfflineBackup() {
           try {
             const CLOUD_API = "https://script.google.com/macros/s/AKfycbwOpDwzAOzaPjyx1w7WF-6f2aEO0Yr6wsHndm1ktryTgJPWl_1eCU1yX-Baf0pxq9UN/exec";
             
-                        // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
-                        // [ELITE QA FIX] Streaming String Serialization (OOM-Proof Memory Compression)
+                // [SURGICAL FIX: Tarik kebenaran absolut via Cursor (OOM-Proof) untuk mengganti payload.data yang dikosongkan]
+              // [ELITE QA FIX] Streaming String Serialization (OOM-Proof Memory Compression)
             const backupPayloadBlob = await new Promise((res, rej) => {
                 const txItems = idb.transaction('items', 'readonly');
+                
+                // [SURGICAL FIX] Kunci mutlak status abort/error. Cegah Promise menggantung seumur hidup jika OS membunuh akses disk!
+                txItems.onabort = () => rej(new Error("Transaksi baca streaming dibatalkan paksa oleh OS."));
+                txItems.onerror = (e) => rej(new Error("Error transaksi streaming: " + e.target.error));
+                
                 const store = txItems.objectStore('items');
                 const req = store.openCursor();
                 let blobParts = ['{"action":"backup","data":['];
