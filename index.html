@@ -1212,27 +1212,32 @@ function handleSearchLogic(val) {
         // --- INJEKSI MULTI-TIER ENGINE ---
         function getCalculatedSubtotal(item, q) {
             let iq = Math.max(1, item.iq || 1);
+            let finalSubtotal = Math.round(q * (item.p1 || 0)); // 3. Fallback: Harga Eceran Normal
             
-            // 1. [Prioritas Mutlak] Multi-Tier Manual
-            // (Jika Anda membuat aturan bertingkat khusus di menu edit barang)
+            // 2. [Auto-Discount Engine] Kalkulasi Base Grosir sebagai acuan batas wajar
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
+                let threshold = Math.max(2, Math.ceil(iq / 2));
+                if (q >= threshold) {
+                    finalSubtotal = Math.round((q * item.p2) / iq);
+                }
+            }
+            
+            // 1. [Multi-Tier Engine] Evaluasi diskon bertingkat (Mencari yang PALING MURAH)
             if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
                 let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
                 for (let i = 0; i < sortedTiers.length; i++) {
-                    if (q >= sortedTiers[i].q) return Math.round(q * sortedTiers[i].p);
+                    if (q >= sortedTiers[i].q) {
+                        let tierSubtotal = Math.round(q * sortedTiers[i].p);
+                        // KUNCI ABSOLUT: Cegah Tier (Beli 5) lebih mahal dari rasio Grosir (Beli 1 Dus)
+                        if (tierSubtotal < finalSubtotal) {
+                            finalSubtotal = tierSubtotal;
+                        }
+                        break; 
+                    }
                 }
             }
             
-            // 2. [Auto-Discount Engine] Logika Separuh Grosir
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1) {
-                let threshold = Math.ceil(iq / 2); // Separuh grosir dibulatkan ke atas (Isi 40 -> 20, Isi 5 -> 3)
-                
-                if (q >= threshold) {
-                    return Math.round((q * item.p2) / iq); // Mencegah IEEE-754 precision loss dengan perkalian lebih awal
-                }
-            }
-            
-            // 3. Fallback: Harga Eceran Normal (Jika pembelian di bawah separuh)
-            return Math.round(q * (item.p1 || 0));
+            return finalSubtotal;
         }
 
         function validatePriceBlur(id, el) {
@@ -1657,6 +1662,7 @@ saveCartMem();
             if (diffY > diffX && diffY > 10) return;
             // [SURGICAL FIX] Isolasi Sumbu-X: Hanya izinkan kartu digeser jika berada di tab HARGA ('all')
             if (tab === 'all' && diffX > 30 && diffX < 90) {
+                if (e.cancelable) e.preventDefault(); // ELITE UI FIX: Mengunci scroll Y native agar DOM tidak berguncang (Jelly Effect) saat swipe
                 card.style.transform = `translateX(-${diffX}px)`;
             }
         }
@@ -2666,7 +2672,7 @@ try {
                         function applyFiltersAndRender() {
             if (swipedCardElem) swipedCardElem = null; const q = $('q').value.trim(), qL = q.toLowerCase(); let active = db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete);
             const exact = active.find(i => (i.b && String(i.b).toLowerCase() === qL) || (i.b2 && String(i.b2).toLowerCase() === qL)); 
-            let base = exact ? [exact] : (workerResult !== null && q !== '' ? workerResult.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) : active); const today = Date.now();
+            let base = exact ? [exact] : (q !== '' ? (workerResult !== null ? workerResult.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) : []) : active); const today = Date.now();
             filteredData = base.filter(i => { if (tab === 'fav') return i.f; if (tab === 'exp') { if (!i.exp) return false; let px = i.exp.split('-'); let expDate = new Date(parseInt(px[0],10), parseInt(px[1],10), 0); const utcExp = expDate.getTime(); return !isNaN(utcExp) && Math.floor((utcExp - today) / 86400000) <= 210; } return true; });
 
             if (!q || tab === 'exp') { 
@@ -2884,7 +2890,7 @@ try {
                 let iq = parseInt($('i-iq').value) || 0;
                 let rawHppG = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 let rawHppE = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
-                const hpp = (rawHppG > 0 && iq > 1) ? (rawHppG / iq) : rawHppE;
+                const hpp = (rawHppG > 0 && iq > 1) ? Math.round(rawHppG / iq) : rawHppE; // ELITE FIX: Sterilisasi presisi float
 
                 // Ambil Data Multi-Tier
                 let tiers = [];
@@ -2972,8 +2978,8 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 } else {
                     let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + b))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
                     const nIt = { id: newId, b, b2, n: cleanName, hpp, p1, p2, f: isFav, exp, t, u1, u2, iq, tiers, updatedAt: ts, deleted: false }; 
-                    db.push(nIt); 
                     await saveItemToIDB(nIt); 
+                    db.push(nIt); 
                     if (worker) worker.postMessage({ type: 'add', item: nIt }); 
                 }
 
@@ -3151,10 +3157,9 @@ db.forEach(i => {
             
             // [INJEKSI PROTEKSI] Payload Size Limiter (Maksimal 10MB)
             try {
-                let payloadBytes = new Blob([JSON.stringify(db.filter(i => !i._isGhost))]).size;
-                let payloadMB = payloadBytes / (1024 * 1024);
+                let payloadMB = (db.length * 250) / (1024 * 1024); // Heuristik O(1) 250 bytes per objek
                 if (payloadMB > 10) {
-                    return showAlert(`Batas Kapasitas Cloud Terlampaui!<br><br>Ukuran data Anda (${payloadMB.toFixed(2)} MB) melebihi limit server Google (10 MB).<br><br>Silakan gunakan menu "Save Excel" untuk mencadangkan (Backup) seluruh data Anda.`, "Payload Too Large", "var(--danger)");
+                    return showAlert(`Batas Kapasitas Cloud Terlampaui!<br><br>Estimasi ukuran data Anda (${payloadMB.toFixed(2)} MB) melebihi limit server Google (10 MB).<br><br>Silakan gunakan menu "Save Excel" untuk mencadangkan (Backup) seluruh data Anda.`, "Payload Too Large", "var(--danger)");
                 }
             } catch (e) {
                 return showAlert("Gagal mengalokasikan memori untuk kalkulasi Cloud. RAM HP penuh.", "OOM Error", "var(--danger)");
@@ -4933,7 +4938,7 @@ const AutoSyncEngine = {
         
         // Pengecekan Batas Payload 10MB
         try {
-            let payloadMB = new Blob([JSON.stringify(db.filter(i => !i._isGhost))]).size / (1024 * 1024);
+            let payloadMB = (db.length * 250) / (1024 * 1024); // Heuristik O(1) Memory
             if (payloadMB > 10) {
                 this.updateUIStatus('Gagal: Ukuran Data > 10MB');
                 return; // Auto-Sync dibatalkan mutlak untuk mencegah OOM Crash
@@ -4972,6 +4977,7 @@ const AutoSyncEngine = {
                 });
             })
             .then(r => r.json())
+
             .then(historyRes => {
                 if (historyRes.status !== 'success') throw new Error();
                 
@@ -4979,7 +4985,13 @@ const AutoSyncEngine = {
                 try {
                     const tx = idb.transaction('items', 'readwrite');
                     const s = tx.objectStore('items');
-                    db = db.filter(i => { if (i.deleted || i._isGhost) { s.delete(i.id); return false; } return true; });
+                    db = db.filter(i => { 
+                        // ELITE FIX: Time-Lock Guardian. Cegah penghancuran item yang diubah selama I/O Fetch berlangsung.
+                        if ((i.deleted || i._isGhost) && (i.updatedAt || 0) <= serverTime) { 
+                            s.delete(i.id); return false; 
+                        } 
+                        return true; 
+                    });
                     updateMaps();
                 } catch(e) {}
                 
