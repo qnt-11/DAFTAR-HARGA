@@ -2307,32 +2307,35 @@ document.addEventListener('focus', function(e) {
                 let intent = 'UNKNOWN'; let extractedQty = 1; let entity = ''; let responseData = null;
                 
                 // [QA LEAD FIX] Escape ganda (\\) pada Regex wajib hukumnya di dalam String Template Literal JS
-                text = text.replace(/^(tolong|coba|barla)\\s+/g, '').trim();
+                text = text.replace(/^(tolong|coba|barla|info|cek)\\s+/g, '').trim();
                 
                 // [QA LEAD FIX] Bersihkan kata-kata filler sampah di akhir kalimat yang memicu Halusinasi Entitas
                 text = text.replace(/\\s+(dong|saja|aja|ya|deh|nih|tuh|kan|lagi)$/g, '').trim();
 
-                const numMap = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'lusin':12};
-                // [QA LEAD FIX] Jadikan grup penangkap entitas di bagian akhir bersifat opsional (?:\\s+(.*))?$ 
-                let qtyMatch = text.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order)\\s+(\\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas)(?:\\s+(lusin|dus|karton|pack|bungkus|pcs|slop|renceng))?(?:\\s+(.*))?$/);
+                const numMap = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12};
+                
+                // [QA LEAD FIX] Penambahan Verba KBBI (Jual/Checkout) & Kata Bilangan Belasan serta Satuan (Bks/Renteng)
+                let qtyMatch = text.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\\s+(\\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\\s*belas)(?:\\s+(lusin|dus|karton|pack|bungkus|bks|pcs|slop|renceng|renteng))?(?:\\s+(.*))?$/);
                 
                 if (qtyMatch) {
                     intent = 'TAMBAH';
-                    let baseQ = parseFloat(qtyMatch[1]) || numMap[qtyMatch[1]] || 1;
+                    let numKey = qtyMatch[1].replace(/\\s+/, ' '); 
+                    let baseQ = parseFloat(qtyMatch[1]) || numMap[numKey] || 1;
                     let mult = qtyMatch[2] ? (numMap[qtyMatch[2]] || 1) : 1;
                     extractedQty = baseQ * mult;
                     entity = qtyMatch[3] ? qtyMatch[3].replace(/\\s+(dan|terus|lalu)\\s+.*$/, '').trim() : '';
-                } else if (/(laku|laris|tren|trending|populer|top|terbaik|sering|paling|tertinggi|banyak dibeli)/.test(text)) {
+                    
+                // [ELITE QA FIX] Anti-Collision (Blind Spot Shield): Mewajibkan adverbia/frasa kuat untuk Analisa agar tidak membajak pencarian (Misal: "Kopi Top", "Buku Laba")
+                } else if (/(?:paling|ter|sangat)\\s*(?:laku|laris)|(?:top\\s*\\d+)|terlaris|terlaku|barang\\s+trending|paling\\s+dicari/i.test(text) && !/\\bcari\\b/.test(text)) {
                     intent = 'ANALISA_TOP';
-                } else if (/(omzet|pendapatan|pemasukan|laba|untung|penjualan hari ini|kas hari ini)/.test(text)) {
+                } else if (/(?:total|jumlah|rekap|laporan)?\\s*(omzet|omset|pendapatan|pemasukan|penjualan hari ini|kas hari ini|keuntungan hari ini)/i.test(text) && !/\\bcari\\b/.test(text)) {
                     intent = 'ANALISA_OMZET';
-                } else if (/(rugi|margin tipis|merah|keuntungan minim|minus|tekor|nombok)/.test(text)) {
+                } else if (/(?:barang|produk)\\s+(rugi|margin tipis|merah|kritis|tekor|nombok)|keuntungan minim/i.test(text) && !/\\bcari\\b/.test(text)) {
                     intent = 'ANALISA_MARGIN';
-                    // [ELITE QA FIX] Menghapus batas .slice(0, 5) agar menampilkan SELURUH barang dengan margin kritis
                     responseData = workerList.filter(x => x.hpp > 0 && x.p1 > 0 && (((x.p1 - x.hpp) / x.p1) * 100) < 5).sort((a, b) => {
                         let mA = ((a.p1 - a.hpp) / a.p1) * 100; let mB = ((b.p1 - b.hpp) / b.p1) * 100; return mA - mB;
                     });
-                } else if (/(lemot|lambat|lamban|lag|ngelag|macet|error|bug|rusak|bermasalah|hang)/.test(text)) {
+                } else if (/(sistem|aplikasi)\\s+(lemot|lambat|lamban|lag|ngelag|macet|error|bug|rusak|bermasalah|hang)/i.test(text)) {
                     intent = 'DIAGNOSTIK';
                     responseData = { count: workerList.length };
                 } else {
@@ -2452,6 +2455,7 @@ const VoiceNinja = {
     queue: [],
     isProcessing: false,
     shouldStayAwake: false,
+    restartTimer: null, // [ELITE QA FIX] Ghost Timer Isolation
     
     init: function() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return false;
@@ -2463,11 +2467,19 @@ const VoiceNinja = {
             this.recognition.interimResults = false;
             this.recognition.maxAlternatives = 1;
             
+            // [ELITE QA FIX] Visibility Paging Interceptor (Battery Drain & VRAM Leak Shield)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && this.shouldStayAwake) {
+                    this.stop();
+                    tampilkanToast("Voice-Ninja dijeda otomatis (Latar Belakang)", "var(--warning)");
+                }
+            });
+
             this.recognition.onstart = () => {
                 this.isListening = true;
                 this.retryCount = 0;
                 $('mic-btn').classList.add('listening');$('q').placeholder = "BARLA Listening...";
-                tampilkanToast("Voice-Ninja Aktif (Katakan: Barla...)", "#3CB371");
+                // [ELITE QA FIX] Hapus spam toast di sini (Silent Watchdog Isolation)
             };
             
             this.recognition.onresult = (event) => {
@@ -2483,6 +2495,9 @@ const VoiceNinja = {
                 if (e.error === 'network') {
                     tampilkanToast("Offline. Voice-Ninja ditangguhkan.", "var(--danger)");
                     this.stop();
+                } else if (e.error === 'no-speech') {
+                    // [ELITE QA FIX] Anti-Silence Penalty: Jangan hukum kasir dengan backoff jika murni karena diam
+                    this.retryCount = 0;
                 }
             };
             
@@ -2494,7 +2509,8 @@ const VoiceNinja = {
                 if (navigator.onLine && this.shouldStayAwake) {
                     let backoffTimer = Math.min(1000 * Math.pow(2, this.retryCount), this.backoffLimit);
                     this.retryCount++;
-                    setTimeout(() => {
+                    if (this.restartTimer) clearTimeout(this.restartTimer);
+                    this.restartTimer = setTimeout(() => {
                         if (navigator.onLine && this.shouldStayAwake) {
                             try { this.recognition.start(); } catch(err){}
                         }
@@ -2508,20 +2524,24 @@ const VoiceNinja = {
     toggle: function() {
         if (!this.init()) return tampilkanToast("Browser tidak mendukung Voice-Ninja!", "var(--warning)");
         if (this.isListening) {
-            this.shouldStayAwake = false;
             this.stop();
             tampilkanToast("Voice-Ninja Dimatikan", "var(--mono-main)");
         } else {
             if (!navigator.onLine) return tampilkanToast("Voice-Ninja butuh Internet!", "var(--danger)");
             this.shouldStayAwake = true;
+            tampilkanToast("Voice-Ninja Aktif (Katakan: Barla...)", "#3CB371"); // [ELITE QA FIX] Trigger UI murni manual
             try { this.recognition.start(); } catch(e){}
         }
     },
     
     stop: function() {
+        this.shouldStayAwake = false;
+        this.queue = []; // Flush antrean (Stop Race Condition)
+        if (this.restartTimer) { clearTimeout(this.restartTimer); this.restartTimer = null; } // Anti-Crash DOMException
         if (this.recognition) {
             try { this.recognition.stop(); } catch(e){}
         }
+        $('mic-btn').classList.remove('listening');$('q').placeholder = "search...";
     },
     
     parseCommand: function(text) {
@@ -2544,11 +2564,16 @@ const VoiceNinja = {
             let cleanCmd = cmd.trim();
             if (!cleanCmd) return;
             
-            let addMatch = cleanCmd.match(/(?:tambah|masukkan|beli|kasih)\s+(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)\s+(.*)/);
+            // [ELITE QA FIX] Regex Sync Parity dengan Worker NLU (Support Fraksi "Setengah" & Multiplier "Lusin/Dus")
+            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order)\s+(\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas)(?:\s+(lusin|dus|karton|pack|bungkus|pcs|slop|renceng))?(?:\s+(.*))?$/);
             if (addMatch) {
-                let mapNum = {'satu':1, 'dua':2, 'tiga':3, 'empat':4, 'lima':5, 'enam':6, 'tujuh':7, 'delapan':8, 'sembilan':9, 'sepuluh':10};
-                let qty = mapNum[addMatch[1]] || parseInt(addMatch[1], 10) || 1;
-                this.queue.push({ type: 'ADD', qty: qty, item: addMatch[2].trim() });
+                let mapNum = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'lusin':12};
+                let baseQ = parseFloat(addMatch[1]) || mapNum[addMatch[1]] || 1;
+                let mult = addMatch[2] ? (mapNum[addMatch[2]] || 1) : 1;
+                let qty = baseQ * mult;
+                let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(dan|terus|lalu)\s+.*$/, '').trim() : '';
+                
+                if (itemStr) this.queue.push({ type: 'ADD', qty: qty, item: itemStr });
             } else if (/(bayar uang pas|uang pas|bayar pas|uangnya pas)/.test(cleanCmd)) {
                 this.queue.push({ type: 'PAY_EXACT' });
             } else if (/(cetak|print|struk|keluarkan nota)/.test(cleanCmd)) {
@@ -2571,11 +2596,17 @@ const VoiceNinja = {
             if (!isCartMode) toggleCartMode();
             
             let inputL = task.item.replace(/[\x00-\x1F\x7F]/g, '').trim();
-            const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.n).toLowerCase().includes(inputL) || String(i.t).toLowerCase() === inputL || String(i.b).toLowerCase() === inputL));
+            // [ELITE QA FIX] Anti-Halusinasi FastMatch: DILARANG pakai includes(), wajib presisi mutlak!
+            const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.n).toLowerCase() === inputL || String(i.t).toLowerCase() === inputL || String(i.b).toLowerCase() === inputL || String(i.b2).toLowerCase() === inputL));
             
             if (fastMatch) {
-                modifyCartItem(fastMatch.id, task.qty);
-                tampilkanToast(`+${task.qty} ${fastMatch.n}`, "var(--mono-main)");
+                let finalQty = task.qty;
+                // Auto-Multiplier jika pencarian adalah exact Barcode Grosir
+                if (String(fastMatch.b2).toLowerCase() === inputL && fastMatch.iq > 1) finalQty = fastMatch.iq * task.qty;
+                
+                modifyCartItem(fastMatch.id, finalQty);
+                playBeep(); // [ELITE QA FIX] Audio Tactile Feedback
+                tampilkanToast(`+${finalQty} ${fastMatch.n}`, "var(--mono-main)");
             } else {
                 $('q').value = task.item;
                 $('q-x').style.display = 'flex';
@@ -2583,8 +2614,14 @@ const VoiceNinja = {
                 handleSearchLogic(task.item);
                 pendingAutoAdds.set(currentSearchReqId, task.qty);
                 
-                // [THE MACHINE GUN FIX] Async Wait agar Worker dan IndexedDB menyelesaikan injeksi DOM
-                await new Promise(resolve => setTimeout(resolve, 350));
+                // [ELITE QA FIX] Await/Poll Polling Architecture (Menjamin Struk Akurat)
+                let reqIdToWait = currentSearchReqId;
+                let pollCount = 0;
+                // Menahan eksekusi antrean selanjutnya hingga Worker menyelesaikan tugas injeksi ADD (Max 2 Detik Timeout)
+                while (pollCount < 40 && pendingAutoAdds.has(reqIdToWait)) {
+                    await new Promise(r => setTimeout(r, 50)); 
+                    pollCount++;
+                }
             }
         } else if (task.type === 'PAY_EXACT') {
             let grandTotal = 0;
@@ -2596,8 +2633,11 @@ const VoiceNinja = {
                 }
             });
             if (grandTotal > 0) {
-                promptPrint();
-                await new Promise(resolve => setTimeout(resolve, 250)); // Tunggu DOM Animasi Modal
+                // [ELITE QA FIX] Cegah Race Condition & Overlapping Modal: Jangan trigger ulang jika Modal Print sudah naik!
+                if (document.getElementById('custom-alert').style.display !== 'flex' || document.getElementById('alert-title').innerText !== 'PRINT') {
+                    promptPrint();
+                }
+                await new Promise(resolve => setTimeout(resolve, 300)); // [ELITE QA FIX] Toleransi render UI HP Kentang dinaikkan
                 let bayarInp = document.getElementById('input-bayar-struk');
                 if (bayarInp) {
                     bayarInp.value = fmt(grandTotal);
@@ -5389,9 +5429,13 @@ function handleBarlaNluResult(res) {
         return appendBarlaMsg(`${svgInfo} Halo! Saya <b>BARLA AI</b>.<br>Ada yang bisa saya bantu? <br><br>Coba ketik: <i><br>"Tambah 2 indomie"</i> atau <i>"Cari paramex"</i>.`, 'ai', true);
     }
 
-    let words = res.raw.split(' ');
-    let isHelp = words.some(w => /(cara|bagaimana|bgmn|gimana|panduan|petunjuk|bantu|tolong|apa|kenapa|knp|maksud|arti|jelaskan|rahasia|intip)/.test(w));
-    if (isHelp || /(hapus|edit|margin|tier|bluetooth|awan|sinkron|keranjang)/.test(res.raw)) {
+    // [ELITE QA FIX] Anti-Collision Help Interceptor: Membatasi Trigger Help hanya jika ada verba pertanyaan / panduan kuat, agar tidak membajak query "Cari margin merah" atau "Cari buku panduan"
+    let isHelpQuestion = /^(cara|bagaimana|bgmn|gimana|bantu|tolong|jelaskan|apa itu|maksud)\b/i.test(res.raw);
+    let hasHelpKeyword = /\b(panduan|petunjuk|tutorial)\b/i.test(res.raw);
+    let targetFeature = /(hapus|buang|menghapus|edit|ubah|menyunting|margin|laba|untung|tier|grosir|bluetooth|print|struk|cetak|rahasia|intip|modal|hpp|awan|upload|sinkron|sync)/i.test(res.raw);
+    
+    // Murni masuk mode Bantuan JIKA diawali kata tanya (cara/bagaimana) ATAU secara eksplisit meminta panduan fitur tertentu. Pengecualian mutlak untuk kata "Cari"
+    if (!/^\b(cari|carikan|cri)\b/i.test(res.raw) && (isHelpQuestion || (hasHelpKeyword && targetFeature) || (isHelpQuestion && targetFeature))) {
         if (/(hapus|buang|menghapus)/.test(res.raw)) return appendBarlaMsg(`${svgInfo} <b>CARA HAPUS:</b> Geser (swipe) kartu barang ke kiri secara cepat di menu utama.`, 'ai', true);
         if (/(edit|ubah|menyunting)/.test(res.raw)) return appendBarlaMsg(`${svgInfo} <b>CARA EDIT:</b> Ketuk ikon Pensil di sisi kanan kartu barang.`, 'ai', true);
         if (/(margin|laba|untung|warna)/.test(res.raw)) return appendBarlaMsg(`${svgInfo} <b>INDIKATOR MARGIN:</b><br>- <b style="color:#32CD32">Hijau:</b> >15%<br>- <b style="color:#FFD700">Kuning:</b> 5%-15%<br>- <b style="color:#FF4C4C">Merah:</b> <5% (Bahaya)`, 'ai', true);
