@@ -2446,16 +2446,18 @@ document.addEventListener('focus', function(e) {
         } 
      };
 
-// [ELITE ARCHITECTURE] BARLA VOICE-NINJA ENGINE (W.I.S.P & Async Queue)
+// [ELITE ARCHITECTURE] BARLA VOICE-NINJA ENGINE (Bimodal Wake-Word AI)
 const VoiceNinja = {
     recognition: null,
-    isListening: false,
+    isListening: false,     // Tanda Mutlak Mic sedang Online
+    isAwake: false,         // Fase 2: Active Command (Barla sedang mendengarkan instruksi)
+    wakeTimer: null,        // Temporal Hot-Window (4 Detik)
     retryCount: 0,
     backoffLimit: 30000,
     queue: [],
     isProcessing: false,
-    shouldStayAwake: false,
-    restartTimer: null, // [ELITE QA FIX] Ghost Timer Isolation
+    shouldStayAwake: false, // Perisai Auto-Restart
+    restartTimer: null,
     
     init: function() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return false;
@@ -2463,11 +2465,11 @@ const VoiceNinja = {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             this.recognition = new SpeechRecognition();
             this.recognition.lang = 'id-ID';
-            this.recognition.continuous = true; // [WISP] Continuous Mode On
+            this.recognition.continuous = true;
             this.recognition.interimResults = false;
             this.recognition.maxAlternatives = 1;
             
-            // [ELITE QA FIX] Visibility Paging Interceptor (Battery Drain & VRAM Leak Shield)
+            // [VISIBILITY PAGING SHIELD] Jeda otomatis saat aplikasi masuk background
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'hidden' && this.shouldStayAwake) {
                     this.stop();
@@ -2478,15 +2480,44 @@ const VoiceNinja = {
             this.recognition.onstart = () => {
                 this.isListening = true;
                 this.retryCount = 0;
-                $('mic-btn').classList.add('listening');$('q').placeholder = "BARLA Listening...";
-                // [ELITE QA FIX] Hapus spam toast di sini (Silent Watchdog Isolation)
+                this.goToSleep(); // Awal nyala langsung masuk fase Passive Sleep (Menunggu Barla)
             };
             
             this.recognition.onresult = (event) => {
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         let transcript = event.results[i][0].transcript.toLowerCase().trim();
-                        this.parseCommand(transcript);
+                        
+                        // [WAKE-WORD PHONETIC CATCHER] Jaring Kesalahan Pendengaran Browser
+                        let wakeRegex = /\b(barla|bala|parla|marla|berla|darla|bela|perla|balla|arla|karla)\b/i;
+                        
+                        if (this.isAwake) {
+                            // Fase 2: Jendela Siaga (Active Command)
+                            this.resetWakeTimer(); // Reset waktu mundur karena ada suara
+                            
+                            // Ekstrak instruksi murni, abaikan panggilan nama ganda ("tambah kopi barla" -> "tambah kopi")
+                            let command = transcript.replace(wakeRegex, '').trim();
+                            if (command) {
+                                this.parseCommand(command);
+                                this.goToSleep(); // Langsung tidur kembali pasca eksekusi
+                            }
+                        } else {
+                            // Fase 1: Tidur Pulas (Passive Sleep - The Gatekeeper)
+                            let match = transcript.match(wakeRegex);
+                            if (match) {
+                                this.wakeUp(); // Bangunkan Barla! (Beep & Visual Red Pulse)
+                                
+                                // Dynamic String Slicing: Potong obrolan sampah sebelum kata Barla
+                                let wakeIndex = transcript.indexOf(match[0]);
+                                let command = transcript.substring(wakeIndex + match[0].length).trim();
+                                
+                                if (command) {
+                                    // Perintah diserukan dalam satu tarikan napas (Contoh: "Eh ibu mau apa, oh iya BARLA tambah dua kopi")
+                                    this.parseCommand(command);
+                                    this.goToSleep();
+                                }
+                            }
+                        }
                     }
                 }
             };
@@ -2496,14 +2527,14 @@ const VoiceNinja = {
                     tampilkanToast("Offline. Voice-Ninja ditangguhkan.", "var(--danger)");
                     this.stop();
                 } else if (e.error === 'no-speech') {
-                    // [ELITE QA FIX] Anti-Silence Penalty: Jangan hukum kasir dengan backoff jika murni karena diam
+                    // [ANTI-SILENCE PENALTY] Tetap siaga meski warung sedang sepi, jangan berikan Backoff hukuman.
                     this.retryCount = 0;
                 }
             };
             
             this.recognition.onend = () => {
                 this.isListening = false;
-                $('mic-btn').classList.remove('listening');$('q').placeholder = "search...";
+                this.goToSleep(); // Kembalikan UI ke normal
                 
                 // [NETWORK WATCHDOG & EXPONENTIAL BACKOFF]
                 if (navigator.onLine && this.shouldStayAwake) {
@@ -2520,6 +2551,56 @@ const VoiceNinja = {
         }
         return true;
     },
+
+    // --- MANAJEMEN STATE BIMODAL & UX FEEDBACK ---
+    wakeUp: function() {
+        this.isAwake = true;
+        this.playWakeBeep();
+        // Injeksi UI: Denyut Merah Agresif (Mode Siaga)
+        $('mic-btn').classList.add('listening');$('mic-btn').style.color = 'var(--danger)';
+        $('mic-btn').style.animation = 'pulseMic 0.5s infinite alternate';$('q').placeholder = "BARLA Mendengarkan...";
+        this.resetWakeTimer();
+    },
+    
+    goToSleep: function() {
+        this.isAwake = false;
+        if (this.wakeTimer) { clearTimeout(this.wakeTimer); this.wakeTimer = null; }
+        
+        if (this.isListening) {
+            // Injeksi UI: Denyut Biru Santai (Mode Pasif / Standby)
+            $('mic-btn').classList.remove('listening');$('mic-btn').style.color = '#87CEFA';
+            $('mic-btn').style.animation = 'pulseMic 2s infinite alternate';$('q').placeholder = "Mode Siaga (Panggil: Barla)...";
+        }
+    },
+    
+    resetWakeTimer: function() {
+        if (this.wakeTimer) clearTimeout(this.wakeTimer);
+        // Temporal Hot-Window 4 Detik
+        this.wakeTimer = setTimeout(() => {
+            if (this.isAwake) {
+                this.goToSleep();
+                tampilkanToast("Waktu habis. Barla kembali tidur.", "var(--warning)");
+            }
+        }, 4000); 
+    },
+    
+    playWakeBeep: function() {
+        try {
+            if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume().catch(()=>{});
+            const osc = globalAudioCtx.createOscillator();
+            const gain = globalAudioCtx.createGain();
+            osc.connect(gain); gain.connect(globalAudioCtx.destination);
+            osc.type = 'sine';
+            // Nada Menanjak (Ascending High-Pitch) mengindikasikan mesin "Bangun"
+            osc.frequency.setValueAtTime(600, globalAudioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(1200, globalAudioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, globalAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + 0.2);
+            osc.start(); osc.stop(globalAudioCtx.currentTime + 0.2);
+        } catch(e){}
+    },
+    // ----------------------------------------------
     
     toggle: function() {
         if (!this.init()) return tampilkanToast("Browser tidak mendukung Voice-Ninja!", "var(--warning)");
@@ -2529,7 +2610,7 @@ const VoiceNinja = {
         } else {
             if (!navigator.onLine) return tampilkanToast("Voice-Ninja butuh Internet!", "var(--danger)");
             this.shouldStayAwake = true;
-            tampilkanToast("Voice-Ninja Aktif (Katakan: Barla...)", "#3CB371"); // [ELITE QA FIX] Trigger UI murni manual
+            tampilkanToast("Voice-Ninja Aktif (Panggil: Barla...)", "#3CB371"); 
             try { this.recognition.start(); } catch(e){}
         }
     },
@@ -2537,17 +2618,17 @@ const VoiceNinja = {
     stop: function() {
         this.shouldStayAwake = false;
         this.queue = []; // Flush antrean (Stop Race Condition)
+        this.goToSleep();
         if (this.restartTimer) { clearTimeout(this.restartTimer); this.restartTimer = null; } // Anti-Crash DOMException
         if (this.recognition) {
             try { this.recognition.stop(); } catch(e){}
         }
-        $('mic-btn').classList.remove('listening');$('q').placeholder = "search...";
+        // Bersihkan CSS Injeksi
+        $('mic-btn').classList.remove('listening');$('mic-btn').style.color = '';
+        $('mic-btn').style.animation = '';$('q').placeholder = "search...";
     },
     
     parseCommand: function(text) {
-        // [ISOLATION LOCK] Abaikan suara bising kecuali dipanggil "Barla" atau instruksi langsung
-        if (!text.includes("barla") && !/^(tambah|masukkan|beli|bayar|cetak)/.test(text)) return;
-        
         // [VERBAL UNDO] Penangkal Kesalahan Manusia
         if (/(batal|salah|ralat|hapus|jangan)/.test(text)) {
             if (this.queue.length > 0) {
@@ -2558,17 +2639,18 @@ const VoiceNinja = {
         }
         
         // [PIPELINE CHAINING] Pisahkan kalimat menjadi komando beruntun
-        let commands = text.replace(/barla/g, '').split(/(?:lalu|terus|kemudian|dan)/);
+        let commands = text.split(/(?:lalu|terus|kemudian|dan)/);
         
         commands.forEach(cmd => {
             let cleanCmd = cmd.trim();
             if (!cleanCmd) return;
             
             // [ELITE QA FIX] Regex Sync Parity dengan Worker NLU (Support Fraksi "Setengah" & Multiplier "Lusin/Dus")
-            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order)\s+(\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas)(?:\s+(lusin|dus|karton|pack|bungkus|pcs|slop|renceng))?(?:\s+(.*))?$/);
+            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s*belas)(?:\s+(lusin|dus|karton|pack|bungkus|bks|pcs|slop|renceng|renteng))?(?:\s+(.*))?$/);
             if (addMatch) {
-                let mapNum = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'lusin':12};
-                let baseQ = parseFloat(addMatch[1]) || mapNum[addMatch[1]] || 1;
+                let mapNum = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12};
+                let numKey = addMatch[1].replace(/\s+/, ' ');
+                let baseQ = parseFloat(addMatch[1]) || mapNum[numKey] || 1;
                 let mult = addMatch[2] ? (mapNum[addMatch[2]] || 1) : 1;
                 let qty = baseQ * mult;
                 let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(dan|terus|lalu)\s+.*$/, '').trim() : '';
