@@ -1088,7 +1088,7 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
     <script>
 
         const $ = (id) => document.getElementById(id);
-        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbwOpDwzAOzaPjyx1w7WF-6f2aEO0Yr6wsHndm1ktryTgJPWl_1eCU1yX-Baf0pxq9UN/exec";
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycbxwmqi7uoxeSG-W5Vm58FxK7Z-sZR_qm93jcCD0XgDs0Wu5tT5R8wSq-Q4q-SeRZP2A/exec";
                         const TemaNotifikasi = { 
             "Error": "var(--danger)", "Gagal": "var(--danger)", 
             "Peringatan": "var(--warning)", "Info": "var(--mono-main)" 
@@ -1185,6 +1185,7 @@ function handleSearchLogic(val) {
         function toggleCartMode() {
             isCartMode = !isCartMode;
             invalidateLayoutCache();
+            for (let i = 0; i < db.length; i++) delete db[i]._cHeight;
             if (isCartMode) {
                 document.body.classList.add('mode-kasir');
                 $('t-cart').classList.add('active');
@@ -1194,8 +1195,7 @@ function handleSearchLogic(val) {
                 applyFiltersAndRender();
             } else {
                 document.body.classList.remove('mode-kasir');
-                $('t-cart').classList.remove('active');
-                $('q').value = '';
+                $('t-cart').classList.remove('active');$('q').value = '';
                 clearSearch(); 
             }
         }
@@ -1278,8 +1278,8 @@ function handleSearchLogic(val) {
                     let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
                     for (let i = 0; i < sortedTiers.length; i++) {
                         if (qtySisa >= sortedTiers[i].q) {
-                            sisaPrice = Math.round(qtySisa * sortedTiers[i].p);
-                            break;
+                            let candidateSisa = Math.round(qtySisa * sortedTiers[i].p);
+                            if (candidateSisa < sisaPrice) sisaPrice = candidateSisa;
                         }
                     }
                 }
@@ -1291,12 +1291,12 @@ function handleSearchLogic(val) {
             // 2. [Multi-Tier Engine] Evaluasi diskon bertingkat untuk Qty Mutlak (Mencari yang PALING MURAH)
             if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
                 let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
+                let normQ = Number(q.toFixed(4));
                 for (let i = 0; i < sortedTiers.length; i++) {
                     // [ELITE QA FIX] Keamanan Presisi Komparasi untuk Qty Mutlak Desimal
-                    if (Number(q.toFixed(4)) >= sortedTiers[i].q) {
+                    if (normQ >= sortedTiers[i].q) {
                         let tierSubtotal = Math.round(q * sortedTiers[i].p);
                         if (tierSubtotal < bestPrice) bestPrice = tierSubtotal;
-                        break; 
                     }
                 }
             }
@@ -1306,13 +1306,14 @@ function handleSearchLogic(val) {
 
         function validatePriceBlur(id, el) {
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
-            if (isNaN(val) || el.value === '') {
+            if (isNaN(val) || val <= 0 || el.value === '') {
                 delete cartState[id].manualPrice;
+                delete cartState[id].baseManualPrice;
                 saveCartMem();
                 updateRowVisuals(id);
                 updateGrandTotal();
             } else {
-                let item = db.find(x => String(x.id) === id);
+                let item = getFastItem(id);
                 let q = cartState[id].q || 1;
                 let defaultSub = item ? getCalculatedSubtotal(item, q) : 0;
                 
@@ -1330,7 +1331,7 @@ function handleSearchLogic(val) {
         }
 
         function updateRowVisuals(id) {
-            const item = db.find(x => String(x.id) === id);
+            const item = getFastItem(id);
             if(!item) return;
             
                         const q = cartState[id].q || 1;
@@ -1348,7 +1349,7 @@ function handleSearchLogic(val) {
             let grandTotal = 0;
             let needsSave = false; 
                                 Object.keys(cartState).forEach(k => {
-                        const item = db.find(x => String(x.id) === String(k));
+                        const item = getFastItem(k);
                 if (!item || item.deleted) {
                     delete cartState[k];
                     needsSave = true;
@@ -1386,7 +1387,7 @@ function handleSearchLogic(val) {
             }
 
                             keys.forEach(id => {
-                    const item = db.find(x => String(x.id) === String(id));
+                    const item = getFastItem(id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q;
                     const iq = Math.max(1, item.iq || 1);
@@ -1427,8 +1428,8 @@ function handleSearchLogic(val) {
                 let recItem = null;
                 for(let rule of marketBasketRules) {
                     if (keys.includes(rule.trigger) && !keys.includes(rule.rec)) {
-                        let i = db.find(x => String(x.id) === rule.rec && !x.deleted);
-                        if (i) { recItem = i; break; }
+                        let i = getFastItem(rule.rec);
+                        if (i && !i._isGhost) { recItem = i; break; }
                     }
                 }
                 if (recItem) {
@@ -1466,7 +1467,7 @@ function handleSearchLogic(val) {
             
             // [INJEKSI KINETIC FEEDBACK] Dieksekusi setelah render selesai agar UI terasa hidup
             if (qty > 0) {
-                const itemDB = db.find(x => String(x.id) === String(id));
+                const itemDB = getFastItem(id);
                 if (itemDB) {
                     const microEl = document.getElementById('micro-receipt');
                     if (microEl) {
@@ -1512,6 +1513,7 @@ function toggleCartExpand() {
     localStorage.removeItem('DB_WA_EDIT_ID');
     localStorage.removeItem('DB_WA_EDIT_TS');
     db = db.filter(x => !x._isGhost);
+    updateMaps();
 
                         // Auto-Reset: Menutup keranjang & mereset teks mikro setiap kali struk diprint/dihapus
             document.body.classList.remove('cart-expanded');
@@ -1559,7 +1561,7 @@ function resetCart() {
                     }
                     
                     // SURGICAL FIX: Rekonstruksi Harga Kustom (Mencegah hangusnya diskon saat Edit Struk)
-                    let dbItem = db.find(x => String(x.id) === String(it.id));
+                    let dbItem = db.find(x => String(x.id) === String(it.id) && !x.deleted);
                     
                     // [GHOST ITEM INJECTION]: Lindungi barang yang sudah dihapus dari DB utama agar tidak lenyap dari Struk lama
                     if (!dbItem) {
@@ -1567,7 +1569,7 @@ function resetCart() {
                         dbItem = db.find(x => String(x.id) === String(it.id) && x._isGhost);
                         if (!dbItem) {
                             dbItem = { id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true };
-                            db.push(dbItem);
+                            db.unshift(dbItem);
                         }
                     }
 
@@ -1584,6 +1586,7 @@ function resetCart() {
 activeEditTrxTs = hData.ts;
 localStorage.setItem('DB_WA_EDIT_ID', activeEditTrxId);
 localStorage.setItem('DB_WA_EDIT_TS', activeEditTrxTs);
+updateMaps();
 
 saveCartMem();
                 closeHistory();
@@ -1895,11 +1898,23 @@ document.addEventListener('focus', function(e) {
             }); 
         }
 
+        let itemMap = new Map();
+        function getFastItem(id) {
+            let it = itemMap.get(String(id));
+            if (it && !it.deleted && !it._isPendingDelete) return it;
+            it = db.find(x => String(x.id) === String(id) && !x.deleted && !x._isPendingDelete);
+            if (it) itemMap.set(String(id), it);
+            return it;
+        }
         function updateMaps() { 
             acronymMap.clear(); 
+            itemMap.clear();
             db.forEach(item => { 
-                if (!item.deleted && !item._isGhost) { 
-                    if (item.t) acronymMap.set(String(item.t).trim().toLowerCase(), item.id); 
+                if (!item.deleted && !item._isPendingDelete) { 
+                    if (!itemMap.has(String(item.id))) itemMap.set(String(item.id), item);
+                    if (!item._isGhost && item.t) { 
+                        acronymMap.set(String(item.t).trim().toLowerCase(), item.id); 
+                    } 
                 } 
             }); 
         }
@@ -2304,7 +2319,7 @@ document.addEventListener('focus', function(e) {
             } 
             else if (e.data.type === 'barla_nlu') {
                 let text = (e.data.text || '').toLowerCase().trim();
-                let intent = 'UNKNOWN'; let extractedQty = 1; let entity = ''; let responseData = null;
+                let intent = 'UNKNOWN'; let extractedQty = 1; let extractedUnit = ''; let entity = ''; let responseData = null;
                 
                 // [QA LEAD FIX] Escape ganda (\\) pada Regex wajib hukumnya di dalam String Template Literal JS
                 text = text.replace(/^(tolong|coba|barla|info|cek)\\s+/g, '').trim();
@@ -2312,18 +2327,19 @@ document.addEventListener('focus', function(e) {
                 // [QA LEAD FIX] Bersihkan kata-kata filler sampah di akhir kalimat yang memicu Halusinasi Entitas
                 text = text.replace(/\\s+(dong|saja|aja|ya|deh|nih|tuh|kan|lagi)$/g, '').trim();
 
-                const numMap = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12};
+                const numMap = {'se':1,'seperempat':0.25,'setengah':0.5,'satu':1,'satu setengah':1.5,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12,'kodi':20};
                 
-                // [QA LEAD FIX] Penambahan Verba KBBI (Jual/Checkout) & Kata Bilangan Belasan serta Satuan (Bks/Renteng)
-                let qtyMatch = text.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\\s+(\\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\\s*belas)(?:\\s+(lusin|dus|karton|pack|bungkus|bks|pcs|slop|renceng|renteng))?(?:\\s+(.*))?$/);
+                // [QA LEAD FIX] Penambahan Verba KBBI, Angka Desimal, & Kamus Satuan Ritel/Grosir Lengkap
+                let qtyMatch = text.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\\s+(\\d+(?:[.,]\\d+)?|satu\\s*setengah|dua\\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)(?:\\s+(lusin|kodi|dus|dos|karton|ktn|box|boks|slop|slp|bal|ball|peti|krat|pack|pak|renceng|renteng|rcg|bungkus|bks|pcs|biji|buah|butir|batang|btg|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|lembar|lbr|gelas|gls|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml))?(?:\\s+(.*))?$/);
                 
                 if (qtyMatch) {
                     intent = 'TAMBAH';
-                    let numKey = qtyMatch[1].replace(/\\s+/, ' '); 
-                    let baseQ = parseFloat(qtyMatch[1]) || numMap[numKey] || 1;
-                    let mult = qtyMatch[2] ? (numMap[qtyMatch[2]] || 1) : 1;
-                    extractedQty = baseQ * mult;
-                    entity = qtyMatch[3] ? qtyMatch[3].replace(/\\s+(dan|terus|lalu)\\s+.*$/, '').trim() : '';
+                    let rawNum = qtyMatch[1].replace(',', '.').replace(/\\s+/g, ' '); 
+                    let baseQ = parseFloat(rawNum) || numMap[rawNum] || 1;
+                    extractedUnit = qtyMatch[2] ? qtyMatch[2].trim() : '';
+                    let mult = extractedUnit ? (numMap[extractedUnit] || 1) : 1;
+                    extractedQty = parseFloat((baseQ * mult).toFixed(4));
+                    entity = qtyMatch[3] ? qtyMatch[3].replace(/\\s+(?:dan|terus|lalu|kemudian)\\s+.*$/, '').trim() : '';
                     
                 // [ELITE QA FIX] Anti-Collision (Blind Spot Shield): Mewajibkan adverbia/frasa kuat untuk Analisa agar tidak membajak pencarian (Misal: "Kopi Top", "Buku Laba")
                 } else if (/(?:paling|ter|sangat)\\s*(?:laku|laris)|(?:top\\s*\\d+)|terlaris|terlaku|barang\\s+trending|paling\\s+dicari/i.test(text) && !/\\bcari\\b/.test(text)) {
@@ -2339,7 +2355,11 @@ document.addEventListener('focus', function(e) {
                     intent = 'DIAGNOSTIK';
                     responseData = { count: workerList.length };
                 } else {
-                    let cleanT = text.replace(/\\b(berapa|brp|harga|hrg|hrga|modal|hpp|cek|ed|exp|stok|cari|carikan|cri|tampilkan|itu|dari|untuk|apa|sih|ya|dong)\\b/g, '').replace(/\\s+/g, ' ').trim();
+                    let cleanT = text
+                        .replace(/[?!.,;:"']+/g, ' ')
+                        .replace(/\\bper\\s+(?:pcs|bungkus|bks|slop|slp|dus|dos|karton|ktn|renceng|renteng|rcg|pack|pak|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|butir|biji|buah|batang|lembar|gelas|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml|satuan|ecer|eceran|grosir)\\b/g, ' ')
+                        .replace(/\\b(berapa|berapaan|brp|harga|harganya|hrg|hrga|hrgnya|modal|modalnya|hpp|hppnya|cek|ed|ednya|exp|expnya|expired|expirednya|kadaluarsa|kadaluarsanya|kedaluwarsa|kedaluwarsanya|stok|stoknya|stock|stocknya|barang|barangnya|produk|produknya|ecer|eceran|ecerannya|ecernya|grosir|grosirnya|satuan|satuannya|isinya|cari|carikan|cri|tampilkan|lihat|liat|kapan|dimana|mana|apakah|kah|ada|ready|per|di|ke|yang|yg|sama|itu|ini|dari|untuk|buat|apa|sih|ya|dong|deh|nih|tuh|kan)\\b/g, ' ')
+                        .replace(/\\s+/g, ' ').trim();
                     if(cleanT.length >= 2) { intent = 'CARI'; entity = cleanT; }
                 }
 
@@ -2378,7 +2398,7 @@ document.addEventListener('focus', function(e) {
                     fuzzyMatches.sort((a, b) => (a.n || '').localeCompare(b.n || ''));
                     matchedItems = exactMatches.length > 0 ? exactMatches.slice(0, 15) : fuzzyMatches.slice(0, 5);
                 }
-                self.postMessage({ type: 'barla_result', intent: intent, qty: extractedQty, entity: entity, matches: matchedItems, data: responseData, raw: text });
+                self.postMessage({ type: 'barla_result', intent: intent, qty: extractedQty, unit: extractedUnit, entity: entity, matches: matchedItems, data: responseData, raw: text });
             }
         };`;
 
@@ -2398,6 +2418,30 @@ document.addEventListener('focus', function(e) {
             errorEvent.preventDefault(); 
         };
 
+        function resolveSmartUnitQty(item, baseQty, unitHint) {
+            if (!item || !unitHint || !(item.iq > 1)) return baseQty;
+            let u = String(unitHint).toLowerCase().trim();
+            let u1 = String(item.u1 || '').toLowerCase().trim();
+            let u2 = String(item.u2 || '').toLowerCase().trim();
+            let shortU1 = formatShortUnit(u1).toLowerCase();
+            let shortU2 = formatShortUnit(u2).toLowerCase();
+            if (u1 && (u === u1 || u === shortU1)) return baseQty;
+            const wholesaleAliases = {
+                'dus': ['dus', 'dos', 'karton', 'ktn', 'box', 'boks'],
+                'dos': ['dus', 'dos', 'karton', 'ktn', 'box', 'boks'],
+                'karton': ['karton', 'ktn', 'dus', 'dos'],
+                'slop': ['slop', 'slp'],
+                'renceng': ['renceng', 'renteng', 'rcg'],
+                'renteng': ['renceng', 'renteng', 'rcg'],
+                'pak': ['pak', 'pack', 'bal', 'ball'],
+                'pack': ['pak', 'pack', 'bal', 'ball'],
+                'bal': ['bal', 'ball', 'karung', 'sak'],
+                'sak': ['sak', 'karung', 'bal']
+            };
+            let isWholesaleMatch = (u2 && (u === u2 || u === shortU2 || (wholesaleAliases[u2] && wholesaleAliases[u2].includes(u)))) || (!u2 && /^(dus|dos|karton|ktn|slop|slp|bal|ball|peti|krat)$/.test(u));
+            return isWholesaleMatch ? parseFloat((baseQty * item.iq).toFixed(4)) : baseQty;
+        }
+
         worker.onmessage = function(e) { 
             if (e.data.type === 'barla_result') {
                 if (typeof handleBarlaNluResult === 'function') handleBarlaNluResult(e.data);
@@ -2405,15 +2449,21 @@ document.addEventListener('focus', function(e) {
             }
             if (e.data.type === 'result') { 
                 if (pendingAutoAdds.has(e.data.reqId)) {
-                    let injectedQ = pendingAutoAdds.get(e.data.reqId);
+                    let pendingMeta = pendingAutoAdds.get(e.data.reqId);
                     pendingAutoAdds.delete(e.data.reqId);
+                    let injectedQ = typeof pendingMeta === 'object' ? pendingMeta.qty : pendingMeta;
+                    let injectedUnit = typeof pendingMeta === 'object' ? pendingMeta.unit : '';
                     if (e.data.data.length > 0) {
                         const topItem = e.data.data[0];
-                        let addQty = injectedQ;
+                        let addQty = resolveSmartUnitQty(topItem, injectedQ, injectedUnit);
                         if (String(topItem.b2).toLowerCase() === e.data.query.toLowerCase() && topItem.iq > 1) {
                             addQty = topItem.iq * injectedQ;
                         }
                         modifyCartItem(topItem.id, addQty);
+                        if (typeof VoiceNinja !== 'undefined' && Array.isArray(VoiceNinja.actionHistory)) {
+                            VoiceNinja.actionHistory.push({ id: topItem.id, qty: addQty, n: topItem.n });
+                        }
+                        playBeep();
                         tampilkanToast(`+${addQty} ${topItem.n}`, "var(--mono-main)");
                         
                         // [QA LEAD FIX] Cegah Race Condition & Truncation pada Hardware Scanner Spamming
@@ -2455,6 +2505,7 @@ const VoiceNinja = {
     retryCount: 0,
     backoffLimit: 30000,
     queue: [],
+    actionHistory: [],      // Memori Rollback Verbal Undo
     isProcessing: false,
     shouldStayAwake: false, // Perisai Auto-Restart
     restartTimer: null,
@@ -2610,7 +2661,7 @@ const VoiceNinja = {
         } else {
             if (!navigator.onLine) return tampilkanToast("Voice-Ninja butuh Internet!", "var(--danger)");
             this.shouldStayAwake = true;
-            tampilkanToast("Voice-Ninja Aktif (Panggil: Barla...)", "#3CB371"); 
+            tampilkanToast("Voice-Ninja Aktif (Panggil: Barla.)", "#3CB371"); 
             try { this.recognition.start(); } catch(e){}
         }
     },
@@ -2629,36 +2680,57 @@ const VoiceNinja = {
     },
     
     parseCommand: function(text) {
-        // [VERBAL UNDO] Penangkal Kesalahan Manusia
-        if (/(batal|salah|ralat|hapus|jangan)/.test(text)) {
+        // [VERBAL UNDO] Penangkal Kesalahan Manusia (Strict Word-Boundary + Post-Execution Rollback)
+        if (/^\s*(batal|batalkan|salah|ralat|hapus|jangan)\b/i.test(text)) {
             if (this.queue.length > 0) {
                 this.queue.pop();
-                tampilkanToast("Perintah Dibatalkan", "var(--warning)");
+                tampilkanToast("Perintah Antrean Dibatalkan", "var(--warning)");
+            } else if (this.actionHistory && this.actionHistory.length > 0) {
+                let lastAct = this.actionHistory.pop();
+                if (lastAct && cartState[lastAct.id]) {
+                    modifyCartItem(lastAct.id, -lastAct.qty);
+                    playBeep();
+                    tampilkanToast(`Ralat: -${lastAct.qty} ${lastAct.n}`, "var(--warning)");
+                } else {
+                    tampilkanToast("Barang sudah tidak ada di keranjang", "var(--warning)");
+                }
+            } else {
+                tampilkanToast("Tidak ada perintah untuk dibatalkan", "var(--warning)");
             }
             return;
         }
         
-        // [PIPELINE CHAINING] Pisahkan kalimat menjadi komando beruntun
-        let commands = text.split(/(?:lalu|terus|kemudian|dan)/);
+        // [PIPELINE CHAINING] Pisahkan kalimat menjadi komando beruntun (Wajib diapit spasi agar tidak membelah kata "Dancow/Pandan")
+        let commands = text.split(/\s+(?:lalu|terus|kemudian|dan)\s+/i);
+        let lastVerb = null;
         
         commands.forEach(cmd => {
             let cleanCmd = cmd.trim();
             if (!cleanCmd) return;
+
+            // [VERB INHERITANCE] Wariskan kata kerja "tambah" jika klausa lanjutan langsung diawali angka/bilangan
+            if (lastVerb === 'ADD' && /^(?:\d+(?:[.,]\d+)?|satu\s*setengah|dua\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)\b/i.test(cleanCmd)) {
+                cleanCmd = 'tambah ' + cleanCmd;
+            }
             
-            // [ELITE QA FIX] Regex Sync Parity dengan Worker NLU (Support Fraksi "Setengah" & Multiplier "Lusin/Dus")
-            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s*belas)(?:\s+(lusin|dus|karton|pack|bungkus|bks|pcs|slop|renceng|renteng))?(?:\s+(.*))?$/);
+            // [ELITE QA FIX] Regex Sync Parity dengan Worker NLU (Support Desimal, Fraksi & Kamus Satuan Lengkap)
+            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+(?:[.,]\d+)?|satu\s*setengah|dua\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)(?:\s+(lusin|kodi|dus|dos|karton|ktn|box|boks|slop|slp|bal|ball|peti|krat|pack|pak|renceng|renteng|rcg|bungkus|bks|pcs|biji|buah|butir|batang|btg|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|lembar|lbr|gelas|gls|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml))?(?:\s+(.*))?$/i);
             if (addMatch) {
-                let mapNum = {'se':1,'setengah':0.5,'satu':1,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12};
-                let numKey = addMatch[1].replace(/\s+/, ' ');
-                let baseQ = parseFloat(addMatch[1]) || mapNum[numKey] || 1;
-                let mult = addMatch[2] ? (mapNum[addMatch[2]] || 1) : 1;
-                let qty = baseQ * mult;
-                let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(dan|terus|lalu)\s+.*$/, '').trim() : '';
+                lastVerb = 'ADD';
+                let mapNum = {'se':1,'seperempat':0.25,'setengah':0.5,'satu':1,'satu setengah':1.5,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12,'kodi':20};
+                let rawNum = addMatch[1].replace(',', '.').replace(/\s+/g, ' ');
+                let baseQ = parseFloat(rawNum) || mapNum[rawNum] || 1;
+                let unitHint = addMatch[2] ? addMatch[2].trim().toLowerCase() : '';
+                let mult = unitHint ? (mapNum[unitHint] || 1) : 1;
+                let qty = parseFloat((baseQ * mult).toFixed(4));
+                let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(?:dan|terus|lalu|kemudian)\s+.*$/i, '').trim() : '';
                 
-                if (itemStr) this.queue.push({ type: 'ADD', qty: qty, item: itemStr });
-            } else if (/(bayar uang pas|uang pas|bayar pas|uangnya pas)/.test(cleanCmd)) {
+                if (itemStr) this.queue.push({ type: 'ADD', qty: qty, unit: unitHint, item: itemStr });
+            } else if (/\b(bayar uang pas|uang pas|bayar pas|uangnya pas)\b/i.test(cleanCmd)) {
+                lastVerb = 'PAY';
                 this.queue.push({ type: 'PAY_EXACT' });
-            } else if (/(cetak|print|struk|keluarkan nota)/.test(cleanCmd)) {
+            } else if (/\b(cetak|print|struk|keluarkan nota)\b/i.test(cleanCmd)) {
+                lastVerb = 'PRINT';
                 this.queue.push({ type: 'PRINT' });
             }
         });
@@ -2682,19 +2754,18 @@ const VoiceNinja = {
             const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.n).toLowerCase() === inputL || String(i.t).toLowerCase() === inputL || String(i.b).toLowerCase() === inputL || String(i.b2).toLowerCase() === inputL));
             
             if (fastMatch) {
-                let finalQty = task.qty;
+                let finalQty = resolveSmartUnitQty(fastMatch, task.qty, task.unit);
                 // Auto-Multiplier jika pencarian adalah exact Barcode Grosir
                 if (String(fastMatch.b2).toLowerCase() === inputL && fastMatch.iq > 1) finalQty = fastMatch.iq * task.qty;
                 
                 modifyCartItem(fastMatch.id, finalQty);
+                this.actionHistory.push({ id: fastMatch.id, qty: finalQty, n: fastMatch.n });
                 playBeep(); // [ELITE QA FIX] Audio Tactile Feedback
                 tampilkanToast(`+${finalQty} ${fastMatch.n}`, "var(--mono-main)");
             } else {
-                $('q').value = task.item;
-                $('q-x').style.display = 'flex';
                 window.scrollTo({ top: 0, behavior: 'instant' });
                 handleSearchLogic(task.item);
-                pendingAutoAdds.set(currentSearchReqId, task.qty);
+                pendingAutoAdds.set(currentSearchReqId, { qty: task.qty, unit: task.unit });
                 
                 // [ELITE QA FIX] Await/Poll Polling Architecture (Menjamin Struk Akurat)
                 let reqIdToWait = currentSearchReqId;
@@ -2704,8 +2775,10 @@ const VoiceNinja = {
                     await new Promise(r => setTimeout(r, 50)); 
                     pollCount++;
                 }
+                if (pendingAutoAdds.has(reqIdToWait)) pendingAutoAdds.delete(reqIdToWait);
             }
         } else if (task.type === 'PAY_EXACT') {
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             let grandTotal = 0;
             Object.keys(cartState).forEach(id => {
                 const item = db.find(x => String(x.id) === id);
@@ -2729,6 +2802,7 @@ const VoiceNinja = {
                 tampilkanToast("Batal bayar, Keranjang Kosong!", "var(--danger)");
                 this.queue = []; // Flush sisa perintah
             }
+        
         } else if (task.type === 'PRINT') {
             let btnOk = document.getElementById('confirm-ok-btn');
             if (btnOk && !btnOk.disabled && document.getElementById('custom-alert').style.display === 'flex') {
@@ -2895,7 +2969,7 @@ try {
             trackModal('alert'); 
         }
         
-        function toggleIsiGrosir() { const val = $('i-u2').value; if (val) { $('label-iq').innerText = `Isi ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none'; $('i-iq').value = ''; } }
+        function toggleIsiGrosir() { const val = $('i-u2').value.trim(); if (val) {$('label-iq').innerText = `Isi ${val}`; $('wrap-iq').style.display = 'block'; } else { $('wrap-iq').style.display = 'none';$('i-iq').value = ''; syncModalGrosir(); } }
 
                 // --- INJEKSI LOGIKA MULTI-TIER UI ---
         function addTierRow(qty = '', price = '') {
@@ -2968,8 +3042,12 @@ try {
         function autoCalcHPP() {
             let mg = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, ''), 10) || 0;
             let isi = parseInt(String($('i-iq').value).replace(/[^\d]/g, ''), 10) || 0;
-            if (mg > 0 && isi > 0) {
-                $('i-hpp').value = fmt(Math.round(mg / isi));
+            if (isi > 0) {
+                if (mg > 0) {
+                    $('i-hpp').value = fmt(Math.round(mg / isi));
+                } else {
+                    $('i-hpp').value = "";
+                }
                 calcMargin('p1'); // Paksa hitung ulang margin eceran
             }
         }
@@ -3274,6 +3352,22 @@ try {
         window.addEventListener('scroll', handleVirtualScroll, { passive: true });
         document.getElementById('list').addEventListener('scroll', handleVirtualScroll, { passive: true });
 
+        let lastViewportWidth = window.innerWidth;
+        const handleViewportResize = debounce(() => {
+            const currentWidth = window.innerWidth;
+            if (currentWidth !== lastViewportWidth) {
+                lastViewportWidth = currentWidth;
+                for (let i = 0; i < db.length; i++) delete db[i]._cHeight;
+            }
+            invalidateLayoutCache();
+            lastStartIndex = -1;
+            lastEndIndex = -1;
+            computeDVS();
+            renderVirtualList(false);
+        }, 150);
+        window.addEventListener('resize', handleViewportResize, { passive: true });
+        window.addEventListener('orientationchange', handleViewportResize, { passive: true });
+
         async function save(bypassAnomaly = false) {
             if (isSaving || isApiLoading) {
                 if (isApiLoading) tampilkanToast("Menunggu sinkronisasi selesai...", "var(--warning)");
@@ -3292,12 +3386,24 @@ try {
                 const exp = $('i-exp').dataset.rawDate || '';
                 const p1 = parseInt(String($('i-p1').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 const p2 = parseInt(String($('i-p2').value).replace(/[^\d]/g, '').substring(0, 15), 10) || null;
-                const u1 = $('i-u1').value; 
-                const u2 = $('i-u2').value; 
-                let iq = parseInt($('i-iq').value) || 0;
+                const u1 = String($('i-u1').value).trim(); 
+                const u2 = String($('i-u2').value).trim(); 
+                let iq = parseInt($('i-iq').value, 10) || 0;
                 let rawHppG = parseInt(String($('i-hpp-grosir').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
                 let rawHppE = parseInt(String($('i-hpp').value).replace(/[^\d]/g, '').substring(0, 15), 10) || 0;
-                const hpp = (rawHppG > 0 && iq > 1) ? Math.round(rawHppG / iq) : rawHppE; // ELITE FIX: Sterilisasi presisi float
+
+                if (!String(nRaw).trim() || p1 === 0) { 
+                    return showAlert("Nama barang dan Harga Satuan tidak boleh kosong!", "Gagal"); 
+                }
+
+                if ((p2 > 0 || b2 !== '') && !u2) {
+                    return showAlert("Satuan Grosir wajib dipilih/diisi jika Harga Grosir atau Barcode Grosir diisi!", "Gagal");
+                }
+                if (rawHppG > 0 && rawHppE === 0 && (!u2 || iq < 2)) {
+                    return showAlert("Anda mengisi HPP Grosir tetapi belum mengisi Satuan Grosir & Isi Grosir!", "Gagal");
+                }
+
+                const hpp = rawHppE > 0 ? rawHppE : ((rawHppG > 0 && iq > 1) ? Math.round(rawHppG / iq) : 0);
 
                 // Ambil Data Multi-Tier
                 let tiers = [];
@@ -3311,12 +3417,9 @@ let tP = parseFloat(String(rawP).replace(/\./g, '').replace(',', '.')) || 0;
 
 if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 });
-
-                if (!String(nRaw).trim() || p1 === 0) { 
-                    return showAlert("Nama barang dan Harga Satuan tidak boleh kosong!", "Gagal"); 
-                }
+                tiers.sort((a, b) => a.q - b.q);
                 
-                                // Pengecekan Absolut: Bencana Finansial tidak boleh di-bypass!
+                // Pengecekan Absolut: Bencana Finansial tidak boleh di-bypass!
                 if (p2 > 0 && iq > 1) {
                     if (p2 <= p1) {
                         isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
@@ -3325,6 +3428,25 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                     if (p2 > p1 * iq) {
                         isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
                         return showAlert("Kesalahan Logika: Harga Grosir total (Rp " + fmt(p2) + ") LEBIH MAHAL dari harga Satuan jika dikalikan isi (Rp " + fmt(p1 * iq) + ")! Cek kembali input Anda.", "Gagal");
+                    }
+                }
+
+                for (let i = 0; i < tiers.length; i++) {
+                    if (tiers[i].q <= 1) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Kesalahan Logika Multi-Tier: Kuantitas (Qty) Tier harus lebih dari 1!", "Gagal");
+                    }
+                    if (tiers[i].p >= p1) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Kesalahan Logika Multi-Tier: Harga Tier (Rp " + fmt(tiers[i].p) + ") tidak boleh lebih mahal/sama dengan Harga Satuan (Rp " + fmt(p1) + ")!", "Gagal");
+                    }
+                    if (i > 0 && tiers[i].q === tiers[i - 1].q) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Kesalahan Logika Multi-Tier: Terdapat duplikasi Kuantitas (Qty >= " + tiers[i].q + ")!", "Gagal");
+                    }
+                    if (i > 0 && tiers[i].p >= tiers[i - 1].p) {
+                        isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                        return showAlert("Kesalahan Logika Multi-Tier: Harga untuk Qty >= " + tiers[i].q + " (Rp " + fmt(tiers[i].p) + ") harus lebih murah dari Qty >= " + tiers[i - 1].q + " (Rp " + fmt(tiers[i - 1].p) + ")!", "Gagal");
                     }
                 }
 
@@ -3341,17 +3463,25 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                             return showConfirm(`Harga Grosir (Rp ${fmt(p2)}) lebih rendah dari Total Modal Grosir (Rp ${fmt(hppGrosir)}).<br>Tetap simpan?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
                         }
                     }
+                    if (hpp > 0 && tiers.length > 0) {
+                        const lowTier = tiers.find(tr => tr.p < hpp);
+                        if (lowTier) {
+                            isSaving = false; if(btnSave) btnSave.disabled = false; if(btnCancel) btnCancel.disabled = false;
+                            return showConfirm(`Harga Multi-Tier (Qty >= ${lowTier.q}: Rp ${fmt(lowTier.p)}) lebih rendah dari HPP Modal Satuan (Rp ${fmt(hpp)}).<br>Tetap simpan?`, "Peringatan Harga", "var(--warning)", () => { save(true); });
+                        }
+                    }
                 }
                 
                 if (b2 !== '') {
-                    if (iq < 2) return showAlert("Isi Per ... wajib diisi jika Barcode Grosir diisi!", "Gagal"); 
+                    if (iq < 2) { toggleIsiGrosir(); return showAlert("Isi Per ... wajib diisi (minimal 2) jika Barcode Grosir diisi!", "Gagal"); }
                     if (b2 === b) return showAlert("Barcode Grosir tidak boleh sama persis dengan Barcode Satuan!", "Gagal"); 
                     const exB2 = db.find(x => !x.deleted && !x._isGhost && (String(x.b) === b2 || String(x.b2) === b2) && String(x.id) !== String(activeId));
                     if (exB2) return showAlert("Barcode Grosir sudah dipakai pada barang lain!", "Gagal"); 
                 }
 
                 if (p2 > 0 && iq < 2) { 
-                    return showAlert("Jika Harga Grosir diisi, Isi Per ... Wajib diisi!", "Gagal"); 
+                    toggleIsiGrosir();
+                    return showAlert("Jika Harga Grosir diisi, Isi Per ... Wajib diisi (minimal 2)!", "Gagal"); 
                 } 
 
                 const cleanName = prop(nRaw);
@@ -3599,17 +3729,25 @@ db.forEach(i => {
 
             showConfirm("Upload data Harga dan Riwayat Transaksi", "Upload Cloud", "#87CEFA", () => { 
                 isApiLoading = true; 
+                if (typeof AutoSyncEngine !== 'undefined') {
+                    if (AutoSyncEngine.syncTimer) clearTimeout(AutoSyncEngine.syncTimer);
+                    AutoSyncEngine.needsSync = false;
+                }
                 showLoading("Upload Data...<br>Mohon Tunggu sebentar.", "#87CEFA"); 
                 const lastSyncTime = parseInt(localStorage.getItem('DB_LAST_SYNC')) || 0;
+                let syncedServerTime = Date.now();
+                let syncStartLocalTime = Date.now();
                 
                 fetchWithTimeout(CLOUD_URL + "?action=load&lastSync=" + lastSyncTime + "&t=" + Date.now(), {}, 30000)
                 .then(r => r.json())
                 .then(dataResponse => { 
                     const dataCloud = dataResponse.data || []; 
-                    const serverTime = dataResponse.serverTime || Date.now(); 
+                    syncedServerTime = dataResponse.serverTime || Date.now(); 
                     
                     if (dataCloud.length > 0) {
-                        let tempMap = new Map(); db.forEach(item => tempMap.set(String(item.id), item));
+                        let tempMap = new Map();
+                        let deletedCloudIds = [];
+                        db.forEach(item => tempMap.set(String(item.id), item));
                         dataCloud.forEach(rawItem => { 
                             let itemCloud = { ...rawItem }; 
                             itemCloud.deleted = String(itemCloud.deleted).trim().toUpperCase() === 'TRUE' || itemCloud.deleted === true; 
@@ -3633,25 +3771,43 @@ db.forEach(i => {
                             
                             const existing = tempMap.get(String(itemCloud.id));
                             if (existing) { 
+                                if (existing._isPendingDelete) return;
                                 if ((itemCloud.updatedAt || 0) >= (existing.updatedAt || 0)) { 
-                                    if (itemCloud.deleted) tempMap.delete(String(itemCloud.id)); else tempMap.set(String(itemCloud.id), itemCloud); 
+                                    if (itemCloud.deleted) {
+                                        tempMap.delete(String(itemCloud.id));
+                                        deletedCloudIds.push(String(itemCloud.id));
+                                    } else {
+                                        tempMap.set(String(itemCloud.id), itemCloud);
+                                    }
                                 } 
                             } else if (!itemCloud.deleted) { 
                                 tempMap.set(String(itemCloud.id), itemCloud); 
                             } 
                         }); 
                         db = Array.from(tempMap.values()); updateMaps(); 
-                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted) }); 
-                        if (isCartMode) renderCartUI(); applyFiltersAndRender();
+                        if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) }); 
+                        if ($('q').value.trim() !== '') handleSearchLogic($('q').value.trim());
+                        if (isCartMode) { renderCartUI(); updateGrandTotal(); }
+                        applyFiltersAndRender();
                         
-                                                   // [SURGICAL FIX] Kunci memori ke Disk secara atomik. Mencegah Data Loss jika koneksi HTTP putus.
-                        // [QA LEAD FIX] Mencegah Memory Crash/Transaction Abort pada 36.000+ data dengan Chunking IDB
-                                                return new Promise((resolve) => {
+                        // [SURGICAL FIX] Kunci memori ke Disk secara atomik & hapus Zombie IDB.
+                        return new Promise((resolve) => {
                             try {
-                                let safeItems = db.filter(item => !item._isGhost);
+                                let safeItems = db.filter(item => !item._isGhost && !item._isPendingDelete);
                                 let idx = 0;
                                 function putChunk() {
-                                    if (idx >= safeItems.length) { resolve(); return; }
+                                    if (idx >= safeItems.length) {
+                                        if (deletedCloudIds.length > 0) {
+                                            let delTx = idb.transaction('items', 'readwrite');
+                                            let delStore = delTx.objectStore('items');
+                                            deletedCloudIds.forEach(delId => delStore.delete(delId));
+                                            delTx.oncomplete = () => resolve();
+                                            delTx.onerror = () => resolve();
+                                        } else {
+                                            resolve();
+                                        }
+                                        return;
+                                    }
                                     let tx = idb.transaction('items', 'readwrite');
                                     let store = tx.objectStore('items');
                                     let end = Math.min(idx + 500, safeItems.length);
@@ -3663,12 +3819,12 @@ db.forEach(i => {
                                 putChunk();
                             } catch(e) { resolve(); }
                         }).then(() => {
-                            localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
-                            return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
+                            syncStartLocalTime = Date.now();
+                            return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost && !i._isPendingDelete) }) }, 90000);
                         });
                     }
-                    localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
-                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 90000);
+                    syncStartLocalTime = Date.now();
+                    return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost && !i._isPendingDelete) }) }, 90000);
                 })
                 .then(r => r.json())
                 .then(backupRes => {
@@ -3679,12 +3835,12 @@ db.forEach(i => {
                             const req = store.index('ts_idx').openCursor(null, 'prev');
                             const results = [];
                             req.onsuccess = (e) => {
-    const cursor = e.target.result;
-    if (cursor && results.length < 1500) {
-        results.push(cursor.value);
-        cursor.continue();
-    } else { resolve(results); }
-};
+                                const cursor = e.target.result;
+                                if (cursor && results.length < 1500) {
+                                    results.push(cursor.value);
+                                    cursor.continue();
+                                } else { resolve(results); }
+                            };
                             req.onerror = () => resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'));
                         } catch(e) { resolve(JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]')); }
                     }).then(historyData => {
@@ -3693,22 +3849,27 @@ db.forEach(i => {
                 })
                 .then(r => r.json())
                 .then(historyRes => {
-    if (historyRes.status !== 'success') throw new Error(historyRes.message);
-    try {
-        const tx = idb.transaction('items', 'readwrite');
-        const s = tx.objectStore('items');
-        db = db.filter(i => { 
-            if (i.deleted) { s.delete(i.id); return false; } 
-            if (i._isGhost) return true; /* [ELITE QA FIX] Ghost Immunity (RAM Shield) */ 
-            return true; 
-        });
-        updateMaps();
-    } catch(e) {}
-    isApiLoading = false;
+                    if (historyRes.status !== 'success') throw new Error(historyRes.message);
+                    try {
+                        const tx = idb.transaction(['items', 'sync-outbox'], 'readwrite');
+                        const s = tx.objectStore('items');
+                        tx.objectStore('sync-outbox').delete('pending_sync_master');
+                        db = db.filter(i => { 
+                            if (i.deleted && (i.updatedAt || 0) <= syncStartLocalTime) { s.delete(i.id); return false; } 
+                            if (i._isGhost) return true; /* [ELITE QA FIX] Ghost Immunity (RAM Shield) */ 
+                            return true; 
+                        });
+                        updateMaps();
+                    } catch(e) {}
+                    localStorage.setItem('DB_LAST_SYNC', syncedServerTime.toString());
+                    isApiLoading = false;
                     hideLoading(); 
+                    if (typeof AutoSyncEngine !== 'undefined' && AutoSyncEngine.needsSync) {
+                        AutoSyncEngine.trigger();
+                    }
                     tampilkanToast("Upload Data Berhasil!", "var(--mono-main)"); 
                 })
-                                   .catch((err) => { 
+                .catch((err) => { 
                     isApiLoading = false; hideLoading(); 
                     if (window.registerBackgroundSync) {
                         return new Promise((resolve) => {
@@ -3730,10 +3891,10 @@ db.forEach(i => {
                             const tx = idb.transaction('sync-outbox', 'readwrite');
                             // [ELITE QA FIX] Dynamic Outbox Key. Mencegah sesi putus jaringan baru menimpa antrean putus jaringan lawas.
                             tx.objectStore('sync-outbox').put({ 
-                            id: 'pending_sync_master', 
-                           data: db.filter(i => !i._isGhost), 
-                           history: histBackup, 
-                           timestamp: Date.now() 
+                                id: 'pending_sync_master', 
+                                data: db.filter(i => !i._isGhost && !i._isPendingDelete), 
+                                history: histBackup, 
+                                timestamp: Date.now() 
                             });
                             tx.oncomplete = () => {
                                 window.registerBackgroundSync();
@@ -3957,11 +4118,13 @@ db.forEach(i => {
                             
                             if (!norm || !norm.n) { failedCount++; continue; }
                             
-                            if (!norm.id || norm.id === "undefined" || norm.id === "") {
+                            let hasValidRawId = norm.id && norm.id !== "undefined" && norm.id !== "";
+                            let existingItem = (hasValidRawId ? dbMapById.get(String(norm.id)) : null) || dbMapByName.get(String(norm.n).toLowerCase());
+                            if (existingItem) {
+                                norm.id = existingItem.id;
+                            } else if (!hasValidRawId) {
                                 norm.id = generateUniqueId();
                             }
-                            
-                            let existingItem = dbMapById.get(String(norm.id)) || dbMapByName.get(String(norm.n).toLowerCase());
                             let exId = existingItem ? String(existingItem.id) : null;
                             
                             if (!norm.t) { norm.t = generateSmartAcronym(norm.n, exId, tempAcrSet); } 
@@ -3981,16 +4144,24 @@ db.forEach(i => {
                             }
                             if (isCollision) { skippedCount++; continue; } 
                             
+                            if (existingItem) {
+                                if (existingItem.b && existingItem.b !== norm.b && dbMapByBarcode.get(existingItem.b)?.id === existingItem.id) dbMapByBarcode.delete(existingItem.b);
+                                if (existingItem.b2 && existingItem.b2 !== norm.b2 && dbMapByBarcode.get(existingItem.b2)?.id === existingItem.id) dbMapByBarcode.delete(existingItem.b2);
+                            }
                             if (norm.b !== '') dbMapByBarcode.set(norm.b, norm);
                             if (norm.b2 !== '') dbMapByBarcode.set(norm.b2, norm);
 
                             let currentTs = baseTs + i;
                             
                             if (existingItem) { 
-                                processedItems.set(existingItem.id, { ...existingItem, ...norm, id: existingItem.id, updatedAt: currentTs }); 
+                                let mergedItem = { ...existingItem, ...norm, id: existingItem.id, updatedAt: currentTs };
+                                processedItems.set(existingItem.id, mergedItem); 
+                                dbMapById.set(String(existingItem.id), mergedItem);
+                                dbMapByName.set(String(mergedItem.n).toLowerCase(), mergedItem);
                             } else { 
                                 norm.updatedAt = currentTs; 
                                 processedItems.set(norm.id, norm); 
+                                dbMapById.set(String(norm.id), norm);
                                 dbMapByName.set(String(norm.n).toLowerCase(), norm);
                             }
                         }
@@ -4007,8 +4178,9 @@ db.forEach(i => {
                                 const chunk = itemsArray.slice(currentIndex, currentIndex + chunkSize);
                                 if (chunk.length === 0) {
                                     if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost), pop: buildPopularityData() });
-                                    updateMaps(); renderCartUI(); clearSearch(); 
+                                    updateMaps(); renderCartUI(); updateGrandTotal(); clearSearch(); 
                                     isApiLoading = false; hideLoading(); if (e && e.target) e.target.value = ''; 
+                                    if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
 
                                     if (skippedCount > 0 || failedCount > 0) { 
                                         let msg = `⚠️ <b>${skippedCount}</b> ditolak (Barcode Ganda).<br>ℹ️ <b>${failedCount}</b> baris kosong diabaikan.<br><br><span style="color:var(--mono-main);">✅ Sukses memuat <b>${processedItems.size}</b> Data Valid.</span>`;
@@ -4241,7 +4413,7 @@ setTimeout(processImportChunk, 0);
             let grandTotal = 0; let itemsPrint = [];
             
             Object.keys(cartState).forEach(id => {
-                const item = db.find(x => String(x.id) === id);
+                const item = getFastItem(id);
                 if (item && !item.deleted) {
                     const q = cartState[id].q; const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0; let finalModal = 0; let printUnit = '';
@@ -4351,28 +4523,24 @@ setTimeout(processImportChunk, 0);
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
                         let seq = 1;
-try {
-    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
-    if (todayTrx.length > 0) {
-        let maxSeq = 0;
-        todayTrx.forEach(x => {
-            let parts = x.id.split('-');
-            if (parts[1] && parts[1].length >= 13) {
-                let sNum = parseInt(parts[1].substring(10, 13), 10);
-                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
-            }
-        });
-        seq = maxSeq + 1;
-    } else {
-        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
-    }
-} catch(e) {}
-localStorage.setItem('TRX_DATE', dKey);
-localStorage.setItem('TRX_SEQ', seq);
+                        try {
+                            let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                            let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+                            let maxSeq = 0;
+                            todayTrx.forEach(x => {
+                                let parts = x.id.split('-');
+                                if (parts[1] && parts[1].length >= 13) {
+                                    let sNum = parseInt(parts[1].substring(10), 10);
+                                    if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+                                }
+                            });
+                            let lsSeq = (localStorage.getItem('TRX_DATE') === dKey) ? (parseInt(localStorage.getItem('TRX_SEQ') || '0', 10) || 0) : 0;
+                            seq = Math.max(maxSeq, lsSeq) + 1;
+                        } catch(e) {}
+                        localStorage.setItem('TRX_DATE', dKey);
+                        localStorage.setItem('TRX_SEQ', seq);
                         let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
-finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
+                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
                     let newTrx = { id: finalId, ts: finalTs, total: grandTotal, bayar: parsedBayar, items: itemsPrint, modal: totalModal };
@@ -4428,27 +4596,23 @@ finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     if (!finalId) {
                         let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                         let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-     let seq = 1;
-try {
-    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
-    if (todayTrx.length > 0) {
-        let maxSeq = 0;
-        todayTrx.forEach(x => {
-            let parts = x.id.split('-');
-            if (parts[1] && parts[1].length >= 13) {
-                let sNum = parseInt(parts[1].substring(10, 13), 10);
-                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
-            }
-        });
-        seq = maxSeq + 1;
-    } else {
-        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
-    }
-} catch(e) {}
-localStorage.setItem('TRX_DATE', dKey);
-localStorage.setItem('TRX_SEQ', seq);
+                        let seq = 1;
+                        try {
+                            let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                            let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+                            let maxSeq = 0;
+                            todayTrx.forEach(x => {
+                                let parts = x.id.split('-');
+                                if (parts[1] && parts[1].length >= 13) {
+                                    let sNum = parseInt(parts[1].substring(10), 10);
+                                    if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+                                }
+                            });
+                            let lsSeq = (localStorage.getItem('TRX_DATE') === dKey) ? (parseInt(localStorage.getItem('TRX_SEQ') || '0', 10) || 0) : 0;
+                            seq = Math.max(maxSeq, lsSeq) + 1;
+                        } catch(e) {}
+                        localStorage.setItem('TRX_DATE', dKey);
+                        localStorage.setItem('TRX_SEQ', seq);
                         let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
                         finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                     }
@@ -4520,7 +4684,7 @@ localStorage.setItem('TRX_SEQ', seq);
         }
         let isPrinting = false; 
 
-        function executePrint(total, bayar, items, timestamp = null, isReprint = false) {
+        function executePrint(total, bayar, items, timestamp = null, isReprint = false, overrideId = null) {
             if (isPrinting) return tampilkanToast("Mohon tunggu, printer sedang memproses...", "var(--warning)");
             isPrinting = true;
             
@@ -4529,35 +4693,31 @@ let kembali = safeBayar - total;
 let labelKembali = kembali < 0 ? "KURANG" : "KEMBALIAN";
 let valKembali = fmt(Math.abs(kembali));
 
-let d = timestamp ? new Date(timestamp) : new Date();
+let d = timestamp ? new Date(timestamp) : (!isReprint && activeEditTrxTs ? new Date(activeEditTrxTs) : new Date());
 
 // SURGICAL FIX: Sinkronisasi Absolut ID Kertas dengan Database Induk
-                        let finalId = activeEditTrxId;
+            let finalId = overrideId ? overrideId : activeEditTrxId;
             try {
                 if (!finalId) {
                     let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
                     let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-let seq = 1;
-try {
-    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-    let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
-    if (todayTrx.length > 0) {
-        let maxSeq = 0;
-        todayTrx.forEach(x => {
-            let parts = x.id.split('-');
-            if (parts[1] && parts[1].length >= 13) {
-                let sNum = parseInt(parts[1].substring(10, 13), 10);
-                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
-            }
-        });
-        seq = maxSeq + 1;
-    } else {
-        let lsSeq = parseInt(localStorage.getItem('TRX_SEQ') || '0');
-        if (localStorage.getItem('TRX_DATE') === dKey) seq = lsSeq + 1;
-    }
-} catch(e) {}
-localStorage.setItem('TRX_DATE', dKey);
-localStorage.setItem('TRX_SEQ', seq);
+                    let seq = 1;
+                    try {
+                        let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                        let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+                        let maxSeq = 0;
+                        todayTrx.forEach(x => {
+                            let parts = x.id.split('-');
+                            if (parts[1] && parts[1].length >= 13) {
+                                let sNum = parseInt(parts[1].substring(10), 10);
+                                if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
+                            }
+                        });
+                        let lsSeq = (localStorage.getItem('TRX_DATE') === dKey) ? (parseInt(localStorage.getItem('TRX_SEQ') || '0', 10) || 0) : 0;
+                        seq = Math.max(maxSeq, lsSeq) + 1;
+                    } catch(e) {}
+                    localStorage.setItem('TRX_DATE', dKey);
+                    localStorage.setItem('TRX_SEQ', seq);
                     let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
                     finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
                 }
@@ -4565,7 +4725,7 @@ localStorage.setItem('TRX_SEQ', seq);
                 isPrinting = false;
                 return tampilkanToast("Memori Penuh! Gagal membuat ID Transaksi.", "var(--danger)");
             }
-                        let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime();
+                        let finalTs = isReprint ? d.getTime() : (activeEditTrxTs ? activeEditTrxTs : d.getTime());
             let receiptNo = finalId ? finalId.split('-').slice(0, 2).join('-') : ''; 
             let totalItemCount = 0;
 
@@ -4657,11 +4817,19 @@ localStorage.setItem('TRX_SEQ', seq);
                     tx.onerror = () => { tampilkanToast("GAGAL SIMPAN DATABASE! Memori Penuh.", "var(--danger)"); };
                 } catch (e) {} 
 
-                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                let hist = [];
+                try { hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch (e) { hist = []; }
                 if (activeEditTrxId) {
                     let hIdx = hist.findIndex(x => x.id === finalId);
                     if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
                 } else { hist.unshift(newTrx); }
+
+                try { 
+                    localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); 
+                } catch (e) { 
+                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 10))); } 
+                    catch (fatal) { localStorage.removeItem('DB_WA_HISTORY'); } 
+                }
 
                 cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender();
                 clearEditMode(); 
@@ -4845,10 +5013,10 @@ localStorage.setItem('TRX_SEQ', seq);
                             <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #3CB371!important; color:#3CB371!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="waHistory('${h.id}')">
                                 WA
                             </button> 
-                                                        <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #87CEFA!important; color:#87CEFA!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="printHistory('${h.id}')">
                                 CETAK
                             </button>
-                           <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #00BFFF!important; color:#00BFFF!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="let hx=JSON.parse(localStorage.getItem('DB_WA_HISTORY')||'[]').find(x=>x.id==='${h.id}'); if(hx) { let itemsArr = Array.isArray(hx.items) ? hx.items : [{ n: 'Item Historis', q: hx.items, u: 'Item', sub: hx.total }]; printBluetoothESCPOS(hx.total, hx.bayar, itemsArr, hx.id, hx.ts, true); }">
+                            <button class="btn-main" style="flex:1; background:transparent!important; border:1px solid #00BFFF!important; color:#00BFFF!important; min-height:36px; padding:0; font-size:10px; display:flex; justify-content:center; align-items:center; gap:5px; outline:none;" onclick="btHistory('${h.id}')">
                                 BT
                             </button>
                         </div>
@@ -4886,18 +5054,10 @@ localStorage.setItem('TRX_SEQ', seq);
             let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
             let h = hist.find(x => x.id === id);
             
-            // [SURGICAL FIX] Force Injeksi ID Lama ke Mesin Printer
+            // [SURGICAL FIX] Force Injeksi ID Lama ke Mesin Printer Tanpa Mutasi State Global
             const triggerPrint = (hData) => {
                 let itemsToPrint = Array.isArray(hData.items) ? hData.items : [{ n: "Item Historis", q: hData.items, u: "Item", sub: hData.total }];
-                
-                // KUNCI ABSOLUT: Paksa printer menggunakan ID lama
-                let tempId = activeEditTrxId; 
-                activeEditTrxId = hData.id; 
-                
-                executePrint(hData.total, hData.bayar, itemsToPrint, hData.ts, true);
-                
-                // Kembalikan state memori seperti semula (Mencegah error sistem)
-                setTimeout(() => { activeEditTrxId = tempId; }, 100); 
+                executePrint(hData.total, hData.bayar, itemsToPrint, hData.ts, true, hData.id);
             };
 
             if (!h) {
@@ -4910,6 +5070,27 @@ localStorage.setItem('TRX_SEQ', seq);
                 return;
             }
             triggerPrint(h);
+        }
+
+        function btHistory(id) {
+            let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+            let h = hist.find(x => x.id === id);
+
+            const triggerBtPrint = (hData) => {
+                let itemsArr = Array.isArray(hData.items) ? hData.items : [{ n: 'Item Historis', q: hData.items, u: 'Item', sub: hData.total }];
+                printBluetoothESCPOS(hData.total, hData.bayar, itemsArr, hData.id, hData.ts, true);
+            };
+
+            if (!h) {
+                const tx = idb.transaction('history', 'readonly');
+                const req = tx.objectStore('history').get(id);
+                req.onsuccess = () => {
+                    if (req.result) { triggerBtPrint(req.result); }
+                    else { tampilkanToast("Data tidak ditemukan!", "var(--danger)"); }
+                };
+                return;
+            }
+            triggerBtPrint(h);
         }
 
         function waHistory(id) {
@@ -5111,14 +5292,25 @@ localStorage.setItem('TRX_SEQ', seq);
                
                 // SURGICAL FIX: Rehidrasi Ghost Item dari History pasca Force-Close
                 if (activeEditTrxId) {
-                    let histCache = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                    let histCache = [];
+                    try { histCache = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e) { histCache = []; }
                     let hData = histCache.find(x => x.id === activeEditTrxId);
+                    if (!hData && idb) {
+                        hData = await new Promise((resolve) => {
+                            try {
+                                const req = idb.transaction('history', 'readonly').objectStore('history').get(activeEditTrxId);
+                                req.onsuccess = () => resolve(req.result || null);
+                                req.onerror = () => resolve(null);
+                            } catch(e) { resolve(null); }
+                        });
+                    }
                     if (hData && Array.isArray(hData.items)) {
                         hData.items.forEach(it => {
-                            if (!db.find(x => String(x.id) === String(it.id))) {
-                                db.push({ id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true });
+                            if (!db.find(x => String(x.id) === String(it.id) && !x.deleted)) {
+                                db.unshift({ id: it.id, n: it.n || 'Item Terhapus', p1: it.q > 0 ? Math.round(it.sub / it.q) : 0, p2: 0, iq: 1, u1: it.u1 || 'Pcs', u2: '', deleted: false, _isGhost: true });
                             }
                         });
+                        updateMaps();
                     }
                 }
                 
@@ -5193,6 +5385,11 @@ localStorage.setItem('TRX_SEQ', seq);
             }
 
             if (activeModals.length > 0) { 
+                if (activeModals[activeModals.length - 1] === 'loading' || isApiLoading || isBTConnecting) {
+                    history.pushState({ modalOpen: true }, '');
+                    tampilkanToast("Mohon tunggu proses selesai...", "var(--warning)");
+                    return;
+                }
                 isPoppingState = true; 
                 const topModal = activeModals.pop(); 
                 closeModalById(topModal); 
@@ -5203,7 +5400,7 @@ localStorage.setItem('TRX_SEQ', seq);
                 function closeModalById(id) {
             if (id === 'mod') { activeId = null; $('mod').style.display = 'none'; checkModalOpen(); }
             else if (id === 'scanner') { closeScanner(); }
-            else if (id === 'loading') { $('loading-modal').style.display = 'none'; checkModalOpen(); }
+            else if (id === 'loading') { if (!isApiLoading && !isBTConnecting) { $('loading-modal').style.display = 'none'; checkModalOpen(); } }
             else if (id === 'picker') { $('custom-picker').style.display = 'none'; checkModalOpen(); }
             else if (id === 'alert') { 
     $('custom-alert').style.display = 'none'; checkModalOpen(); 
@@ -5221,6 +5418,13 @@ localStorage.setItem('TRX_SEQ', seq);
                         else if (id === 'top10') { closeTop10(); } 
             else if (id === 'about') { closeAboutModal(); }
             else if (id === 'cart-expand') { document.body.classList.remove('cart-expanded'); }
+            else if (id === 'barla-modal') { closeBarlaAI(); }
+            else if (id === 'guide') {
+                const gOv = $('qaGuideOverlay');
+                if (gOv) gOv.classList.remove('active');
+                document.body.style.overflow = '';
+                checkModalOpen();
+            }
         }
 
         // --- INJEKSI MESIN ESC/POS BLUETOOTH ---
@@ -5321,6 +5525,7 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null, is
         let marketBasketRules = [];
         async function runMarketBasketAI() {
             try {
+                if (!idb) return;
                 let tx = idb.transaction('history', 'readonly');
                 let hist = await new Promise(res => {
                     let results = [];
@@ -5332,21 +5537,24 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null, is
                             cursor.continue();
                         } else { res(results); }
                     };
+                    req.onerror = () => res(results);
+                    tx.onerror = () => res(results);
+                    tx.onabort = () => res(results);
                 });
                 if(hist.length < 20) return; // Butuh data cukup
                 let pairCounts = {}; let itemCounts = {};
                 hist.forEach(h => {
                     if(!Array.isArray(h.items)) return;
-                    let ids = [...new Set(h.items.map(i => String(i.id)))];
-                                for (let i = 0; i < ids.length; i++) {
-                let id1 = ids[i];
-                itemCounts[id1] = (itemCounts[id1] || 0) + 1;
-                for (let j = i + 1; j < ids.length; j++) {
-                    let id2 = ids[j];
-                    let pair = id1 < id2 ? id1 + '|' + id2 : id2 + '|' + id1;
-                    pairCounts[pair] = (pairCounts[pair] || 0) + 1;
-                }
-            }
+                    let ids = [...new Set(h.items.filter(i => i && i.id && i.id !== 'SYS-TRUNC').map(i => String(i.id)))];
+                    for (let i = 0; i < ids.length; i++) {
+                        let id1 = ids[i];
+                        itemCounts[id1] = (itemCounts[id1] || 0) + 1;
+                        for (let j = i + 1; j < ids.length; j++) {
+                            let id2 = ids[j];
+                            let pair = id1 < id2 ? id1 + '|' + id2 : id2 + '|' + id1;
+                            pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+                        }
+                    }
                 });
                 let rules = [];
                 for (let pair in pairCounts) {
@@ -5386,7 +5594,7 @@ const AutoSyncEngine = {
     // 2. Eksekutor Siluman
     executeSilentSync: function() {
         // Cek Mutex Lock: Blokir jika sedang offline, tidak ada perubahan, atau sedang upload manual
-        if (!navigator.onLine || !this.needsSync || this.isSyncing || isApiLoading || typeof db === 'undefined' || db.length === 0) return;
+        if (!navigator.onLine || !this.needsSync || this.isSyncing || isApiLoading || isSaving || typeof db === 'undefined' || db.length === 0) return;
         
         // Pengecekan Batas Payload 10MB
         try {
@@ -5402,9 +5610,107 @@ const AutoSyncEngine = {
 
         // [SURGICAL FIX] Request Idle Callback untuk mencegah Main Thread Freeze saat JSON.stringify
         const runSync = () => {
-            const serverTime = Date.now();
-            
-            fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost) }) }, 60000)
+            if (!navigator.onLine || isApiLoading || isSaving) {
+                this.isSyncing = false;
+                if (this.needsSync) this.trigger();
+                return;
+            }
+            this.needsSync = false;
+            const lastSyncTime = parseInt(localStorage.getItem('DB_LAST_SYNC')) || 0;
+            let syncedServerTime = Date.now();
+            let syncStartLocalTime = Date.now();
+
+            fetchWithTimeout(CLOUD_URL + "?action=load&lastSync=" + lastSyncTime + "&t=" + Date.now(), {}, 30000)
+            .then(r => r.json())
+            .then(dataResponse => {
+                const dataCloud = dataResponse.data || [];
+                syncedServerTime = dataResponse.serverTime || Date.now();
+
+                if (dataCloud.length > 0) {
+                    let tempMap = new Map();
+                    let deletedCloudIds = [];
+                    db.forEach(item => tempMap.set(String(item.id), item));
+
+                    dataCloud.forEach(rawItem => {
+                        let itemCloud = { ...rawItem };
+                        itemCloud.deleted = String(itemCloud.deleted).trim().toUpperCase() === 'TRUE' || itemCloud.deleted === true;
+                        itemCloud.f = String(itemCloud.f).trim().toUpperCase() === 'TRUE' || itemCloud.f === true;
+                        itemCloud.hpp = parseExcelPrice(itemCloud.hpp) || 0;
+                        itemCloud.p1 = parseExcelPrice(itemCloud.p1) || 0;
+                        itemCloud.p2 = parseExcelPrice(itemCloud.p2) || null;
+                        itemCloud.iq = parseInt(String(itemCloud.iq || 0).replace(/[^0-9]/g, ''), 10) || 0;
+                        if (!itemCloud.id) itemCloud.id = generateUniqueId();
+                        itemCloud.n = itemCloud.n || "";
+                        itemCloud.b = String(itemCloud.b || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
+                        if (itemCloud.b === '-' || itemCloud.b === '0') itemCloud.b = '';
+                        itemCloud.b2 = String(itemCloud.b2 || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
+                        if (itemCloud.b2 === '-' || itemCloud.b2 === '0') itemCloud.b2 = '';
+
+                        if (typeof itemCloud.tiers === 'string') {
+                            try { itemCloud.tiers = JSON.parse(itemCloud.tiers); } catch(e) { itemCloud.tiers = []; }
+                        } else if (!Array.isArray(itemCloud.tiers)) {
+                            itemCloud.tiers = [];
+                        }
+
+                        const existing = tempMap.get(String(itemCloud.id));
+                        if (existing) {
+                            if (existing._isPendingDelete) return;
+                            if ((itemCloud.updatedAt || 0) >= (existing.updatedAt || 0)) {
+                                if (itemCloud.deleted) {
+                                    tempMap.delete(String(itemCloud.id));
+                                    deletedCloudIds.push(String(itemCloud.id));
+                                } else {
+                                    tempMap.set(String(itemCloud.id), itemCloud);
+                                }
+                            }
+                        } else if (!itemCloud.deleted) {
+                            tempMap.set(String(itemCloud.id), itemCloud);
+                        }
+                    });
+
+                    db = Array.from(tempMap.values());
+                    updateMaps();
+                    if (worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) });
+                    if ($('q').value.trim() !== '') handleSearchLogic($('q').value.trim());
+                    if (isCartMode) { renderCartUI(); updateGrandTotal(); }
+                    applyFiltersAndRender();
+
+                    return new Promise((resolve) => {
+                        try {
+                            let safeItems = db.filter(item => !item._isGhost && !item._isPendingDelete);
+                            let idx = 0;
+                            function putChunk() {
+                                if (idx >= safeItems.length) {
+                                    if (deletedCloudIds.length > 0) {
+                                        let delTx = idb.transaction('items', 'readwrite');
+                                        let delStore = delTx.objectStore('items');
+                                        deletedCloudIds.forEach(delId => delStore.delete(delId));
+                                        delTx.oncomplete = () => resolve();
+                                        delTx.onerror = () => resolve();
+                                    } else {
+                                        resolve();
+                                    }
+                                    return;
+                                }
+                                let tx = idb.transaction('items', 'readwrite');
+                                let store = tx.objectStore('items');
+                                let end = Math.min(idx + 500, safeItems.length);
+                                for (let i = idx; i < end; i++) store.put(safeItems[i]);
+                                idx = end;
+                                tx.oncomplete = putChunk;
+                                tx.onerror = () => resolve();
+                            }
+                            putChunk();
+                        } catch(e) { resolve(); }
+                    }).then(() => {
+                        syncStartLocalTime = Date.now();
+                        return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost && !i._isPendingDelete) }) }, 60000);
+                    });
+                }
+
+                syncStartLocalTime = Date.now();
+                return fetchWithTimeout(CLOUD_URL, { method: 'POST', body: JSON.stringify({ action: 'backup', data: db.filter(i => !i._isGhost && !i._isPendingDelete) }) }, 60000);
+            })
             .then(r => r.json())
             .then(backupRes => {
                 if (backupRes.status !== 'success') throw new Error();
@@ -5429,17 +5735,17 @@ const AutoSyncEngine = {
                 });
             })
             .then(r => r.json())
-
             .then(historyRes => {
                 if (historyRes.status !== 'success') throw new Error();
                 
-                // Pembersihan Ghost Item pasca berhasil
+                // Pembersihan Ghost Item & Antrean Outbox pasca berhasil
                 try {
-                    const tx = idb.transaction('items', 'readwrite');
+                    const tx = idb.transaction(['items', 'sync-outbox'], 'readwrite');
                     const s = tx.objectStore('items');
+                    tx.objectStore('sync-outbox').delete('pending_sync_master');
                     db = db.filter(i => { 
                         // ELITE FIX: Time-Lock Guardian. Cegah penghancuran item yang diubah selama I/O Fetch berlangsung.
-                        if (i.deleted && (i.updatedAt || 0) <= serverTime) { 
+                        if (i.deleted && (i.updatedAt || 0) <= syncStartLocalTime) { 
                             s.delete(i.id); return false; 
                         } 
                         if (i._isGhost) return true; /* [ELITE QA FIX] Ghost Immunity (RAM Shield) */
@@ -5449,16 +5755,20 @@ const AutoSyncEngine = {
                 } catch(e) {}
                 
                 this.isSyncing = false;
-                this.needsSync = false;
-                localStorage.setItem('DB_LAST_SYNC', serverTime.toString());
+                localStorage.setItem('DB_LAST_SYNC', syncedServerTime.toString());
                 this.updateUIStatus('Auto-Sync Aktif ✅', '#3CB371');
                 
-                // Kembalikan status ke normal setelah 5 detik
-                setTimeout(() => this.updateUIStatus('[Sistem Status: Optimal | Local Storage: Aktif]', 'var(--mono-main)'), 5000);
+                // Jika ada mutasi baru selama proses upload berlangsung, jadwalkan ulang sinkronisasi
+                if (this.needsSync) {
+                    this.trigger();
+                } else {
+                    setTimeout(() => this.updateUIStatus('[Sistem Status: Optimal | Local Storage: Aktif]', 'var(--mono-main)'), 5000);
+                }
             })
             .catch(() => {
                 // Siluman gagal. Tidur. Coba lagi nanti tanpa mengganggu kasir.
                 this.isSyncing = false;
+                this.needsSync = true;
                 this.updateUIStatus('Auto-Sync Tertunda (Offline)', 'var(--warning)');
             });
         };
@@ -5527,9 +5837,11 @@ function handleBarlaNluResult(res) {
         if (/(awan|upload|sinkron|sync)/.test(res.raw)) return appendBarlaMsg(`${svgInfo} <b>CLOUD SYNC:</b> 100% Offline-First. Klik ikon Awan Biru untuk mengamankan data.`, 'ai', true);
     }
     
-    // [QA LEAD FIX] Intersepsi Cerdas: Jika intent TAMBAH tapi tanpa entity (karena filler word terhapus), alihkan ke KONTEKS!
-    if ((intent === 'TAMBAH' && !res.entity) || intent === 'UNKNOWN') {
-        if (bAiMemory.lastEntities.length > 0 && /^(tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order)\s+(\d+|se|setengah|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas)/.test(res.raw)) {
+    // [QA LEAD FIX] Intersepsi Cerdas: Jika intent TAMBAH tanpa entity (atau memakai kata ganti "itu/ini"), alihkan ke KONTEKS!
+    if (bAiMemory.lastEntities.length > 0) {
+        if (intent === 'TAMBAH' && (!res.entity || /^(itu|ini|tersebut|nya|barang\s+itu|barang\s+ini)$/i.test(res.entity))) {
+            intent = 'TAMBAH_KONTEKS';
+        } else if (intent === 'UNKNOWN' && /^(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+(?:[.,]\d+)?|satu\s*setengah|dua\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)\b/i.test(res.raw)) {
             intent = 'TAMBAH_KONTEKS';
         }
     }
@@ -5545,9 +5857,11 @@ function handleBarlaNluResult(res) {
 
         if (targetItems.length === 1) {
             let it = targetItems[0];
-            modifyCartItem(it.id, qty);
+            let finalQty = resolveSmartUnitQty(it, qty, res.unit);
+            modifyCartItem(it.id, finalQty);
             bAiMemory.lastEntities = [it];
-            return appendBarlaMsg(`${svgAction} <b>TINDAKAN DIEKSEKUSI:</b><br>Berhasil memasukkan <b>${qty} ${escapeHTML(it.u1 || 'Pcs')} ${escapeHTML(it.n)}</b> ke Keranjang.`, 'ai', true);
+            let dispBreakdown = formatQtyBreakdown(finalQty, it.iq, it.u1, it.u2);
+            return appendBarlaMsg(`${svgAction} <b>TINDAKAN DIEKSEKUSI:</b><br>Berhasil memasukkan <b>${escapeHTML(dispBreakdown)} ${escapeHTML(it.n)}</b> ke Keranjang.`, 'ai', true);
         } else if (targetItems.length > 1) {
             bAiMemory.lastEntities = targetItems;
             let html = `${svgWarn} Ada ${targetItems.length} barang terkait. Maksud Anda yang mana?<br><br>`;
@@ -5558,17 +5872,19 @@ function handleBarlaNluResult(res) {
                     appendBarlaMsg(name, 'user');
                     modifyCartItem(id, qty);
                     bAiMemory.lastEntities = [];
-                    appendBarlaMsg(`${svgAction} <b>TINDAKAN DIEKSEKUSI:</b><br>Berhasil memasukkan <b>${qty} ${unit} ${name}</b> ke Keranjang.`, 'ai', true);
+                    appendBarlaMsg(`${svgAction} <b>TINDAKAN DIEKSEKUSI:</b><br>Berhasil memasukkan <b>${escapeHTML(String(unit))} ${escapeHTML(String(name))}</b> ke Keranjang.`, 'ai', true);
                 };
             }
 
             targetItems.forEach(it => {
+                let finalQty = resolveSmartUnitQty(it, qty, res.unit);
+                let dispBreakdown = formatQtyBreakdown(finalQty, it.iq, it.u1, it.u2);
                 // [ELITE QA FIX] Sanitasi XSS & Syntax Error pada Atribut HTML onclick
                 let safeJsN = String(it.n).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
-                let safeJsU = String(it.u1 || 'Pcs').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
+                let safeJsU = String(dispBreakdown).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/[\r\n]+/g, ' ');
                 
                 // [QA LEAD FIX] Eksekusi Native via Global Proxy: Atribut HTML aman, logika 100% tereksekusi
-                html += `<div class="q-chip" style="margin-bottom:6px; background:#222; padding:8px 12px; color:#fff;" onclick="window.bAiSelectChip('${it.id}', ${qty}, '${safeJsN}', '${safeJsU}')">${escapeHTML(it.n)}</div><br>`;
+                html += `<div class="q-chip" style="margin-bottom:6px; background:#222; padding:8px 12px; color:#fff;" onclick="window.bAiSelectChip('${it.id}', ${finalQty}, '${safeJsN}', '${safeJsU}')">${escapeHTML(it.n)}</div><br>`;
             });
             return appendBarlaMsg(html, 'ai', true);
         } else {
@@ -5577,24 +5893,43 @@ function handleBarlaNluResult(res) {
     }
 
     if (intent === 'ANALISA_TOP') {
-        let top10Arr = Object.values(globalItemAgg).sort((a,b) => b.q - a.q).slice(0, 3);
-        if (top10Arr.length === 0) return appendBarlaMsg(`${svgChart} Belum ada data transaksi penjualan hari ini untuk dianalisis.`, 'ai', true);
-        let html = `${svgChart} <b style="color:#3CB371;">TOP 3 BARANG TERLARIS HARI INI:</b><br><br>`;
-        top10Arr.forEach((it, idx) => {
-            let displayQty = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2);
-            html += `<div style="background:#151515; padding:8px 10px; border-left:3px solid #3CB371; margin-bottom:6px;"><b>${idx+1}. ${escapeHTML(it.n)}</b><br><span style="color:#888; font-size:11px;">Terjual: ${displayQty}</span></div>`;
+        getTodayHistoryRecords().then(todayH => {
+            let itemAgg = {};
+            let dbLookup = {};
+            for (let i = 0; i < db.length; i++) dbLookup[db[i].id] = db[i];
+            todayH.forEach(h => {
+                if (Array.isArray(h.items)) {
+                    h.items.forEach(it => {
+                        let key = it.id || it.n;
+                        if (!itemAgg[key]) {
+                            let liveData = it.id ? dbLookup[it.id] : null;
+                            itemAgg[key] = { n: liveData ? liveData.n : it.n, q: 0, iq: liveData ? liveData.iq : it.iq, u1: liveData ? liveData.u1 : it.u1, u2: liveData ? liveData.u2 : it.u2 };
+                        }
+                        let qVal = parseFloat(it.q) || 0;
+                        itemAgg[key].q = parseFloat((itemAgg[key].q + qVal).toFixed(4));
+                    });
+                }
+            });
+            let top10Arr = Object.values(itemAgg).sort((a,b) => b.q - a.q).slice(0, 3);
+            if (top10Arr.length === 0) return appendBarlaMsg(`${svgChart} Belum ada data transaksi penjualan hari ini untuk dianalisis.`, 'ai', true);
+            let html = `${svgChart} <b style="color:#3CB371;">TOP 3 BARANG TERLARIS HARI INI:</b><br><br>`;
+            top10Arr.forEach((it, idx) => {
+                let displayQty = formatQtyBreakdown(it.q, it.iq, it.u1, it.u2);
+                html += `<div style="background:#151515; padding:8px 10px; border-left:3px solid #3CB371; margin-bottom:6px;"><b>${idx+1}. ${escapeHTML(it.n)}</b><br><span style="color:#888; font-size:11px;">Terjual: ${displayQty}</span></div>`;
+            });
+            appendBarlaMsg(html, 'ai', true);
         });
-        return appendBarlaMsg(html, 'ai', true);
+        return;
     }
 
     if (intent === 'ANALISA_OMZET') {
-        let d = new Date(); let dateVal = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        let histCache = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-        let todayH = histCache.filter(h => { let hd = new Date(h.ts); return `${hd.getFullYear()}-${String(hd.getMonth()+1).padStart(2,'0')}-${String(hd.getDate()).padStart(2,'0')}` === dateVal; });
-        let tOmzet = 0; let tModal = 0;
-        todayH.forEach(x => { tOmzet += x.total; tModal += (x.modal || 0); });
-        let html = `${svgChart} <b>LAPORAN KEUANGAN HARI INI:</b><br><br>- Pemasukan: <b>Rp ${fmt(tOmzet)}</b><br>- Laba Bersih: <b style="color:#3CB371;">Rp ${fmt(tOmzet - tModal)}</b><br>- Total Transaksi: <b>${todayH.length} Nota</b>`;
-        return appendBarlaMsg(html, 'ai', true);
+        getTodayHistoryRecords().then(todayH => {
+            let tOmzet = 0; let tModal = 0;
+            todayH.forEach(x => { tOmzet += x.total; tModal += (x.modal || 0); });
+            let html = `${svgChart} <b>LAPORAN KEUANGAN HARI INI:</b><br><br>- Pemasukan: <b>Rp ${fmt(tOmzet)}</b><br>- Laba Bersih: <b style="color:#3CB371;">Rp ${fmt(tOmzet - tModal)}</b><br>- Total Transaksi: <b>${todayH.length} Nota</b>`;
+            appendBarlaMsg(html, 'ai', true);
+        });
+        return;
     }
 
     if (intent === 'ANALISA_MARGIN') {
@@ -5640,6 +5975,36 @@ function handleBarlaNluResult(res) {
     }
 
     return appendBarlaMsg(`${svgInfo} <b>PANDUAN AGENT:</b><br><br>- Aksi: <i>"Tambah 2 indomie"</i><br>- Analisis: <i>"Barang apa yang marginnya merah?"</i><br>- Omzet: <i>"Berapa total pendapatan hari ini?"</i><br><br><span style="font-size:11px; color:#888;">Ketik <b>MENU</b> untuk opsi lainnya.</span>`, 'ai', true);
+}
+
+async function getTodayHistoryRecords() {
+    let d = new Date();
+    let startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+    let endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
+    let hist = [];
+    try {
+        if (idb) {
+            hist = await new Promise((resolve) => {
+                const tx = idb.transaction('history', 'readonly');
+                const store = tx.objectStore('history');
+                const index = store.index('ts_idx');
+                const range = IDBKeyRange.bound(startOfDay, endOfDay);
+                const req = index.getAll(range);
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => resolve([]);
+            });
+        }
+    } catch(e) {}
+    if (hist.length === 0) {
+        let dateVal = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        let cacheHist = [];
+        try { cacheHist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]'); } catch(e) {}
+        hist = cacheHist.filter(h => {
+            let hd = new Date(h.ts);
+            return `${hd.getFullYear()}-${String(hd.getMonth()+1).padStart(2,'0')}-${String(hd.getDate()).padStart(2,'0')}` === dateVal;
+        });
+    }
+    return hist;
 }
 
 function loadBarlaHistory() {
@@ -5712,8 +6077,17 @@ function appendBarlaMsg(text, sender, isHtml = false) {
     area.appendChild(div);
     requestAnimationFrame(() => { area.scrollTop = area.scrollHeight; });
 
+    let persistedText = text;
+    if (isHtml && typeof bAiChipBatal !== 'undefined') {
+        persistedText = String(text)
+            .replace(bAiChipBatal, '')
+            .replace(bAiChipTidak, '')
+            .replace(bAiChipYaTidak, '')
+            .replace(bAiChipSimpanBatal, '');
+    }
+
     let hist = loadBarlaHistory();
-    hist.push({ text: text, sender: sender, isHtml: isHtml });
+    hist.push({ text: persistedText, sender: sender, isHtml: isHtml });
     if (hist.length > 50) hist = hist.slice(hist.length - 50); 
     saveBarlaHistory(hist);
 }
@@ -5764,13 +6138,13 @@ const bAiChipSimpanBatal = `<div style="margin-top:12px; display:flex; gap:8px;"
 function routeBarlaState(text) {
     const tUp = text.toUpperCase();
     
-    // [CONTEXT SWITCHING] Escape Route from Wizard Anti-SoftLock
-    if (bAiState !== 'IDLE' && /^(batal|batalkan|stop|henti|udah|\/|tambah|beli|cek|cari|harga|laku|margin)/i.test(text) && !/^(ya|tidak|simpan)$/i.test(text)) {
-        if (/^(batal|batalkan|stop|henti|udah|\/)/i.test(text)) {
+    // [CONTEXT SWITCHING] Escape Route from Wizard Anti-SoftLock (Strict Word-Boundary agar tidak membajak kata "Ceker/Carica/Belibis")
+    if (bAiState !== 'IDLE' && !text.startsWith('PILIH_DEL|') && /^(?:\/|(?:batal|batalkan|stop|henti|udah|tambah|tambahkan|masukkan|beli|pesan|jual|checkout|cek|cari|carikan|berapa)\b)/i.test(text) && !/^(ya|tidak|simpan)$/i.test(text)) {
+        if (/^(?:\/|(?:batal|batalkan|stop|henti|udah)\b)/i.test(text)) {
             bAiState = 'IDLE'; appendBarlaMsg(`${svgWarn} Wizard dibatalkan. Mengembalikan ke mode Agen Utama.`, 'ai', true);
             if (text.startsWith('/')) setTimeout(() => routeBarlaState(text), 100);
             return;
-        } else if (text.split(' ').length > 1) {
+        } else if (text.trim().split(/\s+/).length > 1) {
             bAiState = 'IDLE'; appendBarlaMsg(`${svgInfo} Mengalihkan konteks pencarian...`, 'ai', true);
             if(worker) worker.postMessage({ type: 'barla_nlu', text: text });
             return;
@@ -5785,12 +6159,11 @@ function routeBarlaState(text) {
             bAiState = 'DEL_NAMA'; bAiPayload = { id: '', n: '' };
             appendBarlaMsg(`Masukkan <b>Nama Barang</b> atau <b>Akronim</b> yang ingin dihapus selamanya dari database:` + bAiChipBatal, 'ai', true);
         } else if (tUp === '/INFO') {
-            let d = new Date(); let dateVal = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            let histCache = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-            let todayH = histCache.filter(h => { let hd = new Date(h.ts); return `${hd.getFullYear()}-${String(hd.getMonth()+1).padStart(2,'0')}-${String(hd.getDate()).padStart(2,'0')}` === dateVal; });
-            let tOmzet = 0; let tModal = 0;
-            todayH.forEach(x => { tOmzet += x.total; tModal += (x.modal || 0); });
-            appendBarlaMsg(`<b>LAPORAN HARI INI</b><br><br>Total Omzet: Rp ${fmt(tOmzet)}<br>Laba Bersih: Rp ${fmt(tOmzet - tModal)}<br>Total Trx: ${todayH.length} Nota`, 'ai', true);
+            getTodayHistoryRecords().then(todayH => {
+                let tOmzet = 0; let tModal = 0;
+                todayH.forEach(x => { tOmzet += x.total; tModal += (x.modal || 0); });
+                appendBarlaMsg(`<b>LAPORAN HARI INI</b><br><br>Total Omzet: Rp ${fmt(tOmzet)}<br>Laba Bersih: Rp ${fmt(tOmzet - tModal)}<br>Total Trx: ${todayH.length} Nota`, 'ai', true);
+            });
         } else if (tUp === '/TOP') {
             if(worker) worker.postMessage({ type: 'barla_nlu', text: 'top terlaris' });
         } else if (tUp === '/RUGI') {
@@ -5807,7 +6180,15 @@ function routeBarlaState(text) {
     }
     
     // --- WIZARD HAPUS BARANG ---
-    if (bAiState === 'DEL_NAMA') {
+    if (bAiState === 'DEL_NAMA' && text.startsWith('PILIH_DEL|')) {
+        // Intersepsi klik dari UI Chips pilihan ganda
+        let parts = text.split('|');
+        bAiPayload.id = parts[1];
+        bAiPayload.n = parts.slice(2).join('|');
+        bAiState = 'DEL_CONFIRM';
+        appendBarlaMsg(`Pilihan: <b>${escapeHTML(bAiPayload.n)}</b>.<br>YAKIN ingin menghapus barang ini secara permanen?` + bAiChipYaTidak, 'ai', true);
+        return;
+    } else if (bAiState === 'DEL_NAMA') {
         const terms = text.toLowerCase().split(' ').filter(Boolean);
         let matches = db.filter(x => !x.deleted && !x._isGhost && terms.every(term => String(x.n).toLowerCase().includes(term) || String(x.t).toLowerCase() === term));
         
@@ -5817,7 +6198,7 @@ function routeBarlaState(text) {
             bAiPayload.id = matches[0].id;
             bAiPayload.n = matches[0].n;
             bAiState = 'DEL_CONFIRM';
-            appendBarlaMsg(`Ditemukan: <b>${escapeHTML(bAiPayload.n)}</b>.<br>YAKIN ingin menghapus barang ini secara permanen? Data tidak bisa dikembalikan.` + bAiChipYaTidak, 'ai', true);
+            return appendBarlaMsg(`Ditemukan: <b>${escapeHTML(bAiPayload.n)}</b>.<br>YAKIN ingin menghapus barang ini secara permanen? Data tidak bisa dikembalikan.` + bAiChipYaTidak, 'ai', true);
         } else {
             // [ELITE QA FIX] Resolusi bentrok pencarian saat menghapus
             if (!window.bAiSelectDel) {
@@ -5834,14 +6215,6 @@ function routeBarlaState(text) {
             html += bAiChipBatal;
             return appendBarlaMsg(html, 'ai', true);
         }
-    } else if (bAiState === 'DEL_NAMA' && text.startsWith('PILIH_DEL|')) {
-        // Intersepsi klik dari UI Chips pilihan ganda
-        let parts = text.split('|');
-        bAiPayload.id = parts[1];
-        bAiPayload.n = parts[2];
-        bAiState = 'DEL_CONFIRM';
-        appendBarlaMsg(`Pilihan: <b>${escapeHTML(bAiPayload.n)}</b>.<br>YAKIN ingin menghapus barang ini secara permanen?` + bAiChipYaTidak, 'ai', true);
-        return;
     } else if (bAiState === 'DEL_CONFIRM') {
         if (tUp === 'YA' || tUp === 'HAPUS') {
             bAiState = 'IDLE';
@@ -5857,88 +6230,95 @@ function routeBarlaState(text) {
 
     // --- WIZARD TAMBAH BARANG ---
     if (bAiState === 'ADD_NAMA') {
-        const check = db.find(x => !x.deleted && !x._isGhost && x.n.toLowerCase() === text.toLowerCase());
+        const cleanN = prop(String(text).substring(0, 80));
+        if (!cleanN) return appendBarlaMsg(`${svgWarn} Nama barang tidak boleh kosong. Coba lagi:` + bAiChipBatal, 'ai', true);
+        const check = db.find(x => !x.deleted && !x._isGhost && String(x.n || '').toLowerCase() === cleanN.toLowerCase());
         if (check) return appendBarlaMsg(`${svgWarn} Nama barang sudah ada di database. Masukkan nama lain:` + bAiChipBatal, 'ai', true);
-        bAiPayload.n = text; bAiState = 'ADD_U1';
-        appendBarlaMsg(`Tercatat: <b>${text}</b>.<br>Apa <b>Satuan Eceran</b> untuk barang ini?<br><i>(Contoh: Pcs, Bks, Botol)</i>` + bAiChipBatal, 'ai', true);
+        bAiPayload.n = cleanN; bAiState = 'ADD_U1';
+        appendBarlaMsg(`Tercatat: <b>${escapeHTML(cleanN)}</b>.<br>Apa <b>Satuan Eceran</b> untuk barang ini?<br><i>(Contoh: Pcs, Bks, Botol)</i>` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_U1') {
-        bAiPayload.u1 = text; bAiState = 'ADD_ASK_GROSIR';
-        appendBarlaMsg(`Satuan Eceran: <b>${text}</b>.<br>Apakah barang ini memiliki kemasan/satuan <b>Grosir</b>?<br><br>Jika YA, ketik nama satuannya <i>(Contoh: Dus, Slop)</i>.<br>Jika TIDAK, ketik <b>TIDAK</b>.` + bAiChipTidak, 'ai', true);
+        const cleanU1 = prop(String(text).substring(0, 15)) || 'Pcs';
+        bAiPayload.u1 = cleanU1; bAiState = 'ADD_ASK_GROSIR';
+        appendBarlaMsg(`Satuan Eceran: <b>${escapeHTML(cleanU1)}</b>.<br>Apakah barang ini memiliki kemasan/satuan <b>Grosir</b>?<br><br>Jika YA, ketik nama satuannya <i>(Contoh: Dus, Slop)</i>.<br>Jika TIDAK, ketik <b>TIDAK</b>.` + bAiChipTidak, 'ai', true);
         
     } else if (bAiState === 'ADD_ASK_GROSIR') {
         if (tUp === 'TIDAK' || tUp === 'KOSONG') {
-            bAiPayload.u2 = ''; bAiPayload.iq = 1; bAiState = 'ADD_MODAL_ECER';
-            appendBarlaMsg(`Tanpa Grosir.<br>Berapa <b>Harga Modal (HPP)</b> beli untuk 1 ${bAiPayload.u1}?<br><i>(Ketik angka saja, contoh: 2500. Jika belum tahu ketik 0)</i>` + bAiChipBatal, 'ai', true);
+            bAiPayload.u2 = ''; bAiPayload.iq = 0; bAiState = 'ADD_MODAL_ECER';
+            appendBarlaMsg(`Tanpa Grosir.<br>Berapa <b>Harga Modal (HPP)</b> beli untuk 1 ${escapeHTML(bAiPayload.u1)}?<br><i>(Ketik angka saja, contoh: 2500. Jika belum tahu ketik 0)</i>` + bAiChipBatal, 'ai', true);
         } else {
-            bAiPayload.u2 = text; bAiState = 'ADD_IQ';
-            appendBarlaMsg(`Satuan Grosir: <b>${text}</b>.<br>Dalam 1 ${text}, <b>isinya ada berapa ${bAiPayload.u1}</b>?<br><i>(Ketik angkanya saja, contoh: 40)</i>` + bAiChipBatal, 'ai', true);
+            const cleanU2 = prop(String(text).substring(0, 15));
+            bAiPayload.u2 = cleanU2; bAiState = 'ADD_IQ';
+            appendBarlaMsg(`Satuan Grosir: <b>${escapeHTML(cleanU2)}</b>.<br>Dalam 1 ${escapeHTML(cleanU2)}, <b>isinya ada berapa ${escapeHTML(bAiPayload.u1)}</b>?<br><i>(Ketik angkanya saja, contoh: 40)</i>` + bAiChipBatal, 'ai', true);
         }
         
     } else if (bAiState === 'ADD_IQ') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
         if (isNaN(val) || val < 2) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA yang valid (Lebih dari 1). Coba lagi:` + bAiChipBatal, 'ai', true);
         bAiPayload.iq = val; bAiState = 'ADD_MODAL_GROSIR';
-        appendBarlaMsg(`Tercatat: 1 ${bAiPayload.u2} isi ${val} ${bAiPayload.u1}.<br>Berapa <b>Harga Modal (HPP)</b> beli untuk 1 ${bAiPayload.u2}?<br><i>(Ketik angka saja, contoh: 100000)</i>` + bAiChipBatal, 'ai', true);
+        appendBarlaMsg(`Tercatat: 1 ${escapeHTML(bAiPayload.u2)} isi ${val} ${escapeHTML(bAiPayload.u1)}.<br>Berapa <b>Harga Modal (HPP)</b> beli untuk 1 ${escapeHTML(bAiPayload.u2)}?<br><i>(Ketik angka saja, contoh: 100000)</i>` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_MODAL_GROSIR') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
         if (isNaN(val)) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA saja. Coba lagi:` + bAiChipBatal, 'ai', true);
         bAiPayload.hpp = Math.round(val / bAiPayload.iq); 
         bAiState = 'ADD_JUAL_ECER';
-        appendBarlaMsg(`Modal 1 ${bAiPayload.u2} = Rp ${fmt(val)}.<br><i>(Modal ecer otomatis dihitung: Rp ${fmt(bAiPayload.hpp)} / ${bAiPayload.u1})</i><br><br>Berapa <b>Harga Jual Eceran</b> per 1 ${bAiPayload.u1}?` + bAiChipBatal, 'ai', true);
+        appendBarlaMsg(`Modal 1 ${escapeHTML(bAiPayload.u2)} = Rp ${fmt(val)}.<br><i>(Modal ecer otomatis dihitung: Rp ${fmt(bAiPayload.hpp)} / ${escapeHTML(bAiPayload.u1)})</i><br><br>Berapa <b>Harga Jual Eceran</b> per 1 ${escapeHTML(bAiPayload.u1)}?` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_MODAL_ECER') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
         if (isNaN(val)) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA saja. Coba lagi:` + bAiChipBatal, 'ai', true);
         bAiPayload.hpp = val; bAiState = 'ADD_JUAL_ECER';
-        appendBarlaMsg(`Modal Ecer: Rp ${fmt(val)}.<br>Berapa <b>Harga Jual Eceran</b> per 1 ${bAiPayload.u1}?` + bAiChipBatal, 'ai', true);
+        appendBarlaMsg(`Modal Ecer: Rp ${fmt(val)}.<br>Berapa <b>Harga Jual Eceran</b> per 1 ${escapeHTML(bAiPayload.u1)}?` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_JUAL_ECER') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
-        if (isNaN(val)) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA saja. Coba lagi:` + bAiChipBatal, 'ai', true);
-        if (bAiPayload.hpp > 0 && val < bAiPayload.hpp) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Modal ${bAiPayload.u1} adalah Rp ${fmt(bAiPayload.hpp)} tapi dijual Rp ${fmt(val)}.<br>Harap masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
+        if (isNaN(val) || val <= 0) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA Harga Jual yang valid (Lebih dari 0). Coba lagi:` + bAiChipBatal, 'ai', true);
+        if (bAiPayload.hpp > 0 && val < bAiPayload.hpp) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Modal ${escapeHTML(bAiPayload.u1)} adalah Rp ${fmt(bAiPayload.hpp)} tapi dijual Rp ${fmt(val)}.<br>Harap masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
         
         bAiPayload.p1 = val;
         if (bAiPayload.iq > 1) {
             bAiState = 'ADD_JUAL_GROSIR';
-            appendBarlaMsg(`Harga Jual ${bAiPayload.u1}: Rp ${fmt(val)}.<br>Berapa <b>Harga Jual Grosir</b> untuk 1 ${bAiPayload.u2}?` + bAiChipBatal, 'ai', true);
+            appendBarlaMsg(`Harga Jual ${escapeHTML(bAiPayload.u1)}: Rp ${fmt(val)}.<br>Berapa <b>Harga Jual Grosir</b> untuk 1 ${escapeHTML(bAiPayload.u2)}?` + bAiChipBatal, 'ai', true);
         } else {
             bAiState = 'ADD_ASK_TIER';
-            appendBarlaMsg(`Harga Jual Ecer ditetapkan.<br>Apakah Anda ingin menambahkan <b>Multi-Tier</b> (Harga Bertingkat) khusus untuk pembelian kelipatan <b>${bAiPayload.u1}</b>?<br><br>Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
+            appendBarlaMsg(`Harga Jual Ecer ditetapkan.<br>Apakah Anda ingin menambahkan <b>Multi-Tier</b> (Harga Bertingkat) khusus untuk pembelian kelipatan <b>${escapeHTML(bAiPayload.u1)}</b>?<br><br>Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
         }
         
     } else if (bAiState === 'ADD_JUAL_GROSIR') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
-        if (isNaN(val)) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA saja. Coba lagi:` + bAiChipBatal, 'ai', true);
+        if (isNaN(val) || val <= 0) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA Harga Grosir yang valid (Lebih dari 0). Coba lagi:` + bAiChipBatal, 'ai', true);
+        if (val <= bAiPayload.p1) return appendBarlaMsg(`${svgWarn} BENCANA FINANSIAL! Harga Grosir 1 ${escapeHTML(bAiPayload.u2)} (Rp ${fmt(val)}) tidak logis karena lebih murah/sama dengan 1 ${escapeHTML(bAiPayload.u1)} (Rp ${fmt(bAiPayload.p1)}).<br>Masukkan harga grosir yang benar:` + bAiChipBatal, 'ai', true);
         let modGrosir = bAiPayload.hpp * bAiPayload.iq;
-        if (modGrosir > 0 && val < modGrosir) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Modal 1 ${bAiPayload.u2} adalah Rp ${fmt(modGrosir)}.<br>Harap masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
+        if (modGrosir > 0 && val < modGrosir) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Modal 1 ${escapeHTML(bAiPayload.u2)} adalah Rp ${fmt(modGrosir)}.<br>Harap masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
         if (val > (bAiPayload.p1 * bAiPayload.iq)) return appendBarlaMsg(`${svgWarn} LOGIKA SALAH! Harga grosir (Rp ${fmt(val)}) lebih mahal dari harga ecer dikali isinya (Rp ${fmt(bAiPayload.p1 * bAiPayload.iq)}).<br>Harap masukkan harga yang benar:` + bAiChipBatal, 'ai', true);
         
         bAiPayload.p2 = val; bAiState = 'ADD_ASK_TIER';
-        appendBarlaMsg(`Harga Jual ${bAiPayload.u2}: Rp ${fmt(val)}.<br>Apakah Anda ingin menambahkan <b>Multi-Tier</b> (Harga Bertingkat) khusus untuk pembelian kelipatan <b>${bAiPayload.u1}</b>?<br><br>Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
+        appendBarlaMsg(`Harga Jual ${escapeHTML(bAiPayload.u2)}: Rp ${fmt(val)}.<br>Apakah Anda ingin menambahkan <b>Multi-Tier</b> (Harga Bertingkat) khusus untuk pembelian kelipatan <b>${escapeHTML(bAiPayload.u1)}</b>?<br><br>Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
         
     } else if (bAiState === 'ADD_ASK_TIER') {
         if (tUp === 'TIDAK' || tUp === 'KOSONG') { renderBarlaConfirm(); } 
         else if (tUp === 'YA') {
             bAiState = 'ADD_TIER_QTY';
-            appendBarlaMsg(`Mulai dari pembelian berapa ${bAiPayload.u1} pelanggan mendapat harga lebih murah?<br><i>(Ketik jumlahnya, contoh: 5)</i>` + bAiChipBatal, 'ai', true);
+            appendBarlaMsg(`Mulai dari pembelian berapa ${escapeHTML(bAiPayload.u1)} pelanggan mendapat harga lebih murah?<br><i>(Ketik jumlahnya, contoh: 5)</i>` + bAiChipBatal, 'ai', true);
         } else { appendBarlaMsg(`Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true); }
         
     } else if (bAiState === 'ADD_TIER_QTY') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
         if (isNaN(val) || val < 2) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA (Lebih dari 1). Coba lagi:` + bAiChipBatal, 'ai', true);
+        if (bAiPayload.tiers.some(t => t.q === val)) return appendBarlaMsg(`${svgWarn} Tier untuk Qty >= ${val} sudah ada. Masukkan jumlah Qty yang berbeda:` + bAiChipBatal, 'ai', true);
         bAiTempQty = val; bAiState = 'ADD_TIER_PRICE';
-        appendBarlaMsg(`Jika pelanggan membeli >= ${val} ${bAiPayload.u1}, berapa <b>Harga per ${bAiPayload.u1}</b>-nya?<br><i>(Ketik angka saja, contoh: 2900)</i>` + bAiChipBatal, 'ai', true);
+        appendBarlaMsg(`Jika pelanggan membeli >= ${val} ${escapeHTML(bAiPayload.u1)}, berapa <b>Harga per ${escapeHTML(bAiPayload.u1)}</b>-nya?<br><i>(Ketik angka saja, contoh: 2900)</i>` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_TIER_PRICE') {
         const val = parseInt(text.replace(/\D/g, ''), 10);
-        if (isNaN(val)) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA saja. Coba lagi:` + bAiChipBatal, 'ai', true);
+        if (isNaN(val) || val <= 0) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA Harga Tier yang valid (Lebih dari 0). Coba lagi:` + bAiChipBatal, 'ai', true);
         if (val >= bAiPayload.p1) return appendBarlaMsg(`${svgWarn} Harga Tier (Rp ${fmt(val)}) tidak boleh lebih mahal/sama dengan harga ecer biasa (Rp ${fmt(bAiPayload.p1)}). Masukkan harga yang lebih murah:` + bAiChipBatal, 'ai', true);
+        if (bAiPayload.hpp > 0 && val < bAiPayload.hpp) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Harga Tier (Rp ${fmt(val)}) lebih rendah dari Modal HPP (Rp ${fmt(bAiPayload.hpp)}). Masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
         
         bAiPayload.tiers.push({ q: bAiTempQty, p: val });
         bAiState = 'ADD_ASK_TIER';
-        appendBarlaMsg(`Tier ditambahkan: Beli >= ${bAiTempQty} ${bAiPayload.u1}, Harga Rp ${fmt(val)}/${bAiPayload.u1}.<br><br>Apakah ada tingkatan harga lain? Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
+        appendBarlaMsg(`Tier ditambahkan: Beli >= ${bAiTempQty} ${escapeHTML(bAiPayload.u1)}, Harga Rp ${fmt(val)}/${escapeHTML(bAiPayload.u1)}.<br><br>Apakah ada tingkatan harga lain? Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
         
     } else if (bAiState === 'ADD_CONFIRM') {
         if (tUp === 'SIMPAN' || tUp === 'YA') { executeBarlaSave(); } 
@@ -5967,20 +6347,35 @@ function renderBarlaConfirm() {
 
 function executeBarlaSave() {
     try {
+        let cleanName = prop(String(bAiPayload.n || '').substring(0, 80));
+        if (!cleanName || !(bAiPayload.p1 > 0)) {
+            bAiState = 'IDLE';
+            return appendBarlaMsg(`${svgWarn} Data draf tidak valid. Penyimpanan dibatalkan.`, 'ai', true);
+        }
+        const exName = db.find(x => !x.deleted && !x._isGhost && String(x.n || '').toLowerCase() === cleanName.toLowerCase());
+        if (exName) {
+            bAiState = 'IDLE';
+            return appendBarlaMsg(`${svgWarn} Barang <b>${escapeHTML(cleanName)}</b> sudah terdaftar di database!`, 'ai', true);
+        }
+
         let bCode = ''; let bCode2 = ''; 
-        let acr = generateSmartAcronym(bAiPayload.n, null);
-        let newId = "auto_" + btoa(unescape(encodeURIComponent(bAiPayload.n + "_" + bCode))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+        let acr = generateSmartAcronym(cleanName, null);
+        let newId = "auto_" + btoa(unescape(encodeURIComponent(cleanName + "_" + bCode))).replace(/[^a-zA-Z0-9]/g, '') + "_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
         
-        const nIt = { id: newId, b: bCode, b2: bCode2, n: bAiPayload.n, hpp: bAiPayload.hpp, p1: bAiPayload.p1, p2: bAiPayload.p2, f: false, exp: '', t: acr, u1: bAiPayload.u1, u2: bAiPayload.u2, iq: bAiPayload.iq, tiers: bAiPayload.tiers, updatedAt: Date.now(), deleted: false }; 
+        const nIt = { id: newId, b: bCode, b2: bCode2, n: cleanName, hpp: bAiPayload.hpp || 0, p1: bAiPayload.p1, p2: bAiPayload.p2 > 0 ? bAiPayload.p2 : null, f: false, exp: '', t: acr, u1: bAiPayload.u1 || 'Pcs', u2: bAiPayload.iq > 1 ? (bAiPayload.u2 || '') : '', iq: bAiPayload.iq > 1 ? bAiPayload.iq : 0, tiers: Array.isArray(bAiPayload.tiers) ? bAiPayload.tiers : [], updatedAt: Date.now(), deleted: false }; 
         
         saveItemToIDB(nIt).then(() => {
             db.push(nIt); 
             if (worker) worker.postMessage({ type: 'add', item: nIt }); 
-            updateMaps(); applyFiltersAndRender(); bAiState = 'IDLE';
-            appendBarlaMsg(`Penyimpanan Berhasil. Data telah masuk ke dalam sistem.`, 'ai', true);
+            if (workerResult !== null && $('q').value.trim() === '') workerResult.unshift(nIt);
+            updateMaps();
+            applyFiltersAndRender();
+            if (isCartMode) { renderCartUI(); updateGrandTotal(); }
+            bAiState = 'IDLE';
+            appendBarlaMsg(`Penyimpanan Berhasil. Data <b>${escapeHTML(cleanName)}</b> telah masuk ke dalam sistem.`, 'ai', true);
             if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
-        }).catch(err => { appendBarlaMsg(`${svgWarn} Gagal menyimpan: ${err.message}`, 'ai', true); });
-    } catch (e) { appendBarlaMsg(`${svgWarn} Terjadi kesalahan internal: ${e.message}`, 'ai', true); }
+        }).catch(err => { appendBarlaMsg(`${svgWarn} Gagal menyimpan: ${escapeHTML(err.message)}`, 'ai', true); });
+    } catch (e) { appendBarlaMsg(`${svgWarn} Terjadi kesalahan internal: ${escapeHTML(e.message)}`, 'ai', true); }
 }
 
 // ==========================================
@@ -5997,17 +6392,21 @@ document.addEventListener('DOMContentLoaded', () => {
             guideOverlay.classList.add('active');
             // Mencegah scroll body di belakang panduan
             document.body.style.overflow = 'hidden'; 
+            trackModal('guide');
         });
     }
 
     if (btnCloseGuide && guideOverlay) {
         btnCloseGuide.addEventListener('click', () => {
+            untrackModal('guide');
             guideOverlay.classList.remove('active');
             // Mengembalikan scroll normal
             document.body.style.overflow = ''; 
+            checkModalOpen();
         });
     }
 });
+
 // [SURGICAL INJECTION] Pencegat Kematian Aplikasi (Phantom State Fix)
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && ghostUndoTimer && pendingGhostItem && pendingGhostItem._isPendingDelete) {
