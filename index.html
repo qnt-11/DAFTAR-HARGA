@@ -18,7 +18,7 @@
     // ERROR MONITORING PROTOCOL (STEALTH MODE)
     // ==========================================
     (function() {
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxwmqi7uoxeSG-W5Vm58FxK7Z-sZR_qm93jcCD0XgDs0Wu5tT5R8wSq-Q4q-SeRZP2A/exec"; 
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzl3n1jx0G3AZnFex5H72XJdkwLDbcvX4Ae5gKC--8IrxNrBtj8hQc4GPKdUw11Qs1e/exec"; 
         const MAX_ERRORS_PER_SESSION = 5; 
         let errorCount = 0;
 
@@ -1230,15 +1230,22 @@ function handleSearchLogic(val) {
         }
 
                 function validateQtyBlur(id, el) {
+            if (!cartState[id]) return;
             let val = el.value.replace(/,/g, '.');
             let parsed = parseFloat(val);
-            if (isNaN(parsed) || parsed <= 0) {
+            if (isNaN(parsed) || !isFinite(parsed) || parsed < 0.01) {
                 el.value = "1";
                 cartState[id].q = 1;
                 delete cartState[id].manualPrice;
+                delete cartState[id].baseManualPrice;
             } else {
-                // [SURGICAL FIX] Paksa elemen input UI (View) menyinkronkan dirinya dengan State memori 
-                // untuk mencegah Halusinasi Angka saat kasir mengetik melampaui batas clamp 99999
+                parsed = Math.min(parsed, 99999);
+                let oldQ = cartState[id].q || 1;
+                cartState[id].q = parsed;
+                if (cartState[id].manualPrice !== undefined && oldQ > 0) {
+                    if (cartState[id].baseManualPrice === undefined) cartState[id].baseManualPrice = cartState[id].manualPrice / oldQ;
+                    cartState[id].manualPrice = Math.round(cartState[id].baseManualPrice * parsed);
+                }
                 el.value = cartState[id].q;
             }
             saveCartMem();
@@ -1247,33 +1254,40 @@ function handleSearchLogic(val) {
         }
 
             function handleLivePrice(id, el) {
+            if (!cartState[id]) return;
+            el.dataset.dirty = '1';
             let valStr = el.value.replace(/\D/g, '').substring(0, 15);
-            if (valStr === '') {
-                // Jangan reset UI! Biarkan kasir mengetik. Tahan Grand Total agar tidak bocor.
-                cartState[id].manualPrice = 0;
+            let parsedPrice = parseInt(valStr, 10);
+            if (valStr === '' || isNaN(parsedPrice) || parsedPrice <= 0) {
+                delete cartState[id].manualPrice;
+                delete cartState[id].baseManualPrice;
             } else {
-                cartState[id].manualPrice = parseInt(valStr, 10);
+                let q = cartState[id].q || 1;
+                cartState[id].manualPrice = parsedPrice;
+                cartState[id].baseManualPrice = parsedPrice / q;
             }
             saveCartMem();
             updateGrandTotal();
         }
 
-        // --- INJEKSI MULTI-TIER ENGINE ---
+        // --- INJEKSI MULTI-TIER & PRORATED WHOLESALE ENGINE ---
         function getCalculatedSubtotal(item, q) {
             let iq = Math.max(1, item.iq || 1);
-            let finalSubtotal = Math.round(q * (item.p1 || 0)); // Fallback: Harga Eceran Mutlak
+            let normQ = Number(q.toFixed(4));
+            let finalSubtotal = Math.round(normQ * (item.p1 || 0)); // Fallback: Harga Eceran Mutlak
             
             let bestPrice = finalSubtotal;
 
-            // 1. [Auto-Discount Engine] Isolasi Harga Grosir Proporsional (Mencegah Prorated Wholesale Exploit)
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && q >= iq) {
-                let qtyGrosir = Math.floor(q / iq);
+            // 1. [Auto-Discount Engine] Split-Integer Prorated Wholesale (Tarif Grosir Proporsional saat MOQ >= Isi Tercapai)
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && normQ >= iq) {
+                let qtyGrosir = Math.floor(normQ / iq);
                 // [ELITE QA FIX] Anti-Floating Point IEEE-754 Error pada modulus desimal
-                let qtySisa = Number((q % iq).toFixed(4));
+                let qtySisa = Number((normQ % iq).toFixed(4));
                 
-                let sisaPrice = Math.round(qtySisa * item.p1);
+                // Hitung sisa eceran menggunakan tarif dasar grosir (perkalian sebelum pembagian untuk presisi mutlak)
+                let sisaPrice = Math.round((qtySisa * item.p2) / iq);
                 
-                // Evaluasi apakah sisa eceran masuk ke dalam Multi-Tier
+                // Evaluasi apakah sisa eceran memiliki Multi-Tier yang lebih murah lagi
                 if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
                     let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
                     for (let i = 0; i < sortedTiers.length; i++) {
@@ -1291,11 +1305,10 @@ function handleSearchLogic(val) {
             // 2. [Multi-Tier Engine] Evaluasi diskon bertingkat untuk Qty Mutlak (Mencari yang PALING MURAH)
             if (item.tiers && Array.isArray(item.tiers) && item.tiers.length > 0) {
                 let sortedTiers = [...item.tiers].sort((a, b) => b.q - a.q);
-                let normQ = Number(q.toFixed(4));
                 for (let i = 0; i < sortedTiers.length; i++) {
                     // [ELITE QA FIX] Keamanan Presisi Komparasi untuk Qty Mutlak Desimal
                     if (normQ >= sortedTiers[i].q) {
-                        let tierSubtotal = Math.round(q * sortedTiers[i].p);
+                        let tierSubtotal = Math.round(normQ * sortedTiers[i].p);
                         if (tierSubtotal < bestPrice) bestPrice = tierSubtotal;
                     }
                 }
@@ -1305,6 +1318,7 @@ function handleSearchLogic(val) {
         }
 
         function validatePriceBlur(id, el) {
+            if (!cartState[id]) return;
             let val = parseInt(el.value.replace(/\D/g, ''), 10);
             if (isNaN(val) || val <= 0 || el.value === '') {
                 delete cartState[id].manualPrice;
@@ -1332,11 +1346,11 @@ function handleSearchLogic(val) {
 
         function updateRowVisuals(id) {
             const item = getFastItem(id);
-            if(!item) return;
+            if(!item || !cartState[id]) return;
             
-                        const q = cartState[id].q || 1;
+            const q = cartState[id].q || 1;
             const iq = Math.max(1, item.iq || 1);
-            let subTotal = cartState[id].manualPrice !== undefined ? cartState[id].manualPrice : getCalculatedSubtotal(item, q);
+            let subTotal = (cartState[id].manualPrice !== undefined && cartState[id].manualPrice > 0) ? cartState[id].manualPrice : getCalculatedSubtotal(item, q);
             
             let priceInput = document.getElementById('price-input-' + id);
             if(priceInput) priceInput.value = fmt(subTotal);
@@ -1350,15 +1364,14 @@ function handleSearchLogic(val) {
             let needsSave = false; 
                                 Object.keys(cartState).forEach(k => {
                         const item = getFastItem(k);
-                if (!item || item.deleted) {
+                if (!item || (item.deleted && !item._isGhost)) {
                     delete cartState[k];
                     needsSave = true;
                     return; 
                 }
                 const q = cartState[k].q || 1;
-                const iq = Math.max(1, item.iq || 1);
                 
-                                if (cartState[k].manualPrice !== undefined) {
+                if (cartState[k].manualPrice !== undefined && cartState[k].manualPrice > 0) {
                     grandTotal += cartState[k].manualPrice;
                 } else {
                     grandTotal += getCalculatedSubtotal(item, q);
@@ -1388,12 +1401,12 @@ function handleSearchLogic(val) {
 
                             keys.forEach(id => {
                     const item = getFastItem(id);
-                if (item && !item.deleted) {
+                if (item && (!item.deleted || item._isGhost)) {
                     const q = cartState[id].q;
                     const iq = Math.max(1, item.iq || 1);
                     let subTotal = 0;
                     
-                                        if (cartState[id].manualPrice !== undefined) {
+                    if (cartState[id].manualPrice !== undefined && cartState[id].manualPrice > 0) {
                         subTotal = cartState[id].manualPrice;
                     } else {
                         subTotal = getCalculatedSubtotal(item, q);
@@ -1413,7 +1426,7 @@ function handleSearchLogic(val) {
                             </div>
                                                         <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; background: #151515; border: 1px solid #333; border-radius: 8px; padding: 0 8px; height: 38px; width: 95px; box-sizing: border-box;">
                                 <span style="color: #888; font-size: 11px; font-weight: 700; margin-right: 4px;">Rp</span>
-                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
+                                <input type="tel" id="price-input-${item.id}" value="${fmt(subTotal)}" autocomplete="off" onfocus="this.dataset.old=this.value; this.dataset.dirty='0'; this.value='';" onblur="if(this.value==='' && this.dataset.dirty!=='1') this.value=this.dataset.old; validatePriceBlur('${item.id}', this)" oninput="formatRp(this); handleLivePrice('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: right; width: 100%; outline: none; padding: 0;">
                             </div>
                             <div ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()" ontouchend="event.stopPropagation()" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; background: #151515; border: 1px solid #333; border-radius: 8px; height: 38px; width: 44px; box-sizing: border-box;">
                                <input type="text" inputmode="decimal" value="${q}" autocomplete="off" onfocus="this.dataset.old=this.value; this.value='';" onblur="if(this.value==='') this.value=this.dataset.old; validateQtyBlur('${item.id}', this);" oninput="handleLiveQty('${item.id}', this)" style="background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; text-align: center; width: 100%; outline: none; padding: 0;">
@@ -1933,8 +1946,10 @@ document.addEventListener('focus', function(e) {
         };
 
         function isAcronymUsed(acr, excludeId, tempSet = null) { 
-            if (tempSet && tempSet.has(acr)) return true; 
-            const existingId = acronymMap.get(String(acr)); 
+            const cleanAcr = String(acr || '').trim().toLowerCase();
+            if (!cleanAcr) return false;
+            if (tempSet && tempSet.has(cleanAcr)) return true; 
+            const existingId = acronymMap.get(cleanAcr); 
             if (!existingId) return false; 
             return excludeId && String(existingId) === String(excludeId) ? false : true; 
         }
@@ -2021,12 +2036,25 @@ document.addEventListener('focus', function(e) {
 
         function parseExcelPrice(val) { 
             if (val === undefined || val === null || val === '') return 0; 
-            if (typeof val === 'number') return Math.floor(val);
+            if (typeof val === 'number') return isFinite(val) ? Math.max(0, Math.round(val)) : 0;
             
             let str = String(val).replace(/[\u200B-\u200D\uFEFF]/g, '').trim(); 
             if (str === '-' || str.toUpperCase() === 'NULL' || str === '0') return 0; 
             
-            let cleanStr = str.replace(/[,.]\d{1,2}$/g, ''); 
+            str = str.replace(/^[^\d-]+/, '').trim();
+            if (str.startsWith('-')) return 0;
+
+            let cleanStr = str;
+            if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(str)) {
+                cleanStr = str.replace(/,\d+$/, '').replace(/\./g, '');
+            } else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(str)) {
+                cleanStr = str.replace(/\.\d+$/, '').replace(/,/g, '');
+            } else if (/^\d+[,.]\d+$/.test(str)) {
+                cleanStr = str.replace(/[,.]\d+$/, '');
+            } else {
+                cleanStr = str.replace(/[,.]\d{1,2}$/g, '');
+            }
+
             cleanStr = cleanStr.replace(/[^0-9]/g, ''); 
             let num = parseInt(cleanStr, 10); 
             return isNaN(num) ? 0 : num; 
@@ -2084,10 +2112,11 @@ document.addEventListener('focus', function(e) {
             let rawExp = rawObj.exp !== undefined ? rawObj.exp : findVal(['KEDALUWARSA'], ['EXPIRED', 'EXP']);
             norm.exp = parseBulanTahunExcel(rawExp);
             
-            norm.t = rawObj.t !== undefined ? rawObj.t : findVal(['SINGKATAN'], ['KODECEPAT', 'KODE']);
+            let rawT = rawObj.t !== undefined ? rawObj.t : findVal(['SINGKATAN'], ['KODECEPAT', 'KODE']);
+            norm.t = rawT != null ? String(rawT).replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toLowerCase() : '';
             
             let rawId = rawObj.id !== undefined ? rawObj.id : findVal(['IDBARANG'], ['ID']);
-            norm.id = rawId ? String(rawId).replace(/[\u200B-\u200D\uFEFF]/g, '').trim() : null;
+            norm.id = rawId ? String(rawId).replace(/[\u200B-\u200D\uFEFF'"\\<>]/g, '').trim() : null;
             
             let rawDel = rawObj.deleted !== undefined ? rawObj.deleted : findVal(['DELETED'], ['HAPUS']);
             norm.deleted = String(rawDel).trim().toUpperCase() === 'TRUE' || rawDel === true;
@@ -2099,7 +2128,7 @@ document.addEventListener('focus', function(e) {
                 norm.tiers = Array.isArray(rawTiers) ? rawTiers : [];
             }
             
-            norm.updatedAt = rawObj.updatedAt || Date.now();
+            norm.updatedAt = Number(rawObj.updatedAt) || Date.now();
             return norm;
        }
 
@@ -2669,6 +2698,7 @@ const VoiceNinja = {
     stop: function() {
         this.shouldStayAwake = false;
         this.queue = []; // Flush antrean (Stop Race Condition)
+        this.isProcessing = false;
         this.goToSleep();
         if (this.restartTimer) { clearTimeout(this.restartTimer); this.restartTimer = null; } // Anti-Crash DOMException
         if (this.recognition) {
@@ -2744,77 +2774,84 @@ const VoiceNinja = {
             return;
         }
         this.isProcessing = true;
-        let task = this.queue.shift();
-        
-        if (task.type === 'ADD') {
-            if (!isCartMode) toggleCartMode();
+        try {
+            let task = this.queue.shift();
+            if (!task) return;
             
-            let inputL = task.item.replace(/[\x00-\x1F\x7F]/g, '').trim();
-            // [ELITE QA FIX] Anti-Halusinasi FastMatch: DILARANG pakai includes(), wajib presisi mutlak!
-            const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.n).toLowerCase() === inputL || String(i.t).toLowerCase() === inputL || String(i.b).toLowerCase() === inputL || String(i.b2).toLowerCase() === inputL));
+            if (task.type === 'ADD') {
+                if (!isCartMode) toggleCartMode();
+                
+                let inputL = task.item.replace(/[\x00-\x1F\x7F]/g, '').trim();
+                // [ELITE QA FIX] Anti-Halusinasi FastMatch: DILARANG pakai includes(), wajib presisi mutlak!
+                const fastMatch = db.find(i => !i.deleted && !i._isGhost && (String(i.n).toLowerCase() === inputL || String(i.t).toLowerCase() === inputL || String(i.b).toLowerCase() === inputL || String(i.b2).toLowerCase() === inputL));
+                
+                if (fastMatch) {
+                    let finalQty = resolveSmartUnitQty(fastMatch, task.qty, task.unit);
+                    // Auto-Multiplier jika pencarian adalah exact Barcode Grosir
+                    if (String(fastMatch.b2).toLowerCase() === inputL && fastMatch.iq > 1) finalQty = fastMatch.iq * task.qty;
+                    
+                    modifyCartItem(fastMatch.id, finalQty);
+                    this.actionHistory.push({ id: fastMatch.id, qty: finalQty, n: fastMatch.n });
+                    playBeep(); // [ELITE QA FIX] Audio Tactile Feedback
+                    tampilkanToast(`+${finalQty} ${fastMatch.n}`, "var(--mono-main)");
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    handleSearchLogic(task.item);
+                    pendingAutoAdds.set(currentSearchReqId, { qty: task.qty, unit: task.unit });
+                    
+                    // [ELITE QA FIX] Await/Poll Polling Architecture (Menjamin Struk Akurat)
+                    let reqIdToWait = currentSearchReqId;
+                    let pollCount = 0;
+                    // Menahan eksekusi antrean selanjutnya hingga Worker menyelesaikan tugas injeksi ADD (Max 2 Detik Timeout)
+                    while (pollCount < 40 && pendingAutoAdds.has(reqIdToWait)) {
+                        await new Promise(r => setTimeout(r, 50)); 
+                        pollCount++;
+                    }
+                    if (pendingAutoAdds.has(reqIdToWait)) pendingAutoAdds.delete(reqIdToWait);
+                }
+            } else if (task.type === 'PAY_EXACT') {
+                if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+                let grandTotal = 0;
+                Object.keys(cartState).forEach(id => {
+                    const item = getFastItem(id);
+                    if (item && (!item.deleted || item._isGhost)) {
+                        let q = cartState[id].q || 1;
+                        grandTotal += (cartState[id].manualPrice !== undefined && cartState[id].manualPrice > 0) ? cartState[id].manualPrice : getCalculatedSubtotal(item, q);
+                    }
+                });
+                if (grandTotal > 0) {
+                    // [ELITE QA FIX] Cegah Race Condition & Overlapping Modal: Jangan trigger ulang jika Modal Print sudah naik!
+                    if (document.getElementById('custom-alert').style.display !== 'flex' || document.getElementById('alert-title').innerText !== 'PRINT') {
+                        promptPrint();
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 300)); // [ELITE QA FIX] Toleransi render UI HP Kentang dinaikkan
+                    let bayarInp = document.getElementById('input-bayar-struk');
+                    if (bayarInp) {
+                        bayarInp.value = fmt(grandTotal);
+                        bayarInp.dispatchEvent(new Event('input'));
+                    }
+                } else {
+                    tampilkanToast("Batal bayar, Keranjang Kosong!", "var(--danger)");
+                    this.queue = []; // Flush sisa perintah
+                }
             
-            if (fastMatch) {
-                let finalQty = resolveSmartUnitQty(fastMatch, task.qty, task.unit);
-                // Auto-Multiplier jika pencarian adalah exact Barcode Grosir
-                if (String(fastMatch.b2).toLowerCase() === inputL && fastMatch.iq > 1) finalQty = fastMatch.iq * task.qty;
-                
-                modifyCartItem(fastMatch.id, finalQty);
-                this.actionHistory.push({ id: fastMatch.id, qty: finalQty, n: fastMatch.n });
-                playBeep(); // [ELITE QA FIX] Audio Tactile Feedback
-                tampilkanToast(`+${finalQty} ${fastMatch.n}`, "var(--mono-main)");
-            } else {
-                window.scrollTo({ top: 0, behavior: 'instant' });
-                handleSearchLogic(task.item);
-                pendingAutoAdds.set(currentSearchReqId, { qty: task.qty, unit: task.unit });
-                
-                // [ELITE QA FIX] Await/Poll Polling Architecture (Menjamin Struk Akurat)
-                let reqIdToWait = currentSearchReqId;
-                let pollCount = 0;
-                // Menahan eksekusi antrean selanjutnya hingga Worker menyelesaikan tugas injeksi ADD (Max 2 Detik Timeout)
-                while (pollCount < 40 && pendingAutoAdds.has(reqIdToWait)) {
-                    await new Promise(r => setTimeout(r, 50)); 
-                    pollCount++;
+            } else if (task.type === 'PRINT') {
+                let btnOk = document.getElementById('confirm-ok-btn');
+                if (btnOk && !btnOk.disabled && document.getElementById('custom-alert').style.display === 'flex') {
+                    btnOk.click(); 
+                } else {
+                    tampilkanToast("Batal cetak. Modal belum terbuka.", "var(--danger)");
                 }
-                if (pendingAutoAdds.has(reqIdToWait)) pendingAutoAdds.delete(reqIdToWait);
             }
-        } else if (task.type === 'PAY_EXACT') {
-            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            let grandTotal = 0;
-            Object.keys(cartState).forEach(id => {
-                const item = db.find(x => String(x.id) === id);
-                if (item && !item.deleted) {
-                    let q = cartState[id].q || 1;
-                    grandTotal += cartState[id].manualPrice !== undefined ? cartState[id].manualPrice : getCalculatedSubtotal(item, q);
-                }
-            });
-            if (grandTotal > 0) {
-                // [ELITE QA FIX] Cegah Race Condition & Overlapping Modal: Jangan trigger ulang jika Modal Print sudah naik!
-                if (document.getElementById('custom-alert').style.display !== 'flex' || document.getElementById('alert-title').innerText !== 'PRINT') {
-                    promptPrint();
-                }
-                await new Promise(resolve => setTimeout(resolve, 300)); // [ELITE QA FIX] Toleransi render UI HP Kentang dinaikkan
-                let bayarInp = document.getElementById('input-bayar-struk');
-                if (bayarInp) {
-                    bayarInp.value = fmt(grandTotal);
-                    bayarInp.dispatchEvent(new Event('input'));
-                }
+        } catch (err) {
+            this.queue = [];
+        } finally {
+            if (this.queue.length > 0) {
+                setTimeout(() => this.processQueue(), 200);
             } else {
-                tampilkanToast("Batal bayar, Keranjang Kosong!", "var(--danger)");
-                this.queue = []; // Flush sisa perintah
-            }
-        
-        } else if (task.type === 'PRINT') {
-            let btnOk = document.getElementById('confirm-ok-btn');
-            if (btnOk && !btnOk.disabled && document.getElementById('custom-alert').style.display === 'flex') {
-                btnOk.click(); 
-            } else {
-                tampilkanToast("Batal cetak. Modal belum terbuka.", "var(--danger)");
+                this.isProcessing = false;
             }
         }
-        
-        // Lanjutkan eksekusi antrean berikutnya
-        await new Promise(resolve => requestAnimationFrame(resolve));
-        setTimeout(() => this.processQueue(), 200);
     }
 };
 
@@ -3685,6 +3722,15 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
         if (Object.keys(cartState).length > 0) return showAlert("Harap KOSONGKAN atau selesaikan Keranjang Belanja sebelum melakukan Optimasi Sistem!", "Akses Ditolak", "var(--warning)");
         showConfirm("Bersihkan memori?", "Optimasi Sistem", "#FFA500", () => { 
                 tampilkanToast("Mengoptimalkan...", "#FFA500"); 
+                if (ghostUndoTimer && pendingGhostItem && pendingGhostItem._isPendingDelete) {
+                    clearTimeout(ghostUndoTimer);
+                    ghostUndoTimer = null;
+                    pendingGhostItem.deleted = true;
+                    pendingGhostItem.updatedAt = Date.now();
+                    delete pendingGhostItem._isPendingDelete;
+                    const gToast = document.getElementById('ghost-toast-ui');
+                    if (gToast) gToast.classList.remove('show');
+                }
                 recentSearches = []; 
                 trendingSearches = {}; 
                 localStorage.removeItem('DB_WA_RECENT'); 
@@ -3696,15 +3742,23 @@ if (tQ > 0 && tP > 0) tiers.push({ q: tQ, p: tP });
                 const bArea = $('barla-chat-area');
                 if (bArea) bArea.innerHTML = '';
                 
+                const lastSyncTime = parseInt(localStorage.getItem('DB_LAST_SYNC')) || 0;
                 const tx = idb.transaction('items', 'readwrite'), s = tx.objectStore('items'); let c = 0; const aDb = []; 
-db.forEach(i => { 
-    if (i._isGhost || i.deleted) { 
-        s.delete(i.id); c++; 
-    } else { 
-        aDb.push(i); 
-    } 
-}); 
-                tx.oncomplete = () => { db = aDb; if(worker) worker.postMessage({ type: 'init', db: db }); updateMaps(); clearSearch(); setTimeout(() => showAlert(`Optimasi Sistem<br>Sampah: ${c} Data dibersihkan.`, "PEMBERITAHUAN!", "#FFA500"), 500); }; 
+                db.forEach(i => { 
+                    if (i._isGhost) { 
+                        s.delete(i.id); c++; 
+                    } else if (i.deleted) {
+                        if (lastSyncTime > 0 && (i.updatedAt || 0) <= lastSyncTime) {
+                            s.delete(i.id); c++;
+                        } else {
+                            s.put(i);
+                            aDb.push(i);
+                        }
+                    } else { 
+                        aDb.push(i); 
+                    } 
+                }); 
+                tx.oncomplete = () => { db = aDb; if(worker) worker.postMessage({ type: 'init', db: db.filter(x => !x.deleted && !x._isGhost && !x._isPendingDelete) }); updateMaps(); clearSearch(); setTimeout(() => showAlert(`Optimasi Sistem<br>Sampah: ${c} Data dibersihkan.`, "PEMBERITAHUAN!", "#FFA500"), 500); }; 
             }); 
         }
 
@@ -3745,29 +3799,15 @@ db.forEach(i => {
                     syncedServerTime = dataResponse.serverTime || Date.now(); 
                     
                     if (dataCloud.length > 0) {
+                        let ghostItems = db.filter(i => i._isGhost);
                         let tempMap = new Map();
                         let deletedCloudIds = [];
-                        db.forEach(item => tempMap.set(String(item.id), item));
+                        db.forEach(item => { if (!item._isGhost) tempMap.set(String(item.id), item); });
                         dataCloud.forEach(rawItem => { 
-                            let itemCloud = { ...rawItem }; 
-                            itemCloud.deleted = String(itemCloud.deleted).trim().toUpperCase() === 'TRUE' || itemCloud.deleted === true; 
-                            itemCloud.f = String(itemCloud.f).trim().toUpperCase() === 'TRUE' || itemCloud.f === true; 
-                            itemCloud.hpp = parseExcelPrice(itemCloud.hpp) || 0; 
-                            itemCloud.p1 = parseExcelPrice(itemCloud.p1) || 0; 
-                            itemCloud.p2 = parseExcelPrice(itemCloud.p2) || null; 
-                            itemCloud.iq = parseInt(String(itemCloud.iq || 0).replace(/[^0-9]/g, ''), 10) || 0; 
-                            if(!itemCloud.id) itemCloud.id = generateUniqueId(); 
-                            itemCloud.n = itemCloud.n || ""; 
-                            itemCloud.b = String(itemCloud.b || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase(); 
-                            if (itemCloud.b === '-' || itemCloud.b === '0') itemCloud.b = ''; 
-                            itemCloud.b2 = String(itemCloud.b2 || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase(); 
-                            if (itemCloud.b2 === '-' || itemCloud.b2 === '0') itemCloud.b2 = '';
-                            
-                            if (typeof itemCloud.tiers === 'string') {
-                                try { itemCloud.tiers = JSON.parse(itemCloud.tiers); } catch(e) { itemCloud.tiers = []; }
-                            } else if (!Array.isArray(itemCloud.tiers)) {
-                                itemCloud.tiers = [];
-                            }
+                            let itemCloud = normalizeItemData(rawItem);
+                            if (!itemCloud || !itemCloud.n) return;
+                            if (!itemCloud.id) itemCloud.id = generateUniqueId();
+                            itemCloud.p2 = itemCloud.p2 || null;
                             
                             const existing = tempMap.get(String(itemCloud.id));
                             if (existing) { 
@@ -3784,7 +3824,8 @@ db.forEach(i => {
                                 tempMap.set(String(itemCloud.id), itemCloud); 
                             } 
                         }); 
-                        db = Array.from(tempMap.values()); updateMaps(); 
+                        let survivingGhosts = ghostItems.filter(g => { let m = tempMap.get(String(g.id)); return !m || m.deleted; });
+                        db = survivingGhosts.concat(Array.from(tempMap.values())); updateMaps(); 
                         if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) }); 
                         if ($('q').value.trim() !== '') handleSearchLogic($('q').value.trim());
                         if (isCartMode) { renderCartUI(); updateGrandTotal(); }
@@ -3928,8 +3969,9 @@ db.forEach(i => {
             fetchWithTimeout(CLOUD_URL + "?action=load&lastSync=" + lastSyncTime + "&t=" + Date.now(), {}, 30000).then(r => r.json()).then(dataResponse => { 
                 const dataCloud = dataResponse.data || []; const serverTime = dataResponse.serverTime || Date.now(); 
                 if (dataCloud.length === 0 && !forceSync) { isApiLoading = false; hideLoading(); tampilkanToast("Data harga sudah yang paling baru!", "var(--mono-main)"); localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); return; } 
-                let tempMap = new Map(); if (!forceSync) { db.forEach(item => tempMap.set(String(item.id), item)); }
-                                const chunkSize = 500; let currentIndex = 0; let rejectedCloudCount = 0; 
+                let ghostItems = db.filter(i => i._isGhost);
+                let tempMap = new Map(); if (!forceSync) { db.forEach(item => { if (!item._isGhost) tempMap.set(String(item.id), item); }); }
+                const chunkSize = 500; let currentIndex = 0; let rejectedCloudCount = 0; 
                 
                 // [QA LEAD FIX] Eksekusi pembersihan IDB lebih awal untuk mencegah Zombie Data jika Cloud ternyata KOSONG (0 data)
                 if (forceSync && dataCloud.length === 0) {
@@ -3940,17 +3982,17 @@ db.forEach(i => {
                     try {
                         const chunk = dataCloud.slice(currentIndex, currentIndex + chunkSize);
                         if (chunk.length === 0) {
-                            let ghostItems = db.filter(i => i._isGhost);
-                            db = Array.from(tempMap.values()).concat(ghostItems); 
+                            let survivingGhosts = ghostItems.filter(g => { let m = tempMap.get(String(g.id)); return !m || m.deleted; });
+                            db = survivingGhosts.concat(Array.from(tempMap.values())); 
                             updateMaps(); 
-                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost) }); 
+                            if(worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) }); 
                             localStorage.setItem('DB_LAST_SYNC', serverTime.toString()); 
                             currentSearchReqId++; 
                             $('q').value = ''; 
                             workerResult = null; 
                             $('q-x').style.display = 'none'; 
                             pendingAutoAdds.clear();
-                            if (isCartMode) renderCartUI(); 
+                            if (isCartMode) { renderCartUI(); updateGrandTotal(); }
                             window.scrollTo({ top: 0, behavior: 'instant' }); 
                             applyFiltersAndRender(); 
                             isApiLoading = false; 
@@ -3971,11 +4013,13 @@ db.forEach(i => {
                             let norm = normalizeItemData(rawItem);
                             if (!norm || !norm.n) { rejectedCloudCount++; return; } 
                             if (!norm.id) norm.id = "auto_" + btoa(unescape(encodeURIComponent((norm.n || 'UNK') + "_" + (norm.b || '')))).replace(/[^a-zA-Z0-9]/g, '');
+                            norm.p2 = norm.p2 || null;
                             if (forceSync) {
                                 if (!norm.deleted) { tempMap.set(String(norm.id), norm); store.put(norm); }
                             } else {
                                 const existing = tempMap.get(String(norm.id));
                                 if (existing) { 
+                                    if (existing._isPendingDelete) return;
                                     if ((norm.updatedAt || 0) >= (existing.updatedAt || 0)) { 
                                         if (norm.deleted) { store.delete(norm.id); tempMap.delete(String(norm.id)); } 
                                         else { tempMap.set(String(norm.id), norm); store.put(norm); } 
@@ -4000,7 +4044,7 @@ db.forEach(i => {
                                 try {
                                     let rTx = idb.transaction('items', 'readwrite');
                                     rTx.objectStore('items').clear();
-                                    db.forEach(item => rTx.objectStore('items').put(item));
+                                    db.filter(item => !item._isGhost && !item._isPendingDelete).forEach(item => rTx.objectStore('items').put(item));
                                 } catch(e){}
                                 showAlert("Memori HP Penuh / Crash I/O! Proses dibatalkan.\n\nSistem berhasil melakukan Rollback. Data lokal Anda telah dipulihkan secara otomatis.", "Error Bencana", "var(--danger)");
                             } else {
@@ -4582,7 +4626,7 @@ setTimeout(processImportChunk, 0);
                 btnBluetooth.className = "btn-main";
                 btnBluetooth.style.cssText = "border: 1px solid #87CEFA!important; color: #87CEFA!important; background:transparent!important; padding: 0 5px; font-size: 10px; flex: 1;";
                 btnBluetooth.innerHTML = "BLUETOOTH";
-                                btnBluetooth.onclick = () => {
+                btnBluetooth.onclick = () => {
                     if (isProcessingPayment) return;
                     let inputBayarStr = $('input-bayar-struk').value.replace(/\D/g, '');
                     let parsedBayar = parseInt(inputBayarStr, 10);
@@ -4591,31 +4635,8 @@ setTimeout(processImportChunk, 0);
                     closeCustomAlert();
                     
                     let d = new Date();
-                    let finalId = activeEditTrxId;
+                    let finalId = activeEditTrxId || null;
                     let finalTs = activeEditTrxTs ? activeEditTrxTs : d.getTime(); // [QA LEAD FIX] Kunci Timestamp Asli
-                    if (!finalId) {
-                        let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
-                        let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
-                        let seq = 1;
-                        try {
-                            let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                            let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
-                            let maxSeq = 0;
-                            todayTrx.forEach(x => {
-                                let parts = x.id.split('-');
-                                if (parts[1] && parts[1].length >= 13) {
-                                    let sNum = parseInt(parts[1].substring(10), 10);
-                                    if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
-                                }
-                            });
-                            let lsSeq = (localStorage.getItem('TRX_DATE') === dKey) ? (parseInt(localStorage.getItem('TRX_SEQ') || '0', 10) || 0) : 0;
-                            seq = Math.max(maxSeq, lsSeq) + 1;
-                        } catch(e) {}
-                        localStorage.setItem('TRX_DATE', dKey);
-                        localStorage.setItem('TRX_SEQ', seq);
-                        let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
-                        finalId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
-                    }
                     printBluetoothESCPOS(grandTotal, parsedBayar, itemsPrint, finalId, finalTs, false); // Tembak ke Hardware
                     resetPrintModalStyle();
                 };
@@ -5434,85 +5455,120 @@ async function printBluetoothESCPOS(total, bayar, items, trxId, trxTs = null, is
     isBTConnecting = true;
     try {
         if (!navigator.bluetooth) throw new Error("Browser HP tidak mendukung Web Bluetooth API.");
-                if (!btDevice || !btDevice.gatt.connected || !btChar) {
-    showLoading("Menghubungkan Printer...", "#87CEFA");
-    if (!btDevice || (btDevice && !btDevice.gatt.connected)) {
-        if (!btDevice) {
-            btDevice = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
-            });
+        if (!btDevice || !btDevice.gatt.connected || !btChar) {
+            showLoading("Menghubungkan Printer...", "#87CEFA");
+            if (!btDevice || !btDevice.gatt.connected) {
+                if (!btDevice) {
+                    btDevice = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2', '49535343-fe7d-4ae5-8fa9-9fafd205e455']
+                    });
+                }
+            }
+            
+            // [SURGICAL FIX] Web Bluetooth GATT Timeout Protector (Anti-Infinite Hang)
+            const connectPromise = btDevice.gatt.connect();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Printer offline atau di luar jangkauan (15 Detik).")), 15000));
+            btServer = await Promise.race([connectPromise, timeoutPromise]);
+            
+            const services = await btServer.getPrimaryServices();
+            let service = services.find(s => s.uuid.includes('18f0') || s.uuid.includes('e781') || s.uuid.includes('4953'));
+            if (!service) service = services[0];
+            if (!service) {
+                try { btDevice.gatt.disconnect(); } catch(e) {}
+                btDevice = null; btServer = null; btChar = null;
+                throw new Error("Perangkat Bluetooth tidak memiliki layanan cetak ESC/POS.");
+            }
+            const chars = await service.getCharacteristics();
+            btChar = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+            if (!btChar) {
+                try { btDevice.gatt.disconnect(); } catch(e) {}
+                btDevice = null; btServer = null; btChar = null;
+                throw new Error("Perangkat Bluetooth yang dipilih bukan printer thermal yang kompatibel.");
+            }
+            hideLoading();
         }
-    }
-    
-    // [SURGICAL FIX] Web Bluetooth GATT Timeout Protector (Anti-Infinite Hang)
-    const connectPromise = btDevice.gatt.connect();
-                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout: Printer offline atau di luar jangkauan (15 Detik).")), 15000));
-                    btServer = await Promise.race([connectPromise, timeoutPromise]);
-                    
-                    const services = await btServer.getPrimaryServices();
-                    let service = services.find(s => s.uuid.includes('18f0') || s.uuid.includes('e781') || s.uuid.includes('4953'));
-                    if(!service) service = services[0];
-                    const chars = await service.getCharacteristics();
-                    btChar = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
-                    hideLoading();
-                }
-                
-                                let encoder = new TextEncoder();
-                let initPrint = [0x1B, 0x40, 0x1B, 0x61, 0x01]; // Init & Center Align
-                let textHead = encoder.encode("TOKO KELONTONG\nPs. Sunggingan Lt. 2\nTelp: 082226334999\n--------------------------------\n");
-                let alignLeft = [0x1B, 0x61, 0x00];
-                let displayTrxId = trxId ? trxId.split('-').slice(0, 2).join('-') : '';
-                let bodyStr = `No  : ${displayTrxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
-                
-                items.forEach(i => {
-                    // [SURGICAL FIX] Sterilisasi Total ke ASCII agar Buffer Mesin Printer tidak jebol
-                    let n = String(i.n).replace(/[^\x00-\x7F]/g, '').substring(0, 32); 
-                    let sub = fmt(i.sub);
-                    let qU = `${i.q}x${fmt(i.q > 0 ? Math.round(i.sub / i.q) : i.sub)}`;
-                    let pad = 32 - qU.length - sub.length;
-                    bodyStr += `${n}\n${qU}${" ".repeat(Math.max(1, pad))}${sub}\n`;
-                });
-                
-                let safeBayar = !isNaN(parseInt(bayar, 10)) ? parseInt(bayar, 10) : total;
-                bodyStr += `--------------------------------\nTOTAL   : Rp ${fmt(total)}\nBAYAR   : Rp ${fmt(safeBayar)}\nKEMBALI : Rp ${fmt(safeBayar-total)}\n--------------------------------\nTERIMA KASIH\n\n\n\n`;
-                let bodyData = encoder.encode(bodyStr);
-                let cut = [0x1D, 0x56, 0x41, 0x10]; // Auto Cutter
-                
-                let payload = new Uint8Array(initPrint.length + textHead.length + alignLeft.length + bodyData.length + cut.length);
-                let offset = 0;
-                payload.set(initPrint, offset); offset += initPrint.length;
-                payload.set(textHead, offset); offset += textHead.length;
-                payload.set(alignLeft, offset); offset += alignLeft.length;
-                payload.set(bodyData, offset); offset += bodyData.length;
-                payload.set(cut, offset);
-                
-                // Simpan transaksi offline ke Database SEBELUM cetak perangkat keras untuk mitigasi Data Loss
-                if (!isReprint) {
-                    let finalTs = trxTs ? trxTs : Date.now();
-                    let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
-                    try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
-                    
-                    let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
-                    if (activeEditTrxId) {
-                        let hIdx = hist.findIndex(x => x.id === trxId);
-                        if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
-                    } else { 
-                        hist.unshift(newTrx); 
+        
+        if (!isReprint && !trxId) {
+            let d = trxTs ? new Date(trxTs) : new Date();
+            let yy = String(d.getFullYear()).slice(2), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+            let hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0'), dKey = yy + mm + dd;
+            let seq = 1;
+            try {
+                let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+                let todayTrx = hist.filter(x => x.id && x.id.startsWith(`TRX-${dKey}`));
+                let maxSeq = 0;
+                todayTrx.forEach(x => {
+                    let parts = x.id.split('-');
+                    if (parts[1] && parts[1].length >= 13) {
+                        let sNum = parseInt(parts[1].substring(10), 10);
+                        if (!isNaN(sNum) && sNum > maxSeq) maxSeq = sNum;
                     }
-                    try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
+                });
+                let lsSeq = (localStorage.getItem('TRX_DATE') === dKey) ? (parseInt(localStorage.getItem('TRX_SEQ') || '0', 10) || 0) : 0;
+                seq = Math.max(maxSeq, lsSeq) + 1;
+            } catch(e) {}
+            localStorage.setItem('TRX_DATE', dKey);
+            localStorage.setItem('TRX_SEQ', seq);
+            let salt = localStorage.getItem('DEV_SALT'); if(!salt) { salt = Math.random().toString(36).substring(2, 5).toUpperCase(); localStorage.setItem('DEV_SALT', salt); }
+            trxId = `TRX-${dKey}${hh}${mn}${String(seq).padStart(3, '0')}-${salt}`;
+        }
 
-                     // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
-                    cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
-                    
-                    // [INJEKSI AUTO-SYNC]
-                    if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
-                }
-                for (let i = 0; i < payload.length; i += 256) {
-                    await btChar.writeValue(payload.slice(i, i + 256));
-                    await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
-                }
-                
+        let encoder = new TextEncoder();
+        let initPrint = [0x1B, 0x40, 0x1B, 0x61, 0x01]; // Init & Center Align
+        let textHead = encoder.encode("TOKO KELONTONG\nPs. Sunggingan Lt. 2\nTelp: 082226334999\n--------------------------------\n");
+        let alignLeft = [0x1B, 0x61, 0x00];
+        let displayTrxId = trxId ? trxId.split('-').slice(0, 2).join('-') : '';
+        let bodyStr = `No  : ${displayTrxId}\nTgl : ${new Date(trxTs || Date.now()).toLocaleString('id-ID')}\n--------------------------------\n`;
+        
+        items.forEach(i => {
+            // [SURGICAL FIX] Sterilisasi Total ke ASCII agar Buffer Mesin Printer tidak jebol
+            let n = String(i.n).replace(/[^\x00-\x7F]/g, '').substring(0, 32); 
+            let sub = fmt(i.sub);
+            let qU = `${i.q}x${fmt(i.q > 0 ? Math.round(i.sub / i.q) : i.sub)}`;
+            let pad = 32 - qU.length - sub.length;
+            bodyStr += `${n}\n${qU}${" ".repeat(Math.max(1, pad))}${sub}\n`;
+        });
+        
+        let safeBayar = !isNaN(parseInt(bayar, 10)) ? parseInt(bayar, 10) : total;
+        bodyStr += `--------------------------------\nTOTAL   : Rp ${fmt(total)}\nBAYAR   : Rp ${fmt(safeBayar)}\nKEMBALI : Rp ${fmt(safeBayar-total)}\n--------------------------------\nTERIMA KASIH\n\n\n\n`;
+        let bodyData = encoder.encode(bodyStr);
+        let cut = [0x1D, 0x56, 0x41, 0x10]; // Auto Cutter
+        
+        let payload = new Uint8Array(initPrint.length + textHead.length + alignLeft.length + bodyData.length + cut.length);
+        let offset = 0;
+        payload.set(initPrint, offset); offset += initPrint.length;
+        payload.set(textHead, offset); offset += textHead.length;
+        payload.set(alignLeft, offset); offset += alignLeft.length;
+        payload.set(bodyData, offset); offset += bodyData.length;
+        payload.set(cut, offset);
+        
+        // Simpan transaksi offline ke Database SEBELUM cetak perangkat keras untuk mitigasi Data Loss
+        if (!isReprint) {
+            let finalTs = trxTs ? trxTs : Date.now();
+            let newTrx = { id: trxId, ts: finalTs, total: total, bayar: bayar, items: items, modal: items.reduce((sum, i) => sum + (i.modal || 0), 0) };
+            try { const tx = idb.transaction('history', 'readwrite'); tx.objectStore('history').put(newTrx); } catch (e) {}
+            
+            let hist = JSON.parse(localStorage.getItem('DB_WA_HISTORY') || '[]');
+            if (activeEditTrxId) {
+                let hIdx = hist.findIndex(x => x.id === trxId);
+                if (hIdx !== -1) hist[hIdx] = newTrx; else hist.unshift(newTrx);
+            } else { 
+                hist.unshift(newTrx); 
+            }
+            try { localStorage.setItem('DB_WA_HISTORY', JSON.stringify(hist.slice(0, 50))); } catch(e) {}
+
+             // AMANKAN KERANJANG SEBELUM TRANSMISI HARDWARE (Mencegah Double Omzet jika Printer Mati)
+            cartState = {}; saveCartMem(); renderCartUI(); applyFiltersAndRender(); clearEditMode();
+            
+            // [INJEKSI AUTO-SYNC]
+            if (typeof AutoSyncEngine !== 'undefined') AutoSyncEngine.trigger();
+        }
+        for (let i = 0; i < payload.length; i += 256) {
+            await btChar.writeValue(payload.slice(i, i + 256));
+            await new Promise(resolve => setTimeout(resolve, 20)); // Rem Buffer Printer
+        }
+        
         tampilkanToast("Struk Thermal Keluar!", "#87CEFA");
         isBTConnecting = false;
     } catch (err) {
@@ -5627,30 +5683,16 @@ const AutoSyncEngine = {
                 syncedServerTime = dataResponse.serverTime || Date.now();
 
                 if (dataCloud.length > 0) {
+                    let ghostItems = db.filter(i => i._isGhost);
                     let tempMap = new Map();
                     let deletedCloudIds = [];
-                    db.forEach(item => tempMap.set(String(item.id), item));
+                    db.forEach(item => { if (!item._isGhost) tempMap.set(String(item.id), item); });
 
                     dataCloud.forEach(rawItem => {
-                        let itemCloud = { ...rawItem };
-                        itemCloud.deleted = String(itemCloud.deleted).trim().toUpperCase() === 'TRUE' || itemCloud.deleted === true;
-                        itemCloud.f = String(itemCloud.f).trim().toUpperCase() === 'TRUE' || itemCloud.f === true;
-                        itemCloud.hpp = parseExcelPrice(itemCloud.hpp) || 0;
-                        itemCloud.p1 = parseExcelPrice(itemCloud.p1) || 0;
-                        itemCloud.p2 = parseExcelPrice(itemCloud.p2) || null;
-                        itemCloud.iq = parseInt(String(itemCloud.iq || 0).replace(/[^0-9]/g, ''), 10) || 0;
+                        let itemCloud = normalizeItemData(rawItem);
+                        if (!itemCloud || !itemCloud.n) return;
                         if (!itemCloud.id) itemCloud.id = generateUniqueId();
-                        itemCloud.n = itemCloud.n || "";
-                        itemCloud.b = String(itemCloud.b || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
-                        if (itemCloud.b === '-' || itemCloud.b === '0') itemCloud.b = '';
-                        itemCloud.b2 = String(itemCloud.b2 || "").replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
-                        if (itemCloud.b2 === '-' || itemCloud.b2 === '0') itemCloud.b2 = '';
-
-                        if (typeof itemCloud.tiers === 'string') {
-                            try { itemCloud.tiers = JSON.parse(itemCloud.tiers); } catch(e) { itemCloud.tiers = []; }
-                        } else if (!Array.isArray(itemCloud.tiers)) {
-                            itemCloud.tiers = [];
-                        }
+                        itemCloud.p2 = itemCloud.p2 || null;
 
                         const existing = tempMap.get(String(itemCloud.id));
                         if (existing) {
@@ -5668,7 +5710,8 @@ const AutoSyncEngine = {
                         }
                     });
 
-                    db = Array.from(tempMap.values());
+                    let survivingGhosts = ghostItems.filter(g => { let m = tempMap.get(String(g.id)); return !m || m.deleted; });
+                    db = survivingGhosts.concat(Array.from(tempMap.values()));
                     updateMaps();
                     if (worker) worker.postMessage({ type: 'init', db: db.filter(i => !i.deleted && !i._isGhost && !i._isPendingDelete) });
                     if ($('q').value.trim() !== '') handleSearchLogic($('q').value.trim());
@@ -6304,19 +6347,34 @@ function routeBarlaState(text) {
         } else { appendBarlaMsg(`Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true); }
         
     } else if (bAiState === 'ADD_TIER_QTY') {
-        const val = parseInt(text.replace(/\D/g, ''), 10);
-        if (isNaN(val) || val < 2) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA (Lebih dari 1). Coba lagi:` + bAiChipBatal, 'ai', true);
+        const val = parseFloat(text.replace(/,/g, '.').replace(/[^0-9.]/g, ''));
+        if (isNaN(val) || val <= 1) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA (Lebih dari 1). Coba lagi:` + bAiChipBatal, 'ai', true);
         if (bAiPayload.tiers.some(t => t.q === val)) return appendBarlaMsg(`${svgWarn} Tier untuk Qty >= ${val} sudah ada. Masukkan jumlah Qty yang berbeda:` + bAiChipBatal, 'ai', true);
         bAiTempQty = val; bAiState = 'ADD_TIER_PRICE';
         appendBarlaMsg(`Jika pelanggan membeli >= ${val} ${escapeHTML(bAiPayload.u1)}, berapa <b>Harga per ${escapeHTML(bAiPayload.u1)}</b>-nya?<br><i>(Ketik angka saja, contoh: 2900)</i>` + bAiChipBatal, 'ai', true);
         
     } else if (bAiState === 'ADD_TIER_PRICE') {
-        const val = parseInt(text.replace(/\D/g, ''), 10);
+        let cleanPriceStr = text.trim();
+        if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(cleanPriceStr)) { cleanPriceStr = cleanPriceStr.replace(/\./g, '').replace(',', '.'); } else if (cleanPriceStr.includes(',')) { cleanPriceStr = cleanPriceStr.replace(/\./g, '').replace(',', '.'); } else if (!/^\d+\.\d{1,2}$/.test(cleanPriceStr)) {
+            cleanPriceStr = cleanPriceStr.replace(/\D/g, '');
+        }
+        const val = parseFloat(cleanPriceStr);
         if (isNaN(val) || val <= 0) return appendBarlaMsg(`${svgWarn} Harap masukkan ANGKA Harga Tier yang valid (Lebih dari 0). Coba lagi:` + bAiChipBatal, 'ai', true);
         if (val >= bAiPayload.p1) return appendBarlaMsg(`${svgWarn} Harga Tier (Rp ${fmt(val)}) tidak boleh lebih mahal/sama dengan harga ecer biasa (Rp ${fmt(bAiPayload.p1)}). Masukkan harga yang lebih murah:` + bAiChipBatal, 'ai', true);
         if (bAiPayload.hpp > 0 && val < bAiPayload.hpp) return appendBarlaMsg(`${svgWarn} HARGA RUGI! Harga Tier (Rp ${fmt(val)}) lebih rendah dari Modal HPP (Rp ${fmt(bAiPayload.hpp)}). Masukkan harga yang lebih tinggi:` + bAiChipBatal, 'ai', true);
         
+        for (let i = 0; i < bAiPayload.tiers.length; i++) {
+            let exTier = bAiPayload.tiers[i];
+            if (bAiTempQty > exTier.q && val >= exTier.p) {
+                return appendBarlaMsg(`${svgWarn} Kesalahan Logika Multi-Tier: Harga untuk Qty >= ${bAiTempQty} (Rp ${fmt(val)}) harus lebih murah dari Qty >= ${exTier.q} (Rp ${fmt(exTier.p)}). Masukkan harga yang benar:` + bAiChipBatal, 'ai', true);
+            }
+            if (bAiTempQty < exTier.q && val <= exTier.p) {
+                return appendBarlaMsg(`${svgWarn} Kesalahan Logika Multi-Tier: Harga untuk Qty >= ${bAiTempQty} (Rp ${fmt(val)}) harus lebih tinggi dari Qty >= ${exTier.q} (Rp ${fmt(exTier.p)}). Masukkan harga yang benar:` + bAiChipBatal, 'ai', true);
+            }
+        }
+
         bAiPayload.tiers.push({ q: bAiTempQty, p: val });
+        bAiPayload.tiers.sort((a, b) => a.q - b.q);
         bAiState = 'ADD_ASK_TIER';
         appendBarlaMsg(`Tier ditambahkan: Beli >= ${bAiTempQty} ${escapeHTML(bAiPayload.u1)}, Harga Rp ${fmt(val)}/${escapeHTML(bAiPayload.u1)}.<br><br>Apakah ada tingkatan harga lain? Ketik <b>YA</b> atau <b>TIDAK</b>.` + bAiChipYaTidak, 'ai', true);
         
