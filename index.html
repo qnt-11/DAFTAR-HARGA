@@ -2582,10 +2582,25 @@ const VoiceNinja = {
                 }
             });
 
+            // [NETWORK REVIVER SHIELD] Pasukan gaib yang membangunkan mesin saat sinyal pulih
+            window.addEventListener('online', () => {
+                if (this.shouldStayAwake && !this.isListening) {
+                    try { this.recognition.start(); } catch(e){}
+                }
+            });
+
             this.recognition.onstart = () => {
                 this.isListening = true;
                 this.retryCount = 0;
-                this.goToSleep(); // Awal nyala langsung masuk fase Passive Sleep (Menunggu Barla)
+                
+                // [SURGICAL FIX] Jangan pernah tidurkan Barla jika dia sudah bangun. Lindungi dari restart mesin OS.
+                if (!this.isAwake) {
+                    this.goToSleep(); 
+                } else {
+                    // Pulihkan UI denyut merah jika terhapus oleh render layar lain
+                    $('mic-btn').classList.add('listening');
+                    $('mic-btn').style.color = 'var(--danger)';$('q').placeholder = "BARLA Mendengarkan...";
+                }
             };
             
             this.recognition.onresult = (event) => {
@@ -2593,18 +2608,24 @@ const VoiceNinja = {
                     if (event.results[i].isFinal) {
                         let transcript = event.results[i][0].transcript.toLowerCase().trim();
                         
-                        // [WAKE-WORD PHONETIC CATCHER] Jaring Kesalahan Pendengaran Browser
-                        let wakeRegex = /\b(barla|bala|parla|marla|berla|darla|bela|perla|balla|arla|karla)\b/i;
+                        // [WAKE-WORD PHONETIC CATCHER V2] Tahan banting terhadap split-words dari Speech Engine
+                        let wakeRegex = /\b(barla|bala|parla|marla|berla|darla|bela|perla|balla|arla|karla|bar la|mbak la|bah la|bak la)\b/i;
                         
                         if (this.isAwake) {
                             // Fase 2: Jendela Siaga (Active Command)
                             this.resetWakeTimer(); // Reset waktu mundur karena ada suara
                             
-                            // Ekstrak instruksi murni, abaikan panggilan nama ganda ("tambah kopi barla" -> "tambah kopi")
-                            let command = transcript.replace(wakeRegex, '').trim();
+                            // Ekstrak instruksi murni secara presisi (Hapus wake word pertama yang ditemukan)
+                            let command = transcript;
+                            let match = transcript.match(wakeRegex);
+                            if (match) {
+                                let wakeIndex = transcript.search(wakeRegex);
+                                command = transcript.substring(wakeIndex + match[0].length).trim();
+                            }
+                            
                             if (command) {
                                 this.parseCommand(command);
-                                this.goToSleep(); // Langsung tidur kembali pasca eksekusi
+                                this.goToSleep(); // Langsung tidur kembali pasca eksekusi mutlak
                             }
                         } else {
                             // Fase 1: Tidur Pulas (Passive Sleep - The Gatekeeper)
@@ -2613,7 +2634,7 @@ const VoiceNinja = {
                                 this.wakeUp(); // Bangunkan Barla! (Beep & Visual Red Pulse)
                                 
                                 // Dynamic String Slicing: Potong obrolan sampah sebelum kata Barla
-                                let wakeIndex = transcript.indexOf(match[0]);
+                                let wakeIndex = transcript.search(wakeRegex);
                                 let command = transcript.substring(wakeIndex + match[0].length).trim();
                                 
                                 if (command) {
@@ -2630,7 +2651,13 @@ const VoiceNinja = {
             this.recognition.onerror = (e) => {
                 if (e.error === 'network') {
                     tampilkanToast("Offline. Voice-Ninja ditangguhkan.", "var(--danger)");
-                    this.stop();
+                    // [SURGICAL FIX] Jangan matikan shouldStayAwake mutlak. Izinkan Network Reviver hidup!
+                    if (this.recognition) { try { this.recognition.stop(); } catch(err){} }
+                    this.isListening = false;
+                    this.goToSleep();
+                } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                    this.stop(); // Hentikan paksa mutlak, kasir sengaja menolak izin Mic
+                    tampilkanToast("Izin Mic Ditolak!", "var(--danger)");
                 } else if (e.error === 'no-speech') {
                     // [ANTI-SILENCE PENALTY] Tetap siaga meski warung sedang sepi, jangan berikan Backoff hukuman.
                     this.retryCount = 0;
@@ -2639,18 +2666,26 @@ const VoiceNinja = {
             
             this.recognition.onend = () => {
                 this.isListening = false;
-                this.goToSleep(); // Kembalikan UI ke normal
+                
+                // [SURGICAL FIX BENCANA AMNESIA] JANGAN pernah reset isAwake saat mesin mati! 
+                // Biarkan wakeTimer yang bertugas menidurkan Barla secara independen.
+                if (!this.isAwake) {
+                    this.goToSleep(); 
+                }
                 
                 // [NETWORK WATCHDOG & EXPONENTIAL BACKOFF]
-                if (navigator.onLine && this.shouldStayAwake) {
-                    let backoffTimer = Math.min(1000 * Math.pow(2, this.retryCount), this.backoffLimit);
-                    this.retryCount++;
-                    if (this.restartTimer) clearTimeout(this.restartTimer);
-                    this.restartTimer = setTimeout(() => {
-                        if (navigator.onLine && this.shouldStayAwake) {
-                            try { this.recognition.start(); } catch(err){}
-                        }
-                    }, backoffTimer);
+                if (this.shouldStayAwake) {
+                    if (navigator.onLine) {
+                        let backoffTimer = Math.min(1000 * Math.pow(2, this.retryCount), this.backoffLimit);
+                        this.retryCount++;
+                        if (this.restartTimer) clearTimeout(this.restartTimer);
+                        this.restartTimer = setTimeout(() => {
+                            // Cek ulang keamanan bendera, barangkali user menekan stop saat timeout berjalan
+                            if (navigator.onLine && this.shouldStayAwake) {
+                                try { this.recognition.start(); } catch(err){}
+                            }
+                        }, backoffTimer);
+                    }
                 }
             };
         }
