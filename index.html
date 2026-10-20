@@ -407,23 +407,24 @@ body.mode-kasir.cart-expanded #cp-expand-icon { transform: rotate(180deg); color
 /* =========================================================
    [ELITE QA] BARLA AI INTERFACE (ISOLATED & KEYBOARD-PROOF)
    ========================================================= */
-html.barla-lock, body.barla-open { overflow: hidden !important; height: 100% !important; max-height: 100% !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; overscroll-behavior: none !important; }
+html.barla-lock { overflow: hidden !important; overscroll-behavior: none !important; }
+body.barla-open { overflow: hidden !important; position: fixed !important; left: 0 !important; right: 0 !important; width: 100% !important; overscroll-behavior: none !important; }
 body.barla-open .fab { display: none !important; }
-.barla-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; height: 100dvh; background: rgba(0,0,0,0.88); backdrop-filter: blur(4px); z-index: 9000; flex-direction: column; justify-content: flex-end; padding-top: calc(15px + env(safe-area-inset-top, 0px)); box-sizing: border-box; overflow: hidden; touch-action: none; overscroll-behavior: none; box-shadow: 0 500px 0 500px #080808; }
-.barla-modal.kb-open { background: #080808; padding-top: env(safe-area-inset-top, 0px); }
-.barla-container { background: #080808; width: 100%; flex: 1; min-height: 0; max-height: 85vh; max-height: 85dvh; border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; animation: slideUpBarla 0.3s cubic-bezier(0.25, 1, 0.5, 1); margin-top: auto; box-shadow: 0 -10px 35px rgba(0,0,0,0.9), 0 500px 0 500px #080808; }
-.barla-modal.kb-open .barla-container { max-height: 100%; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
+.barla-modal { display: none; position: fixed; top: 0; left: 0; right: 0; width: 100%; height: 100%; height: 100dvh; background: rgba(0,0,0,0.88); backdrop-filter: blur(4px); z-index: 9000; flex-direction: column; justify-content: flex-end; padding-top: calc(15px + env(safe-area-inset-top, 0px)); box-sizing: border-box; overflow: hidden; touch-action: none; overscroll-behavior: none; box-shadow: 0 500px 0 500px #080808; }
+.barla-modal.kb-open { background: #080808; padding-top: env(safe-area-inset-top, 0px); justify-content: stretch; }
+.barla-container { background: #080808; width: 100%; flex: 1 1 auto; min-height: 0; max-height: 85vh; max-height: 85dvh; border-top-left-radius: 20px; border-top-right-radius: 20px; border-top: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; animation: slideUpBarla 0.25s cubic-bezier(0.25, 1, 0.5, 1); margin-top: auto; box-shadow: 0 -10px 35px rgba(0,0,0,0.9), 0 500px 0 500px #080808; }
+.barla-modal.kb-open .barla-container { max-height: 100% !important; height: 100% !important; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; animation: none !important; transform: none !important; margin-top: 0 !important; }
 @keyframes slideUpBarla { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.barla-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #222; background: #111; flex-shrink: 0; touch-action: none; }
+.barla-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #222; background: #111; flex: 0 0 auto; touch-action: none; }
 .barla-modal.kb-open .barla-header { padding: 10px 18px; }
 .barla-header-title { display: flex; align-items: center; gap: 8px; color: #87CEFA; font-family: 'Audiowide', sans-serif; font-size: 16px; }
 .barla-close { background: none; border: none; color: var(--danger); cursor: pointer; outline: none; display: flex; align-items: center; justify-content: center; padding: 4px; }
-.barla-chat-area { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 15px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+.barla-chat-area { flex: 1 1 0%; min-height: 0; overflow-y: auto; padding: 14px 15px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
 .b-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-wrap: break-word; font-family: 'Montserrat', sans-serif; flex-shrink: 0; }
 .b-msg.ai { background: #151515; color: #e0e0e0; align-self: flex-start; border: 1px solid #333; border-bottom-left-radius: 2px; }
 .b-msg.user { background: #87CEFA; color: #000; align-self: flex-end; font-weight: 700; border-bottom-right-radius: 2px; }
-.barla-input-area { display: flex; align-items: center; gap: 10px; padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: #111; border-top: 1px solid #222; flex-shrink: 0; position: relative; z-index: 5; touch-action: none; }
-.barla-modal.kb-open .barla-input-area { padding: 10px 15px; }
+.barla-input-area { display: flex; align-items: center; gap: 10px; padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: #111; border-top: 1px solid #222; flex: 0 0 auto; position: relative; z-index: 5; touch-action: none; box-sizing: border-box; }
+.barla-modal.kb-open .barla-input-area { padding: 8px 15px 10px 15px !important; }
 .barla-input-area input { flex: 1; height: 42px; background: #000; border: 1px solid #333; border-radius: 21px; padding: 0 16px; color: #fff; font-family: 'Montserrat', sans-serif; outline: none; font-size: 13px; font-weight: 500; box-sizing: border-box; }
 .barla-input-area input:focus { border-color: #87CEFA; box-shadow: 0 0 0 1px rgba(135, 206, 250, 0.25); }
 .barla-input-area button { background: #87CEFA; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #000; cursor: pointer; outline: none; transition: transform 0.2s; flex-shrink: 0; }
@@ -6181,8 +6182,9 @@ function saveBarlaHistory(histArray) {
     try { localStorage.setItem('DB_BARLA_HIST', JSON.stringify(histArray)); } catch(e) {}
 }
 
-// [ELITE QA FIX] VISUAL VIEWPORT API ENGINE v5.0 (Zero-Gap Hard Lock & Anti-Panning Shield)
-let barlaBaseHeight = Math.max(window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
+// [ELITE QA FIX] VISUAL VIEWPORT API ENGINE v6.0 (Closed-Loop Bounding-Box Clamping & Scroll Compensation)
+let barlaBaseHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
+let barlaLastWidth = window.innerWidth || 0;
 let barlaSyncTimers = [];
 let barlaSavedScrollY = 0;
 let barlaTouchStartY = 0;
@@ -6198,45 +6200,78 @@ function syncBarlaViewport(scrollChatToBottom = false) {
     const modal = document.getElementById('barla-modal');
     if (!modal || modal.style.display !== 'flex') return;
 
-    if (document.body.classList.contains('barla-open') && window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-    }
+    const area = document.getElementById('barla-chat-area');
+    const prevChatH = area ? area.clientHeight : 0;
+    const prevScrollTop = area ? area.scrollTop : 0;
+    const prevScrollH = area ? area.scrollHeight : 0;
+    const wasNearBottom = area ? (prevScrollH - (prevScrollTop + prevChatH) <= 80) : true;
 
     const vv = window.visualViewport;
-    const curWinH = window.innerHeight || document.documentElement.clientHeight || 0;
-    const rawH = vv ? vv.height : curWinH;
-    const offsetTop = vv ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+    const docH = document.documentElement.clientHeight || 0;
+    const winH = window.innerHeight || 0;
+    const curWinH = (docH > 0 && winH > 0) ? Math.min(docH, winH) : (winH || docH);
+    const curWinW = window.innerWidth || document.documentElement.clientWidth || 0;
+    const vvH = vv && vv.height > 0 ? vv.height : curWinH;
+    const vvTop = vv ? Math.max(0, vv.offsetTop) : 0;
 
-    if (rawH > barlaBaseHeight || Math.abs((window.innerWidth || 0) - lastViewportWidth) > 50) {
-        barlaBaseHeight = Math.max(curWinH, rawH);
+    if (Math.abs(curWinW - barlaLastWidth) > 50) {
+        barlaLastWidth = curWinW;
+        barlaBaseHeight = Math.max(curWinH, vvH);
+    } else if (Math.max(curWinH, vvH) > barlaBaseHeight) {
+        barlaBaseHeight = Math.max(curWinH, vvH);
     }
 
-    const kbDelta = barlaBaseHeight - rawH;
+    // Deteksi apakah OS mengecilkan Layout Viewport (resizes-content) atau hanya Visual Viewport (resizes-visual)
+    const isLayoutResized = Math.abs(curWinH - vvH) <= 50;
+    const effectiveH = Math.min(curWinH, vvH);
+    const visibleTop = isLayoutResized ? 0 : Math.round(vvTop);
+    const layoutVisibleBottom = vv ? Math.min(curWinH, Math.round(vvTop + vvH)) : curWinH;
+    const rawAvailableH = Math.max(180, layoutVisibleBottom - visibleTop);
+
+    const kbDelta = barlaBaseHeight - effectiveH;
     const isInputFocused = document.activeElement === document.getElementById('barla-input');
-    const isKbOpen = kbDelta > 100 || (isInputFocused && kbDelta > 50);
-    const finalHeight = Math.max(200, Math.round(rawH));
+    const isKbOpen = kbDelta > 85 || (isInputFocused && kbDelta > 40);
 
     modal.classList.toggle('kb-open', isKbOpen);
-    modal.style.top = offsetTop + 'px';
+    modal.style.top = visibleTop + 'px';
     modal.style.bottom = 'auto';
-    modal.style.height = finalHeight + 'px';
+    modal.style.height = rawAvailableH + 'px';
+    modal.style.maxHeight = rawAvailableH + 'px';
 
-    if (scrollChatToBottom === true) {
-        const area = document.getElementById('barla-chat-area');
-        if (area) area.scrollTop = area.scrollHeight;
+    // Closed-Loop Bounding-Box Verification: Pastikan .barla-input-area tidak melewati batas atas keyboard
+    const inputArea = modal.querySelector('.barla-input-area');
+    if (inputArea) {
+        const inputRect = inputArea.getBoundingClientRect();
+        if (inputRect.bottom > layoutVisibleBottom) {
+            const overflowPx = Math.ceil(inputRect.bottom - layoutVisibleBottom);
+            const clampedH = Math.max(180, rawAvailableH - overflowPx);
+            modal.style.height = clampedH + 'px';
+            modal.style.maxHeight = clampedH + 'px';
+        }
+    }
+
+    // Kompensasi Scroll Area Chat secara Instan agar pesan terbaru tidak tertutup naiknya kolom input
+    if (area) {
+        const newChatH = area.clientHeight;
+        const heightShrinkDelta = prevChatH - newChatH;
+        if (scrollChatToBottom === true || wasNearBottom || isInputFocused) {
+            area.scrollTop = area.scrollHeight;
+        } else if (heightShrinkDelta > 0) {
+            area.scrollTop = prevScrollTop + heightShrinkDelta;
+        }
     }
 }
 
 function scheduleBarlaViewportSync() {
     clearBarlaSyncTimers();
     syncBarlaViewport(true);
-    [60, 150, 280, 420].forEach(delay => {
+    [40, 100, 180, 280, 420, 600].forEach(delay => {
         barlaSyncTimers.push(setTimeout(() => syncBarlaViewport(true), delay));
     });
 }
 
 if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => syncBarlaViewport(true));
+    window.visualViewport.addEventListener('resize', () => syncBarlaViewport(false));
     window.visualViewport.addEventListener('scroll', () => syncBarlaViewport(false));
 }
 window.addEventListener('resize', () => syncBarlaViewport(false));
@@ -6246,6 +6281,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bInp) {
         bInp.addEventListener('focus', scheduleBarlaViewportSync);
         bInp.addEventListener('blur', scheduleBarlaViewportSync);
+        bInp.addEventListener('click', scheduleBarlaViewportSync);
+        bInp.addEventListener('touchend', scheduleBarlaViewportSync, { passive: true });
+        bInp.addEventListener('input', () => syncBarlaViewport(true));
     }
 
     const bModal = document.getElementById('barla-modal');
@@ -6266,9 +6304,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const dx = e.touches[0].clientX - barlaTouchStartX;
             const chatArea = e.target.closest('#barla-chat-area');
 
-            // 1. Kunci mati geseran vertikal pada Header, Kolom Input, dan Area Luar
+            // 1. Kunci mati geseran vertikal pada Header, Kolom Input, dan Area Luar (Izinkan interaksi kursor di input)
             if (!chatArea) {
-                if (e.target.id === 'barla-input' && Math.abs(dx) > Math.abs(dy)) return;
+                if (e.target.id === 'barla-input' && (Math.abs(dx) > Math.abs(dy) || Math.abs(dy) < 8)) return;
                 if (e.cancelable) e.preventDefault();
                 return;
             }
@@ -6290,13 +6328,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function openBarlaAI() {
     $('dropdown-menu').classList.add('hidden');
+    if (document.activeElement && document.activeElement !== document.body && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+    }
     barlaSavedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
     document.documentElement.classList.add('barla-lock');
     document.body.classList.add('barla-open', 'modal-open');
-    barlaBaseHeight = Math.max(window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
+    document.body.style.top = (-barlaSavedScrollY) + 'px';
+
+    const curMaxH = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
+    if (curMaxH > barlaBaseHeight) barlaBaseHeight = curMaxH;
+    barlaLastWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+
     $('barla-modal').style.display = 'flex';
     trackModal('barla-modal');
-    syncBarlaViewport(); // Sinkronisasi awal viewport
+    syncBarlaViewport(true);
     
     const area = $('barla-chat-area'); area.innerHTML = ''; 
     let hist = loadBarlaHistory();
@@ -6307,37 +6353,29 @@ function openBarlaAI() {
     } else {
         let htmlBuffer = '';
         hist.forEach(msg => { htmlBuffer += `<div class="b-msg ${msg.sender}">${msg.isHtml ? msg.text : escapeHTML(msg.text)}</div>`; });
-        
-        // [QA LEAD FIX] Lumpuhkan animasi CSS sementara agar lompatan ke bawah terjadi secara instan (0 ms latency)
-        area.style.scrollBehavior = 'auto';
         area.innerHTML = htmlBuffer;
-        
-        requestAnimationFrame(() => { 
-            area.scrollTop = area.scrollHeight; 
-            // Kembalikan ke smooth scroll setelah posisi render terkunci mutlak
-            setTimeout(() => { area.style.scrollBehavior = ''; }, 100);
+        requestAnimationFrame(() => {
+            syncBarlaViewport(true);
         });
     }
-    setTimeout(() => {
-        const bInp = $('barla-input');
-        if (bInp) {
-            try { bInp.focus({ preventScroll: true }); } catch (e) { bInp.focus(); }
-        }
-        scheduleBarlaViewportSync();
-    }, 320);
+    scheduleBarlaViewportSync();
 }
 
 function closeBarlaAI() {
     clearBarlaSyncTimers();
+    const bInp = document.getElementById('barla-input');
+    if (bInp && document.activeElement === bInp) bInp.blur();
     untrackModal('barla-modal'); $('barla-modal').style.display = 'none';
     document.documentElement.classList.remove('barla-lock');
     document.body.classList.remove('barla-open');
+    document.body.style.top = '';
     checkModalOpen();
     window.scrollTo({ top: barlaSavedScrollY, behavior: 'instant' });
     const modal = document.getElementById('barla-modal');
     if (modal) {
         modal.classList.remove('kb-open');
         modal.style.height = '';
+        modal.style.maxHeight = '';
         modal.style.top = '';
         modal.style.bottom = '';
     }
@@ -6352,7 +6390,9 @@ function appendBarlaMsg(text, sender, isHtml = false) {
     div.className = `b-msg ${sender}`;
     if (isHtml) div.innerHTML = text; else div.innerText = text;
     area.appendChild(div);
-    requestAnimationFrame(() => { area.scrollTop = area.scrollHeight; });
+    requestAnimationFrame(() => {
+        syncBarlaViewport(true);
+    });
 
     let persistedText = text;
     if (isHtml && typeof bAiChipBatal !== 'undefined') {
