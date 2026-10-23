@@ -2571,7 +2571,8 @@ const VoiceNinja = {
             this.recognition = new SpeechRecognition();
             this.recognition.lang = 'id-ID';
             this.recognition.continuous = true;
-            this.recognition.interimResults = false;
+            // [ELITE QA FIX] Zero-Latency Engine: Buka katup interim untuk deteksi Wake-Word kilat
+            this.recognition.interimResults = true;
             this.recognition.maxAlternatives = 1;
             
             // [VISIBILITY PAGING SHIELD] Jeda otomatis saat aplikasi masuk background
@@ -2604,12 +2605,12 @@ const VoiceNinja = {
             };
             
             this.recognition.onresult = (event) => {
+                let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    let wakeRegex = /\b(barla|bala|parla|marla|berla|darla|bela|perla|balla|arla|karla|bar la|mbak la|bah la|bak la)\b/i;
+                    
                     if (event.results[i].isFinal) {
                         let transcript = event.results[i][0].transcript.toLowerCase().trim();
-                        
-                        // [WAKE-WORD PHONETIC CATCHER V2] Tahan banting terhadap split-words dari Speech Engine
-                        let wakeRegex = /\b(barla|bala|parla|marla|berla|darla|bela|perla|balla|arla|karla|bar la|mbak la|bah la|bak la)\b/i;
                         
                         if (this.isAwake) {
                             // Fase 2: Jendela Siaga (Active Command)
@@ -2643,6 +2644,12 @@ const VoiceNinja = {
                                     this.goToSleep();
                                 }
                             }
+                        }
+                    } else {
+                        // [ELITE QA FIX] Zero-Latency Wake-Word Detection: Bangun instan sebelum kalimat selesai
+                        interimTranscript += event.results[i][0].transcript.toLowerCase();
+                        if (!this.isAwake && wakeRegex.test(interimTranscript)) {
+                            this.wakeUp();
                         }
                     }
                 }
@@ -2743,6 +2750,12 @@ const VoiceNinja = {
     // ----------------------------------------------
     
     toggle: function() {
+        // [ELITE QA FIX] Bypass Otorisasi Audio Context Browser secara Sinkron (Diikat Mutlak pada Event Klik User)
+        try {
+            if (!globalAudioCtx) globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume().catch(()=>{});
+        } catch(e) {}
+
         if (!this.init()) return tampilkanToast("Browser tidak mendukung Voice-Ninja!", "var(--warning)");
         if (this.isListening) {
             this.stop();
@@ -6217,7 +6230,7 @@ function saveBarlaHistory(histArray) {
     try { localStorage.setItem('DB_BARLA_HIST', JSON.stringify(histArray)); } catch(e) {}
 }
 
-// [ELITE QA FIX] VISUAL VIEWPORT API ENGINE v6.0 (Closed-Loop Bounding-Box Clamping & Scroll Compensation)
+// [ELITE QA FIX] VISUAL VIEWPORT API ENGINE v7.0 (Absolute Viewport Anchor)
 let barlaBaseHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
 let barlaLastWidth = window.innerWidth || 0;
 let barlaSyncTimers = [];
@@ -6246,8 +6259,10 @@ function syncBarlaViewport(scrollChatToBottom = false) {
     const winH = window.innerHeight || 0;
     const curWinH = (docH > 0 && winH > 0) ? Math.min(docH, winH) : (winH || docH);
     const curWinW = window.innerWidth || document.documentElement.clientWidth || 0;
+    
+    // [SURGICAL FIX] Kalkulasi Absolut Murni dari Visual Viewport API
     const vvH = vv && vv.height > 0 ? vv.height : curWinH;
-    const vvTop = vv ? Math.max(0, vv.offsetTop) : 0;
+    const vvTop = vv ? vv.offsetTop : 0;
 
     if (Math.abs(curWinW - barlaLastWidth) > 50) {
         barlaLastWidth = curWinW;
@@ -6256,34 +6271,18 @@ function syncBarlaViewport(scrollChatToBottom = false) {
         barlaBaseHeight = Math.max(curWinH, vvH);
     }
 
-    // Deteksi apakah OS mengecilkan Layout Viewport (resizes-content) atau hanya Visual Viewport (resizes-visual)
-    const isLayoutResized = Math.abs(curWinH - vvH) <= 50;
-    const effectiveH = Math.min(curWinH, vvH);
-    const visibleTop = isLayoutResized ? 0 : Math.round(vvTop);
-    const layoutVisibleBottom = vv ? Math.min(curWinH, Math.round(vvTop + vvH)) : curWinH;
-    const rawAvailableH = Math.max(180, layoutVisibleBottom - visibleTop);
-
-    const kbDelta = barlaBaseHeight - effectiveH;
     const isInputFocused = document.activeElement === document.getElementById('barla-input');
-    const isKbOpen = kbDelta > 85 || (isInputFocused && kbDelta > 40);
+    // Deteksi Keyboard Terbuka Berdasarkan Penyusutan Tinggi Viewport
+    const isKbOpen = (barlaBaseHeight - vvH) > 85 || (isInputFocused && (barlaBaseHeight - vvH) > 40);
 
     modal.classList.toggle('kb-open', isKbOpen);
-    modal.style.top = visibleTop + 'px';
+    
+    // Penguncian Posisi Mutlak pada Area yang Tersedia (Anti-Tertutup Keyboard)
+    modal.style.position = 'fixed';
+    modal.style.top = vvTop + 'px';
     modal.style.bottom = 'auto';
-    modal.style.height = rawAvailableH + 'px';
-    modal.style.maxHeight = rawAvailableH + 'px';
-
-    // Closed-Loop Bounding-Box Verification: Pastikan .barla-input-area tidak melewati batas atas keyboard
-    const inputArea = modal.querySelector('.barla-input-area');
-    if (inputArea) {
-        const inputRect = inputArea.getBoundingClientRect();
-        if (inputRect.bottom > layoutVisibleBottom) {
-            const overflowPx = Math.ceil(inputRect.bottom - layoutVisibleBottom);
-            const clampedH = Math.max(180, rawAvailableH - overflowPx);
-            modal.style.height = clampedH + 'px';
-            modal.style.maxHeight = clampedH + 'px';
-        }
-    }
+    modal.style.height = vvH + 'px';
+    modal.style.maxHeight = vvH + 'px';
 
     // Kompensasi Scroll Area Chat secara Instan agar pesan terbaru tidak tertutup naiknya kolom input
     if (area) {
