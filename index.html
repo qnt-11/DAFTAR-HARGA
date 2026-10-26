@@ -1285,8 +1285,14 @@ function handleSearchLogic(val) {
             
             let bestPrice = finalSubtotal;
 
-            // 1. [Auto-Discount Engine] Split-Integer Prorated Wholesale (Tarif Grosir Proporsional saat MOQ >= Isi Tercapai)
-            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && normQ >= iq) {
+            // [QA LEAD FIX] Fractional Wholesale Engine (Grosir Pecahan Warung)
+            // Mengakomodasi pembelian Setengah Dus (1/2) atau Seperempat Dus (1/4) agar mendapat harga proporsional.
+            let minSyaratGrosir = iq;
+            if (iq >= 4 && normQ >= iq / 2) minSyaratGrosir = iq / 2; // Threshold: Setengah isi
+            if (iq >= 12 && normQ >= iq / 4) minSyaratGrosir = iq / 4; // Threshold: Seperempat isi
+
+            // 1. [Auto-Discount Engine] Split-Integer Prorated Wholesale
+            if (item.p1 > 0 && item.p2 > 0 && iq > 1 && normQ >= minSyaratGrosir) {
                 let qtyGrosir = Math.floor(normQ / iq);
                 // [ELITE QA FIX] Anti-Floating Point IEEE-754 Error pada modulus desimal
                 let qtySisa = Number((normQ % iq).toFixed(4));
@@ -2817,25 +2823,37 @@ const VoiceNinja = {
             }
             
             // [ELITE QA FIX] Regex Sync Parity dengan Worker NLU (Support Desimal, Fraksi & Kamus Satuan Lengkap)
-            let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+(?:[.,]\d+)?|satu\s*setengah|dua\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)(?:\s+(lusin|kodi|dus|dos|karton|ktn|box|boks|slop|slp|bal|ball|peti|krat|pack|pak|renceng|renteng|rcg|bungkus|bks|pcs|biji|buah|butir|batang|btg|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|lembar|lbr|gelas|gls|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml))?(?:\s+(.*))?$/i);
-            if (addMatch) {
-                lastVerb = 'ADD';
-                let mapNum = {'se':1,'seperempat':0.25,'setengah':0.5,'satu':1,'satu setengah':1.5,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12,'kodi':20};
-                let rawNum = addMatch[1].replace(',', '.').replace(/\s+/g, ' ');
-                let baseQ = parseFloat(rawNum) || mapNum[rawNum] || 1;
-                let unitHint = addMatch[2] ? addMatch[2].trim().toLowerCase() : '';
-                let mult = unitHint ? (mapNum[unitHint] || 1) : 1;
-                let qty = parseFloat((baseQ * mult).toFixed(4));
-                let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(?:dan|terus|lalu|kemudian)\s+.*$/i, '').trim() : '';
-                
-                if (itemStr) this.queue.push({ type: 'ADD', qty: qty, unit: unitHint, item: itemStr });
-            } else if (/\b(bayar uang pas|uang pas|bayar pas|uangnya pas)\b/i.test(cleanCmd)) {
-                lastVerb = 'PAY';
-                this.queue.push({ type: 'PAY_EXACT' });
-            } else if (/\b(cetak|print|struk|keluarkan nota)\b/i.test(cleanCmd)) {
-                lastVerb = 'PRINT';
-                this.queue.push({ type: 'PRINT' });
+        let addMatch = cleanCmd.match(/(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)\s+(\d+(?:[.,]\d+)?|satu\s*setengah|dua\s*belas|seperempat|setengah|sepuluh|sebelas|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|se)(?:\s+(lusin|kodi|dus|dos|karton|ktn|box|boks|slop|slp|bal|ball|peti|krat|pack|pak|renceng|renteng|rcg|bungkus|bks|pcs|biji|buah|butir|batang|btg|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|lembar|lbr|gelas|gls|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml))?(?:\s+(.*))?$/i);
+        let directAddMatch = !addMatch ? cleanCmd.match(/^(?:tambah(?:kan)?|masuk(?:kan)?|beli|pesan|kasih|order|jual|checkout)(?:\s+(.*))?$/i) : null;
+        
+        if (addMatch) {
+            lastVerb = 'ADD';
+            let mapNum = {'se':1,'seperempat':0.25,'setengah':0.5,'satu':1,'satu setengah':1.5,'dua':2,'tiga':3,'empat':4,'lima':5,'enam':6,'tujuh':7,'delapan':8,'sembilan':9,'sepuluh':10,'sebelas':11,'dua belas':12,'lusin':12,'kodi':20};
+            let rawNum = addMatch[1].replace(',', '.').replace(/\s+/g, ' ');
+            let baseQ = parseFloat(rawNum) || mapNum[rawNum] || 1;
+            let unitHint = addMatch[2] ? addMatch[2].trim().toLowerCase() : '';
+            let mult = unitHint ? (mapNum[unitHint] || 1) : 1;
+            let qty = parseFloat((baseQ * mult).toFixed(4));
+            let itemStr = addMatch[3] ? addMatch[3].replace(/\s+(?:dan|terus|lalu|kemudian)\s+.*$/i, '').trim() : '';
+            
+            if (itemStr) this.queue.push({ type: 'ADD', qty: qty, unit: unitHint, item: itemStr });
+        } else if (directAddMatch) {
+            lastVerb = 'ADD';
+            let rawRest = directAddMatch[1] ? directAddMatch[1].replace(/\s+(?:dan|terus|lalu|kemudian)\s+.*$/i, '').trim() : '';
+            if (rawRest) {
+                // Cegah halusinasi jika user hanya menyebut nama kemasan (Misal: "tambah dus") tanpa nama barang
+                let unitOnlyMatch = rawRest.match(/^(lusin|kodi|dus|dos|karton|ktn|box|boks|slop|slp|bal|ball|peti|krat|pack|pak|renceng|renteng|rcg|bungkus|bks|pcs|biji|buah|butir|batang|btg|botol|btl|kaleng|klg|sachet|saset|sct|strip|str|lembar|lbr|gelas|gls|kotak|ikat|karung|sak|kg|kilo|kilogram|ons|gram|gr|liter|ltr|ml)$/i);
+                if (!unitOnlyMatch) {
+                    this.queue.push({ type: 'ADD', qty: 1, unit: '', item: rawRest });
+                }
             }
+        } else if (/\b(bayar uang pas|uang pas|bayar pas|uangnya pas)\b/i.test(cleanCmd)) {
+            lastVerb = 'PAY';
+            this.queue.push({ type: 'PAY_EXACT' });
+        } else if (/\b(cetak|print|struk|keluarkan nota)\b/i.test(cleanCmd)) {
+            lastVerb = 'PRINT';
+            this.queue.push({ type: 'PRINT' });
+        }
         });
         
         if (!this.isProcessing) this.processQueue();
@@ -6260,9 +6278,14 @@ function syncBarlaViewport(scrollChatToBottom = false) {
     const curWinH = (docH > 0 && winH > 0) ? Math.min(docH, winH) : (winH || docH);
     const curWinW = window.innerWidth || document.documentElement.clientWidth || 0;
     
-    // [SURGICAL FIX] Kalkulasi Absolut Murni dari Visual Viewport API
+    // [SURGICAL FIX] Kalkulasi Padding Bottom Mutlak (Padding Anchor Anti-Clipping)
     const vvH = vv && vv.height > 0 ? vv.height : curWinH;
     const vvTop = vv ? vv.offsetTop : 0;
+    let kbOffset = 0;
+    if (vv) {
+        kbOffset = curWinH - (vvH + vvTop);
+        if (kbOffset < 0) kbOffset = 0;
+    }
 
     if (Math.abs(curWinW - barlaLastWidth) > 50) {
         barlaLastWidth = curWinW;
@@ -6272,17 +6295,22 @@ function syncBarlaViewport(scrollChatToBottom = false) {
     }
 
     const isInputFocused = document.activeElement === document.getElementById('barla-input');
-    // Deteksi Keyboard Terbuka Berdasarkan Penyusutan Tinggi Viewport
-    const isKbOpen = (barlaBaseHeight - vvH) > 85 || (isInputFocused && (barlaBaseHeight - vvH) > 40);
+    // Deteksi Keyboard Terbuka (Kombinasi Heuristik)
+    const isKbOpen = kbOffset > 40 || (barlaBaseHeight - vvH) > 85 || (isInputFocused && (barlaBaseHeight - vvH) > 40);
 
     modal.classList.toggle('kb-open', isKbOpen);
     
-    // Penguncian Posisi Mutlak pada Area yang Tersedia (Anti-Tertutup Keyboard)
+    // [QA LEAD FIX] Penguncian Posisi Padding (Bypass Bug Layout Viewport PWA Android/iOS)
+    // Mengganti top/height absolut dengan dorongan Padding Bottom agar layout Flexbox menyusut presisi di atas keyboard
     modal.style.position = 'fixed';
-    modal.style.top = vvTop + 'px';
-    modal.style.bottom = 'auto';
-    modal.style.height = vvH + 'px';
-    modal.style.maxHeight = vvH + 'px';
+    modal.style.top = '0px';
+    modal.style.bottom = '0px';
+    modal.style.height = '100%';
+    modal.style.maxHeight = '100%';
+    
+    let basePadding = isKbOpen ? 0 : 15;
+    modal.style.paddingTop = `calc(${vvTop + basePadding}px + env(safe-area-inset-top, 0px))`;
+    modal.style.paddingBottom = kbOffset + 'px';
 
     // Kompensasi Scroll Area Chat secara Instan agar pesan terbaru tidak tertutup naiknya kolom input
     if (area) {
