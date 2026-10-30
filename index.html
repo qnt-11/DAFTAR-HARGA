@@ -3111,7 +3111,7 @@ try {
                     <input type="number" class="tier-q" placeholder="Qty" value="${qty}" style="margin:0; padding:8px; font-size:12px; background:#111; color:#FFD700; border-color:#FFD700;">
                </div>
                <div style="flex: 2;">
-               <input type="text" inputmode="decimal" class="tier-p" placeholder="Harga/Pcs" value="${price ? String(price).replace('.', ',') : ''}" oninput="let v=this.value.replace(/[^0-9,]/g,'').split(','); let b=v[0]?new Intl.NumberFormat('id-ID').format(parseInt(v[0].replace(/\\./g,''),10)):''; this.value=v.length>1?b+','+v.slice(1).join('').substring(0,2):b;" style="margin:0; padding:8px; font-size:12px; background:#111;">
+               <input type="text" inputmode="decimal" class="tier-p" placeholder="Harga Per Pcs" value="${price ? String(price).replace('.', ',') : ''}" oninput="let v=this.value.replace(/[^0-9,]/g,'').split(','); let b=v[0]?new Intl.NumberFormat('id-ID').format(parseInt(v[0].replace(/\\./g,''),10)):''; this.value=v.length>1?b+','+v.slice(1).join('').substring(0,2):b;" style="margin:0; padding:8px; font-size:12px; background:#111;">
                 </div>
                 <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); border-radius:4px; height:32px; width:32px; display:flex; justify-content:center; align-items:center; cursor:pointer; outline:none; padding:0; transition: transform 0.2s;">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
